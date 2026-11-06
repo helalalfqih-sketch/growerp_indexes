@@ -11,14 +11,14 @@ void main() {
         MaterialApp(
           home: Directionality(
             textDirection: direction,
-            child: Scaffold(
+            child: const Scaffold(
               body: StyledDataTable(
-                columns: const [
+                columns: [
                   StyledColumn(header: 'start'),
                   StyledColumn(header: 'end', alignment: TextAlign.end),
                   StyledColumn(header: 'left', alignment: TextAlign.left),
                 ],
-                rows: const [
+                rows: [
                   [Text('start cell'), Text('end cell'), Text('left cell')],
                 ],
               ),

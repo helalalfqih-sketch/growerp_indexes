@@ -54,6 +54,21 @@ validates required inputs, submits an Arabic name and decimal percentage to a
 mocked REST client, and checks the resulting list entry. It does not replace a
 test against a running backend.
 
+### Cloud validation
+
+The `Arabic localization` GitHub Actions workflow runs on relevant Flutter
+changes in pull requests, pushes to `master`, and manual dispatch. It installs
+the pinned Flutter SDK on the runner, generates the project sources, runs both
+ARB checkers, analyzes the localization implementation and merged RTL tests,
+and executes the eight package test suites. Results are uploaded as the
+`arabic-localization-tests` artifact. Local Flutter, Gradle or Java installation
+is not required to run this workflow.
+
+This workflow produces test reports. It does not build an APK or deploy to app
+stores. The separate `Publish Binary to Stores` workflow performs store uploads
+and uses release credentials; an APK for direct testing needs a dedicated build
+that uploads the APK as an artifact.
+
 ## Remaining product work
 
 - Backend-provided data, including account names and dynamically configured menu

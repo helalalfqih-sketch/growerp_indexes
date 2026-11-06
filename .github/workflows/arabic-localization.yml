@@ -30,7 +30,9 @@ jobs:
       - uses: actions/checkout@v4
 
       - name: Check Arabic message and argument coverage
-        run: python3 flutter/ci/check_arabic_localizations.py
+        run: |
+          python3 flutter/ci/check_arabic_localizations.py
+          python3 flutter/tool/check_arabic_localizations.py
 
       - uses: subosito/flutter-action@v2
         with:
@@ -47,9 +49,13 @@ jobs:
             packages/growerp_core/lib/src/common/fallback_localizations_delegate.dart \
             packages/growerp_core/lib/src/domains/common/widgets/top_app.dart \
             packages/growerp_core/lib/src/domains/common/widgets/styled_data_table.dart \
+            packages/growerp_core/lib/src/domains/common/widgets/popup.dart \
+            packages/growerp_core/lib/src/domains/common/widgets/popup_dialog.dart \
+            packages/growerp_core/lib/src/domains/common/widgets/popup_dialog_no_scaf.dart \
             packages/growerp_core/lib/src/domains/common/views/home_form.dart \
             packages/growerp_core/test/arabic_localization_test.dart \
             packages/growerp_core/test/styled_data_table_rtl_test.dart \
+            packages/growerp_core/test/l10n \
             packages/growerp_order_accounting/test/tax/tax_rate_list_test.dart \
             packages/admin/test/arabic_delegates_test.dart
 
