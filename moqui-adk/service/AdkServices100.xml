@@ -588,6 +588,20 @@
         <out-parameters><parameter name="adkMcpServer" type="Map"/></out-parameters>
         <actions>
             <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ownerPartyId">
+                <return error="true" message="Cannot determine your company, please log in again."/>
+            </if>
+            <!-- Validate on the server too: a REST client can bypass Flutter's form. -->
+            <script><![CDATA[
+                try {
+                    org.moqui.adk.AdkManager.externalMcpConnectionConfig([
+                        url: url, transport: transport, headersJson: headersJson])
+                } catch (Exception e) {
+                    ec.message.addError(e instanceof IllegalArgumentException ?
+                        e.message : 'Invalid external MCP connection settings')
+                }
+            ]]></script>
+            <if condition="ec.message.hasError()"><return/></if>
             <service-call name="create#moqui.adk.AdkMcpServer" out-map="context"
                 in-map="[ownerPartyId: ownerPartyId, serverName: serverName, url: url,
                          transport: transport ?: 'sse', headersJson: headersJson,
@@ -615,6 +629,17 @@
             <if condition="!srv || srv.ownerPartyId != ownerPartyId">
                 <return error="true" message="MCP server not found for your company."/>
             </if>
+            <script><![CDATA[
+                try {
+                    org.moqui.adk.AdkManager.externalMcpConnectionConfig([
+                        url: url ?: srv.url, transport: transport ?: srv.transport,
+                        headersJson: headersJson ?: srv.headersJson])
+                } catch (Exception e) {
+                    ec.message.addError(e instanceof IllegalArgumentException ?
+                        e.message : 'Invalid external MCP connection settings')
+                }
+            ]]></script>
+            <if condition="ec.message.hasError()"><return/></if>
             <if condition="serverName"><set field="srv.serverName" from="serverName"/></if>
             <if condition="url"><set field="srv.url" from="url"/></if>
             <if condition="transport"><set field="srv.transport" from="transport"/></if>
