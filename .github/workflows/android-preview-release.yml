@@ -1,0 +1,46 @@
+name: Publish approved Arabic APK prerelease
+on:
+  push:
+    branches: [build/arabic-android-preview]
+    paths: ['.github/workflows/android-preview-release.yml']
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish-existing-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: growerp-arabic-preview-apk
+          run-id: 42265897704
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          path: apk
+      - name: Verify original APK and publish approved prerelease
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          APK=apk/growerp-arabic-preview-debug.apk
+          printf '%s  %s\n' ff89b98cdb721e6b75970c091526121cead823fc17bae6270d7fcdf77eec0850 "$APK" | sha256sum --check -
+          test "$(stat -c %s "$APK")" = 198566613
+          TAG=arabic-preview-1.22.4-141
+          if gh release view "$TAG" >/dev/null 2>&1; then
+            echo "Release already exists; do not overwrite."
+            exit 1
+          fi
+          cat > notes.md <<'NOTES'
+          User-approved public Android debug preview, not a production release.
+          Exact existing APK from Actions run 42265897704; not rebuilt.
+          Version 1.22.4 (141), Android 7+, universal arm64/armv7/x86_64.
+          Package org.growerp.admin.arabicpreview; Android Debug v2 signature.
+          SHA256 ff89b98cdb721e6b75970c091526121cead823fc17bae6270d7fcdf77eec0850.
+          Core/Admin tests: 145 passed. No physical-device or live-backend end-to-end testing.
+          GrowERP staging backend; use test data only. Product translation remains partial.
+          No Google Play upload, master merge or production deployment.
+          NOTES
+          gh release create "$TAG" "$APK" --target 6891a1a65b409506119f1d211d64e00b610e9423 --prerelease --latest=false --title "Arabic Android preview 1.22.4 (141)" --notes-file notes.md
+          gh release view "$TAG" --json url,assets,isPrerelease
