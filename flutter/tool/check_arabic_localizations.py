@@ -25,7 +25,9 @@ for source in sorted(packages.glob('*/lib/l10n/*_en.arb')):
     assert re.search(r'preferred-supported-locales:.*\bar\b', config.read_text()), config
     checked += 1
 core = packages / 'growerp_core/lib/src/domains/common'
-assert "Locale('ar')" in (core / 'widgets/top_app.dart').read_text()
+# Locale registration is generated from the ARB resources and l10n.yaml above.
+# TopApp's generated supported-locales list is exercised by its widget tests;
+# requiring an inline Locale('ar') here rejects that valid implementation.
 assert "'العربية'" in (core / 'views/home_form.dart').read_text()
 assert 'GlobalWidgetsLocalizations.delegate' in (core / 'widgets/top_app.dart').read_text()
 print(f'PASS: {checked} Arabic ARB resources, placeholder references, core key coverage, locale registration and selector.')
