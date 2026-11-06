@@ -182,10 +182,10 @@ class StyledDataTable extends StatelessWidget {
     switch (textAlign) {
       case TextAlign.left:
         return Alignment.centerLeft;
-      case TextAlign.right:
-        return Alignment.centerRight;
       case TextAlign.start:
         return AlignmentDirectional.centerStart;
+      case TextAlign.right:
+        return Alignment.centerRight;
       case TextAlign.end:
         return AlignmentDirectional.centerEnd;
       case TextAlign.center:
@@ -209,7 +209,7 @@ class StyledDataTable extends StatelessWidget {
                 flex: column.flex,
                 child: Container(
                   height: 12,
-                  margin: const EdgeInsets.only(right: 24),
+                  margin: const EdgeInsetsDirectional.only(end: 24),
                   decoration: BoxDecoration(
                     color: colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
@@ -304,7 +304,7 @@ class _SkeletonCellState extends State<_SkeletonCell>
       builder: (context, child) {
         return Container(
           height: 16,
-          margin: const EdgeInsets.only(right: 24),
+          margin: const EdgeInsetsDirectional.only(end: 24),
           decoration: BoxDecoration(
             color: colorScheme.onSurfaceVariant.withValues(
               alpha: _animation.value * 0.3,
