@@ -30,7 +30,7 @@ jobs:
           java-version: '21'
           cache: gradle
 
-      - name: Compile ADK against actual Google ADK and MCP SDK
+      - name: Compile and test ADK against actual Google ADK and MCP SDK
         working-directory: moqui
         run: |
           set -euo pipefail
@@ -39,7 +39,7 @@ jobs:
             -Dorg.gradle.jvmargs=-Xmx3g \
             -I ../ci/gradle-plugin-repos.init.gradle \
             -I ../ci/groovy-compile-heap.init.gradle \
-            :runtime:component:moqui-adk:compileGroovy
+            :runtime:component:moqui-adk:test
 
   flutter-validation:
     runs-on: ubuntu-latest
