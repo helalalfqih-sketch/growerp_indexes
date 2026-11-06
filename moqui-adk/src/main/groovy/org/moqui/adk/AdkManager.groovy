@@ -1412,25 +1412,65 @@ CRITICAL tool-use rules — follow exactly:
         return ts
     }
 
-    /** Build a toolset for an external (tenant-registered) MCP server. Unlike buildMcpToolset
-     *  this targets a third-party URL and sends only the server's own auth headers (from the
-     *  encrypted headersJson map) — no SystemSupport credentials. */
+    /** Build a toolset for a tenant-registered external MCP server.
+     *  Unlike the built-in MCP toolset, this never sends SystemSupport credentials.
+     *  The transport choice is persisted in AdkMcpServer.transport: 'http' means
+     *  MCP Streamable HTTP, while 'sse' preserves legacy HTTP+SSE support.
+     *
+     *  Header values are encrypted in the entity and must never appear in logs.
+     *  OAuth access-token renewal is NOT implemented here: a configured Bearer
+     *  header is a static credential, not an OAuth client session.
+     */
     private static com.google.adk.tools.mcp.McpToolset buildExternalMcpToolset(def srv) {
-        Map<String, String> sseHeaders = ['Accept': 'application/json, text/event-stream']
+        String transport = (srv.transport ?: 'sse').toString().trim().toLowerCase(Locale.ROOT)
+        if (!(transport in ['http', 'sse'])) {
+            throw new IllegalArgumentException("Unsupported external MCP transport: ${transport}")
+        }
+        String endpoint = (srv.url ?: '').toString().trim()
+        URI endpointUri = new URI(endpoint)
+        String scheme = endpointUri.scheme?.toLowerCase(Locale.ROOT)
+        String host = endpointUri.host?.toLowerCase(Locale.ROOT)
+        if (!host || endpointUri.userInfo || endpointUri.fragment ||
+                !(scheme == 'https' || (scheme == 'http' && host in ['localhost', '127.0.0.1', '::1']))) {
+            throw new IllegalArgumentException('External MCP URL must be HTTPS (HTTP only on loopback), without credentials or fragment')
+        }
+
+        Map<String, String> headers = ['Accept': 'application/json, text/event-stream']
         String hj = srv.headersJson as String
         if (hj) {
+            def parsed
             try {
-                def parsed = new groovy.json.JsonSlurper().parseText(hj)
-                if (parsed instanceof Map) parsed.each { k, v -> if (k && v != null) sseHeaders[k as String] = v as String }
-            } catch (Exception e) {
-                logger.warn("Bad headersJson for AdkMcpServer ${srv.adkMcpServerId}: ${e.message}")
+                parsed = new groovy.json.JsonSlurper().parseText(hj)
+            } catch (Exception ignored) {
+                throw new IllegalArgumentException('Invalid external MCP headers JSON')
+            }
+            if (!(parsed instanceof Map)) throw new IllegalArgumentException('External MCP headers must be a JSON object')
+            parsed.each { k, v ->
+                if (k == null || v == null) return
+                String name = k.toString().trim()
+                String value = v.toString()
+                // Refuse header injection and hop-by-hop/authority overrides.
+                if (!(name ==~ /[A-Za-z0-9!#\$%&'*+.^_`|~-]+/) ||
+                        value.contains('\r') || value.contains('\n') ||
+                        name.toLowerCase(Locale.ROOT) in ['host', 'connection', 'content-length', 'transfer-encoding']) {
+                    throw new IllegalArgumentException('Invalid or forbidden external MCP header')
+                }
+                headers[name] = value
             }
         }
-        def sseParams = com.google.adk.tools.mcp.SseServerParameters.builder()
-                .url(srv.url as String)
-                .headers(sseHeaders)
+
+        if (transport == 'http') {
+            def params = com.google.adk.tools.mcp.StreamableHttpServerParameters.builder()
+                    .url(endpoint)
+                    .headers(headers)
+                    .build()
+            return new com.google.adk.tools.mcp.McpToolset(params)
+        }
+        def params = com.google.adk.tools.mcp.SseServerParameters.builder()
+                .url(endpoint)
+                .headers(headers)
                 .build()
-        return new com.google.adk.tools.mcp.McpToolset(sseParams)
+        return new com.google.adk.tools.mcp.McpToolset(params)
     }
 
     /** Build the toolsets for every enabled external MCP server attached to this agent.
