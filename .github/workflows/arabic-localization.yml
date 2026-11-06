@@ -1,6 +1,13 @@
 name: Arabic localization
 
 on:
+  push:
+    branches:
+      - master
+    paths:
+      - 'flutter/**'
+      - '.github/workflows/arabic-localization.yml'
+      - '.github/actions/bootstrap/**'
   pull_request:
     paths:
       - 'flutter/**'
