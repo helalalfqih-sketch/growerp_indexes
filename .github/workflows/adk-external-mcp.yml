@@ -1,0 +1,70 @@
+name: ADK external MCP transport
+
+on:
+  pull_request:
+    paths:
+      - 'moqui-adk/**'
+      - 'flutter/packages/growerp_adk/**'
+      - '.github/workflows/adk-external-mcp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  backend-compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize backend submodules
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive
+          bash setup-backend.sh
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Compile ADK against actual Google ADK and MCP SDK
+        working-directory: moqui
+        run: |
+          set -euo pipefail
+          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' gradle/wrapper/gradle-wrapper.properties
+          ./gradlew --no-daemon --console=plain \
+            -Dorg.gradle.jvmargs=-Xmx3g \
+            -I ../ci/gradle-plugin-repos.init.gradle \
+            -I ../ci/groovy-compile-heap.init.gradle \
+            :runtime:component:moqui-adk:compileGroovy
+
+  flutter-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+
+      - uses: ./.github/actions/bootstrap
+
+      - name: Analyze external MCP dialog and tests
+        working-directory: flutter
+        run: |
+          dart format --output=none --set-exit-if-changed \
+            packages/growerp_adk/lib/src/adk_mcp_server_dialog.dart \
+            packages/growerp_adk/test/adk_mcp_server_url_test.dart
+          flutter analyze --no-pub \
+            packages/growerp_adk/lib/src/adk_mcp_server_dialog.dart \
+            packages/growerp_adk/test/adk_mcp_server_url_test.dart
+
+      - name: Test external MCP URL validation
+        working-directory: flutter/packages/growerp_adk
+        run: flutter test --no-pub test/adk_mcp_server_url_test.dart
