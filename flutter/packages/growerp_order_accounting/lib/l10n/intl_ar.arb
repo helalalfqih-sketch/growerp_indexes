@@ -197,7 +197,7 @@
   "postedHeader": "مرحّل",
   "dataForYearNotAvailable": "بيانات السنة {year} غير متاحة",
   "yearLetter": "سنة",
-  "quarterLetter": "الكمية",
+  "quarterLetter": "ر",
   "monthLetter": "شهر",
   "getBalanceSheetFail": "تعذر جلب الميزانية العمومية",
   "noBalanceSummaryFound": "لا يوجد ملخص للأرصدة",
