@@ -1452,9 +1452,13 @@ CRITICAL tool-use rules — follow exactly:
             return new com.google.adk.tools.mcp.McpToolset(params)
         }
 
+        // ADK 1.10.1 SSE headers accept Map<String, Object>, whereas Streamable
+        // HTTP headers accept Map<String, String>. Keep the HTTP map type-safe.
+        Map<String, Object> sseHeaders = [:]
+        sseHeaders.putAll(headers)
         def params = com.google.adk.tools.mcp.SseServerParameters.builder()
                 .url(url)
-                .headers(headers)
+                .headers(sseHeaders)
                 .build()
         return new com.google.adk.tools.mcp.McpToolset(params)
     }
