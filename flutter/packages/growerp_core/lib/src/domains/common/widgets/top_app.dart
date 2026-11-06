@@ -25,6 +25,7 @@ import 'package:responsive_framework/responsive_framework.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 
 import '../../../common/translate_bloc_messages.dart';
+import '../../../common/fallback_localizations_delegate.dart';
 import '../../../get_core_bloc_providers.dart';
 import '../../../services/widget_registry.dart';
 import '../../../services/ws_client.dart';
@@ -255,7 +256,7 @@ class _TopAppState extends State<TopApp> {
             // _localizationsDelegates doesn't grow on every rebuild.
             final allDelegates = [
               ..._localizationsDelegates,
-              ...widget.extraDelegates,
+              ...widget.extraDelegates.map(FallbackLocalizationsDelegate.new),
             ];
             return BlocBuilder<LocaleBloc, LocaleState>(
               builder: (context, localeState) {
@@ -303,15 +304,7 @@ class _TopAppState extends State<TopApp> {
                       scaffoldMessengerKey: Constant.scaffoldMessengerKey,
                       title: widget.title,
                       locale: localeState.locale,
-                      supportedLocales: const [
-                        Locale('en'),
-                        Locale('th'),
-                        Locale('zh'),
-                        Locale('de'),
-                        Locale('fr'),
-                        Locale('nl'),
-                        Locale('es'),
-                      ],
+                      supportedLocales: CoreLocalizations.supportedLocales,
                       scrollBehavior: const MaterialScrollBehavior().copyWith(
                         dragDevices: {
                           PointerDeviceKind.mouse,

@@ -20,6 +20,7 @@ export 'src/get_core_bloc_providers.dart';
 export 'src/domains/authenticate/authenticate.dart';
 
 export 'src/common/translate_bloc_messages.dart';
+export 'src/common/fallback_localizations_delegate.dart';
 export 'src/domains/integration_test.dart';
 // NOTE: ADK (AI agent) views moved to the growerp_adk building block.
 // The AI-navigation directive hooks (ai_navigation_service / ai_prompt_dialog)

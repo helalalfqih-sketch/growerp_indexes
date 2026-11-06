@@ -178,18 +178,20 @@ class StyledDataTable extends StatelessWidget {
     );
   }
 
-  Alignment _getAlignment(TextAlign textAlign) {
+  AlignmentGeometry _getAlignment(TextAlign textAlign) {
     switch (textAlign) {
       case TextAlign.left:
-      case TextAlign.start:
         return Alignment.centerLeft;
+      case TextAlign.start:
+        return AlignmentDirectional.centerStart;
       case TextAlign.right:
-      case TextAlign.end:
         return Alignment.centerRight;
+      case TextAlign.end:
+        return AlignmentDirectional.centerEnd;
       case TextAlign.center:
         return Alignment.center;
       default:
-        return Alignment.centerLeft;
+        return AlignmentDirectional.centerStart;
     }
   }
 
@@ -207,7 +209,7 @@ class StyledDataTable extends StatelessWidget {
                 flex: column.flex,
                 child: Container(
                   height: 12,
-                  margin: const EdgeInsets.only(right: 24),
+                  margin: const EdgeInsetsDirectional.only(end: 24),
                   decoration: BoxDecoration(
                     color: colorScheme.onSurfaceVariant.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
@@ -252,7 +254,7 @@ class StyledColumn {
   const StyledColumn({
     required this.header,
     this.flex = 1,
-    this.alignment = TextAlign.left,
+    this.alignment = TextAlign.start,
   });
 }
 
@@ -302,7 +304,7 @@ class _SkeletonCellState extends State<_SkeletonCell>
       builder: (context, child) {
         return Container(
           height: 16,
-          margin: const EdgeInsets.only(right: 24),
+          margin: const EdgeInsetsDirectional.only(end: 24),
           decoration: BoxDecoration(
             color: colorScheme.onSurfaceVariant.withValues(
               alpha: _animation.value * 0.3,

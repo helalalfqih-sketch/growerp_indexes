@@ -1,0 +1,68 @@
+name: Arabic localization
+
+on:
+  pull_request:
+    paths:
+      - 'flutter/**'
+      - '.github/workflows/arabic-localization.yml'
+      - '.github/actions/bootstrap/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: arabic-localization-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  localization:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Check Arabic message and argument coverage
+        run: python3 flutter/ci/check_arabic_localizations.py
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+
+      - uses: ./.github/actions/bootstrap
+
+      - name: Analyze localization changes
+        working-directory: flutter
+        run: |
+          flutter analyze --no-pub \
+            packages/growerp_core/lib/src/common/fallback_localizations_delegate.dart \
+            packages/growerp_core/lib/src/domains/common/widgets/top_app.dart \
+            packages/growerp_core/lib/src/domains/common/widgets/styled_data_table.dart \
+            packages/growerp_core/lib/src/domains/common/views/home_form.dart \
+            packages/growerp_core/test/arabic_localization_test.dart \
+            packages/growerp_core/test/styled_data_table_rtl_test.dart \
+            packages/growerp_order_accounting/test/tax/tax_rate_list_test.dart \
+            packages/admin/test/arabic_delegates_test.dart
+
+      - name: Test translated packages and Admin delegates
+        working-directory: flutter
+        run: |
+          set -euo pipefail
+          for package in growerp_core growerp_order_accounting growerp_user_company growerp_catalog growerp_inventory growerp_pos growerp_activity admin; do
+            (
+              cd "packages/$package"
+              mkdir -p build
+              flutter test --no-pub --reporter expanded --file-reporter json:build/arabic_unit_tests.json
+            )
+          done
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: arabic-localization-tests
+          path: flutter/packages/*/build/arabic_unit_tests.json
+          if-no-files-found: ignore
+          retention-days: 14

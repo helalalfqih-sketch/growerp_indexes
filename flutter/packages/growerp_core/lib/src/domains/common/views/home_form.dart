@@ -310,6 +310,11 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                 '🇪🇸',
                                 'Español',
                               ),
+                              _buildLanguageMenuItem(
+                                const Locale('ar'),
+                                '🌐',
+                                'العربية',
+                              ),
                             ],
                           ),
                         ],
@@ -464,6 +469,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     String name,
   ) {
     return PopupMenuItem<Locale>(
+      key: ValueKey('language_${locale.languageCode}'),
       value: locale,
       child: Row(
         children: [
