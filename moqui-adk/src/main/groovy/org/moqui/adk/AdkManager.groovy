@@ -1430,7 +1430,13 @@ CRITICAL tool-use rules — follow exactly:
             throw new IllegalArgumentException("Unsupported external MCP transport: ${transport}")
         }
         String endpoint = (srv.url ?: '').toString().trim()
-        URI endpointUri = new URI(endpoint)
+        URI endpointUri
+        try {
+            endpointUri = new URI(endpoint)
+        } catch (Exception ignored) {
+            // URISyntaxException can echo the submitted URL, which may contain credentials.
+            throw new IllegalArgumentException('Invalid external MCP URL')
+        }
         String scheme = endpointUri.scheme?.toLowerCase(Locale.ROOT)
         String host = endpointUri.host?.toLowerCase(Locale.ROOT)
         if (!host || endpointUri.userInfo || endpointUri.fragment ||
