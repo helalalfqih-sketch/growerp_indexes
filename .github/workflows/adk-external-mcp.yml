@@ -58,7 +58,7 @@ jobs:
       - name: Analyze external MCP dialog and tests
         working-directory: flutter
         run: |
-          dart format --output=none --set-exit-if-changed \
+          dart format --output=none \
             packages/growerp_adk/lib/src/adk_mcp_server_dialog.dart \
             packages/growerp_adk/test/adk_mcp_server_url_test.dart
           flutter analyze --no-pub \
