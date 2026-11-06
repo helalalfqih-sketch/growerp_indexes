@@ -1471,24 +1471,29 @@ CRITICAL tool-use rules — follow exactly:
         return [transport: transport, endpoint: endpoint, headers: headers]
     }
 
-    private static com.google.adk.tools.mcp.McpToolset buildExternalMcpToolset(def srv) {
+    /** Construct the actual SDK transport parameters without opening an HTTP connection.
+     *  The JUnit suite checks both SDK types so 'http' can never silently fall back to SSE.
+     */
+    static Object externalMcpTransportParameters(def srv) {
         def connection = externalMcpConnectionConfig(srv)
         String transport = connection.transport as String
         String endpoint = connection.endpoint as String
         Map<String, String> headers = connection.headers as Map<String, String>
 
         if (transport == 'http') {
-            def params = com.google.adk.tools.mcp.StreamableHttpServerParameters.builder()
+            return com.google.adk.tools.mcp.StreamableHttpServerParameters.builder()
                     .url(endpoint)
                     .headers(headers)
                     .build()
-            return new com.google.adk.tools.mcp.McpToolset(params)
         }
-        def params = com.google.adk.tools.mcp.SseServerParameters.builder()
+        return com.google.adk.tools.mcp.SseServerParameters.builder()
                 .url(endpoint)
                 .headers(headers)
                 .build()
-        return new com.google.adk.tools.mcp.McpToolset(params)
+    }
+
+    private static com.google.adk.tools.mcp.McpToolset buildExternalMcpToolset(def srv) {
+        return new com.google.adk.tools.mcp.McpToolset(externalMcpTransportParameters(srv))
     }
 
     /** Build the toolsets for every enabled external MCP server attached to this agent.
