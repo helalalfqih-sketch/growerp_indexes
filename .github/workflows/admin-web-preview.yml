@@ -1,0 +1,40 @@
+name: Admin web preview build
+
+on:
+  pull_request:
+    paths:
+      - 'flutter/**'
+      - 'ci/build-admin-web-vercel.sh'
+      - 'vercel.json'
+      - '.github/workflows/admin-web-preview.yml'
+      - '.github/actions/bootstrap/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  web-build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - uses: ./.github/actions/bootstrap
+      - name: Build Admin Flutter web
+        working-directory: flutter/packages/admin
+        run: flutter build web --release --pwa-strategy=none --base-href=/
+      - name: Assert complete static build
+        run: |
+          test -s flutter/packages/admin/build/web/index.html
+          test -s flutter/packages/admin/build/web/flutter_bootstrap.js
+      - uses: actions/upload-artifact@v4
+        with:
+          name: growerp-admin-web-preview
+          path: flutter/packages/admin/build/web/
+          if-no-files-found: error
+          retention-days: 7
