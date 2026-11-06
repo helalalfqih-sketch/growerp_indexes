@@ -3,6 +3,7 @@ package org.growerp.verification;
 import com.google.adk.tools.mcp.McpToolset;
 import com.google.adk.tools.mcp.SseServerParameters;
 import com.google.adk.tools.mcp.StreamableHttpServerParameters;
+import java.util.HashMap;
 import java.util.Map;
 
 /**
@@ -14,15 +15,15 @@ public final class TransportContract {
 
   public static McpToolset http(String url, Map<String, String> headers) {
     return new McpToolset(StreamableHttpServerParameters.builder()
-        .url(url)
+       .url(url)
         .headers(headers)
         .build());
   }
 
   public static McpToolset sse(String url, Map<String, String> headers) {
     return new McpToolset(SseServerParameters.builder()
-        .url(url)
-        .headers(headers)
+         .url(url)
+        .headers(new HashMap<String, Object>(headers))
         .build());
   }
 }
