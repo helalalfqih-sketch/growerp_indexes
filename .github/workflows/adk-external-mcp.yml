@@ -45,6 +45,37 @@ jobs:
             -I ../ci/groovy-compile-heap.init.gradle \
             :runtime:component:moqui-adk:test
 
+      - name: Validate ADK service XML and JUnit report
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          ET.parse('moqui-adk/service/AdkServices100.xml')
+          directory = Path('moqui-adk/build/test-results/test')
+          reports = list(directory.glob('TEST-*.xml'))
+          assert reports, f'No JUnit reports found in {directory}'
+          tests = failures = errors = skipped = 0
+          for report in reports:
+              root = ET.parse(report).getroot()
+              tests += int(root.get('tests', 0))
+              failures += int(root.get('failures', 0))
+              errors += int(root.get('errors', 0))
+              skipped += int(root.get('skipped', 0))
+          print(f'ADK JUnit: {tests} tests, {failures} failures, {errors} errors, {skipped} skipped')
+          assert tests >= 5, 'The external-MCP regression suite was not discovered'
+          assert failures == errors == skipped == 0, 'ADK tests are not all passing'
+          PY
+
+      - name: Upload ADK test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adk-external-mcp-junit
+          path: moqui-adk/build/test-results/test/TEST-*.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
   flutter-validation:
     runs-on: ubuntu-latest
     timeout-minutes: 35
