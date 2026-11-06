@@ -27,3 +27,16 @@ artifact; neither it nor the Vercel build updates GrowERP production services.
 4. Inspect REST and WebSocket requests in the browser network console.
 5. Run authentication, permissions and invoice workflows against an isolated
    backend before accepting this as a functioning accounting environment.
+
+## GitHub Pages preview
+
+The PR-scoped workflow additionally builds Admin with the repository base path
+`/growerp_indexes/`, uploads a GitHub Pages artifact, and attempts to publish
+that UI at the fork's Pages URL. Deployment is restricted to same-repository
+PRs from `feat/admin-web-vercel-preview`. Pages must be enabled/authorized
+for Actions on the GitHub repository; a successful build alone does not prove
+that GitHub Pages accepted the deployment.
+
+The Vercel script builds for root (/) separately; its configuration remains
+available, but linking the Git provider to Vercel currently requires account
+authorization. Both hosting choices only publish frontend assets, not Moqui.

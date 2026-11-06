@@ -27,7 +27,7 @@ jobs:
       - uses: ./.github/actions/bootstrap
       - name: Build Admin Flutter web
         working-directory: flutter/packages/admin
-        run: flutter build web --release --pwa-strategy=none --base-href=/
+        run: flutter build web --release --pwa-strategy=none --base-href=/growerp_indexes/
       - name: Assert complete static build
         run: |
           test -s flutter/packages/admin/build/web/index.html
@@ -38,3 +38,34 @@ jobs:
           path: flutter/packages/admin/build/web/
           if-no-files-found: error
           retention-days: 7
+
+      - name: Package GitHub Pages site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: flutter/packages/admin/build/web/
+
+  deploy-preview:
+    needs: web-build
+    # Only this owner's dedicated preview branch may publish; do not deploy
+    # arbitrary external PRs or updated default-branch releases.
+    if: ${{ github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.head_ref == 'feat/admin-web-vercel-preview' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: growerp-admin-pages-preview
+      cancel-in-progress: false
+    steps:
+      - name: Prepare GitHub Pages
+        uses: actions/configure-pages@v5
+        with:
+          enablement: true
+      - name: Deploy preview
+        id: deployment
+        uses: actions/deploy-pages@v4
