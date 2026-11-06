@@ -1,0 +1,31 @@
+name: External MCP transport contract
+
+on:
+  pull_request:
+    paths:
+      - 'moqui-adk/src/main/groovy/org/moqui/adk/AdkManager.groovy'
+      - 'moqui-adk/build.gradle'
+      - 'scripts/check_external_mcp_transport.py'
+      - 'scripts/adk-transport-contract/**'
+      - '.github/workflows/external-mcp-transport.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  transport-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check external transport selection and credential isolation
+        run: python3 scripts/check_external_mcp_transport.py
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+          cache-dependency-path: scripts/adk-transport-contract/pom.xml
+      - name: Compile transport builder API against Google ADK 1.10.1
+        run: mvn -B -ntp -f scripts/adk-transport-contract/pom.xml -DskipTests compile
