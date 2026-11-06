@@ -1,0 +1,93 @@
+name: Arabic Android preview APK
+on:
+  push:
+    branches: [build/arabic-android-preview]
+    paths: ['.github/workflows/android-preview.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: arabic-android-preview
+  cancel-in-progress: false
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - name: Check Arabic resources
+        run: |
+          python3 flutter/ci/check_arabic_localizations.py
+          python3 flutter/tool/check_arabic_localizations.py
+      - uses: ./.github/actions/bootstrap
+      - name: Configure isolated debug preview in runner only
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          root = Path('flutter/packages/admin')
+          gradle = root / 'android/app/build.gradle.kts'
+          text = gradle.read_text()
+          old = 'applicationId = "org.growerp.admin"'
+          assert text.count(old) == 1
+          gradle.write_text(text.replace(old, 'applicationId = "org.growerp.admin.arabicpreview"'))
+          manifest = root / 'android/app/src/main/AndroidManifest.xml'
+          text = manifest.read_text().replace('android:label="GrowERP Administrator"', 'android:label="GrowERP Arabic Preview"')
+          text = text.replace('android:name=".MainActivity"', 'android:name="org.growerp.admin.MainActivity"')
+          text = text.replace('android:name=".AccountingWidgetProvider"', 'android:name="org.growerp.admin.AccountingWidgetProvider"')
+          import re
+          text = re.sub(r'<intent-filter[^>]*>\s*<action android:name="android.intent.action.VIEW".*?</intent-filter>', '', text, flags=re.S)
+          manifest.write_text(text)
+          config = root / 'assets/cfg/app_settings.json'
+          settings = json.loads(config.read_text())
+          settings.update(databaseUrl='https://backend.growerp.org', chatUrl='wss://backend.growerp.org', databaseUrlDebug='https://backend.growerp.org', chatUrlDebug='wss://backend.growerp.org', test=True)
+          config.write_text(json.dumps(settings, indent=2) + '\n')
+          PY
+      - name: Test core and Admin delegates
+        working-directory: flutter
+        shell: bash
+        run: |
+          set -euo pipefail
+          for package in growerp_core admin; do
+            (cd "packages/$package" && mkdir -p build && flutter test --no-pub --reporter expanded --file-reporter json:build/arabic_preview_tests.json)
+          done
+      - name: Build universal debug APK
+        working-directory: flutter/packages/admin
+        run: flutter build apk --debug --no-pub
+      - name: Verify signature and package metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p apk-delivery
+          cp flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk apk-delivery/growerp-arabic-preview-debug.apk
+          tools=$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)
+          "$tools/apksigner" verify --verbose --print-certs apk-delivery/growerp-arabic-preview-debug.apk | tee apk-delivery/signature.txt
+          "$tools/aapt" dump badging apk-delivery/growerp-arabic-preview-debug.apk | tee apk-delivery/package.txt
+          grep -q "name='org.growerp.admin.arabicpreview'" apk-delivery/package.txt
+          sha256sum apk-delivery/growerp-arabic-preview-debug.apk | tee apk-delivery/SHA256SUMS.txt
+          git rev-parse HEAD > apk-delivery/source-commit.txt
+          git diff > apk-delivery/preview-build-only.patch
+          printf '%s\n' 'Debug preview only. Not signed for release/store publication.' 'Arabic source base: bb638db69b435ea72b021da9e92e9d98e5e9a08b.' 'Isolated package: org.growerp.admin.arabicpreview.' 'Configured test backend: https://backend.growerp.org. No account or data is created by this build.' 'No physical Android device or live backend end-to-end validation has been performed.' 'The debug signing key is ephemeral; later builds may require uninstalling this preview.' > apk-delivery/README.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: growerp-arabic-preview-apk
+          path: apk-delivery/
+          if-no-files-found: error
+          retention-days: 14
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: arabic-preview-test-reports
+          path: flutter/packages/*/build/arabic_preview_tests.json
+          if-no-files-found: ignore
+          retention-days: 14
