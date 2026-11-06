@@ -22,6 +22,19 @@ class ExternalMcpConnectionConfigTest {
     }
 
     @Test
+    void sdkTransportSelectionNeverFallsBackToSse() {
+        Object http = AdkManager.externalMcpTransportParameters(Map.of(
+                "url", "https://waha.indexesstore.com/serpapi/mcp",
+                "transport", "http"));
+        assertTrue(http instanceof com.google.adk.tools.mcp.StreamableHttpServerParameters);
+
+        Object sse = AdkManager.externalMcpTransportParameters(Map.of(
+                "url", "https://example.org/mcp/sse",
+                "transport", "sse"));
+        assertTrue(sse instanceof com.google.adk.tools.mcp.SseServerParameters);
+    }
+
+    @Test
     void sseRemainsDefaultForLegacyRegistrations() {
         Map<String, Object> result = AdkManager.externalMcpConnectionConfig(Map.of(
                 "url", "https://example.org/mcp/sse"));
