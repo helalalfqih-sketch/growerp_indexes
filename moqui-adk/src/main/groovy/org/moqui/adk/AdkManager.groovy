@@ -1421,7 +1421,10 @@ CRITICAL tool-use rules — follow exactly:
      *  OAuth access-token renewal is NOT implemented here: a configured Bearer
      *  header is a static credential, not an OAuth client session.
      */
-    private static com.google.adk.tools.mcp.McpToolset buildExternalMcpToolset(def srv) {
+    /** Parse and validate an external MCP connection without opening a network socket.
+     *  Used by both the transport builder and dedicated regression tests.
+     */
+    static Map<String, Object> externalMcpConnectionConfig(def srv) {
         String transport = (srv.transport ?: 'sse').toString().trim().toLowerCase(Locale.ROOT)
         if (!(transport in ['http', 'sse'])) {
             throw new IllegalArgumentException("Unsupported external MCP transport: ${transport}")
@@ -1458,6 +1461,15 @@ CRITICAL tool-use rules — follow exactly:
                 headers[name] = value
             }
         }
+
+        return [transport: transport, endpoint: endpoint, headers: headers]
+    }
+
+    private static com.google.adk.tools.mcp.McpToolset buildExternalMcpToolset(def srv) {
+        def connection = externalMcpConnectionConfig(srv)
+        String transport = connection.transport as String
+        String endpoint = connection.endpoint as String
+        Map<String, String> headers = connection.headers as Map<String, String>
 
         if (transport == 'http') {
             def params = com.google.adk.tools.mcp.StreamableHttpServerParameters.builder()
