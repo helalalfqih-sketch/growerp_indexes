@@ -1,5 +1,6 @@
 #!/bin/bash
-set -x
+# Do not enable shell tracing: startup may interpolate sensitive mail tokens.
+set -e
 
 echo "params 1: $1 2: $2 3: $3"
 echo "docker tag: $TAG"
@@ -40,6 +41,12 @@ if [ "$DISABLE_SECA" == "true" ] ; then
     rm runtime/component/mantle-usl/service/ProductSubscription.secas.xml
 fi
 
+
+# Never allow demo data into the commercial NASQO production environment.
+if [ "${instance_purpose:-}" = "production" ] && [ "${DB_DATA:-}" = "DEMO" ]; then
+    echo "Refusing demo data in production" >&2
+    exit 1
+fi
 
 #load data if required
 if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then

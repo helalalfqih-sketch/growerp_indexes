@@ -1,0 +1,12 @@
+# Automatic HTTPS requires a real DNS record and reachable ports 80 and 443.
+{$NASQO_DOMAIN} {
+    encode zstd gzip
+    header {
+        X-Content-Type-Options "nosniff"
+        Referrer-Policy "strict-origin-when-cross-origin"
+        X-Frame-Options "DENY"
+    }
+    @api path /rest/* /rpc/* /status /vapps* /chat* /notws*
+    reverse_proxy @api backend:80
+    reverse_proxy web:80
+}

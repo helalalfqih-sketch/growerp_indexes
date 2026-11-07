@@ -6,6 +6,9 @@ docker/logs
 *.ipa
 docker/nginx/html
 .env
+# Generated NASQO production runtime settings and private TLS material.
+deploy/nasqo/private/
+deploy/nasqo/*.env
 
 flutter/packages/growerp_agent
 moqui/runtime/component/growerp-shopify/

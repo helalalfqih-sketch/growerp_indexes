@@ -1,0 +1,28 @@
+# NASQO Flutter Admin, built only from the checked-out fork (no upstream clone).
+FROM debian:trixie-slim AS build
+ARG FLUTTER_VERSION=3.47.9
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ca-certificates curl git unzip xz-utils zip libstdc++6 \
+    libgtk-3-dev libclang-dev libpulse-dev && \
+    rm -rf /var/lib/apt/lists/* && useradd -m builder
+USER builder
+WORKDIR /home/builder
+RUN mkdir -p /home/builder/sdk && \
+    curl -fsSL "https://storage.googleapis.com/flutter_infra_release/releases/stable/linux/flutter_linux_${FLUTTER_VERSION}-stable.tar.xz" \
+      | tar -xJ -C /home/builder/sdk
+ENV PATH="/home/builder/sdk/flutter/bin:/home/builder/.pub-cache/bin:$PATH"
+RUN flutter --version && flutter precache --web && flutter config --no-analytics
+COPY --chown=builder:builder . /home/builder/nasqo_flutter
+WORKDIR /home/builder/nasqo_flutter
+RUN flutter pub get && \
+    dart pub global activate melos 7.8.1 && \
+    melos bootstrap && \
+    melos l10n --no-select && \
+    melos build --no-select
+WORKDIR /home/builder/nasqo_flutter/packages/admin
+RUN flutter build web --release --no-pub --pwa-strategy=none && \
+    find build/web -name '*.symbols' -delete
+
+FROM nginx:1.27-alpine
+COPY --from=build /home/builder/nasqo_flutter/packages/admin/build/web /usr/share/nginx/html
+EXPOSE 80

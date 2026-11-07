@@ -1,0 +1,28 @@
+name: NASQO production foundation checks
+
+on:
+  pull_request:
+    paths:
+      - 'deploy/nasqo/**'
+      - '.github/workflows/nasqo-production-foundation.yml'
+      - 'backend/deploy/initstart.sh'
+      - 'flutter/packages/growerp_core/lib/src/domains/common/functions/get_backend_url.dart'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  production-config:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate production config without deploying services
+        run: python3 deploy/nasqo/test_production_config.py
+      - name: Check entrypoint syntax
+        run: bash -n backend/deploy/initstart.sh
+      - name: Check generated config is ignored
+        run: |
+          git check-ignore deploy/nasqo/private/app_settings.json
+          ! git ls-files --error-unmatch deploy/nasqo/private/app_settings.json
