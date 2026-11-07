@@ -105,7 +105,7 @@ def money(value):
         raise ValueError("Invalid price") from e
     if not d.is_finite() or d < 0:
         raise ValueError("Invalid nonfinite or negative price")
-    return format(d, "f")
+    return format(d.normalize(), "f")
 
 def index_by(items, key):
     if not isinstance(items, list):
