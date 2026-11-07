@@ -62,7 +62,7 @@ void main() {
               builder: (context) {
                 expect(Directionality.of(context), TextDirection.rtl);
                 final strings = CoreLocalizations.of(context)!;
-                expect(strings.selectLanguage, 'اختر اللغة');
+                expect(strings.selectLanguage, 'اختيار اللغة');
                 expect(strings.aboutApp('GrowERP'), contains('GrowERP'));
                 return Scaffold(body: Text(strings.selectLanguage));
               },
@@ -70,7 +70,7 @@ void main() {
           ),
         );
         await tester.pumpAndSettle();
-        expect(find.text('اختر اللغة'), findsOneWidget);
+        expect(find.text('اختيار اللغة'), findsOneWidget);
         expect(tester.takeException(), isNull);
       });
     }
