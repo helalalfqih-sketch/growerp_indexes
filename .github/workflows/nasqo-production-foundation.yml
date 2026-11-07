@@ -20,6 +20,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Validate production config without deploying services
         run: python3 deploy/nasqo/test_production_config.py
+      - name: Verify VPSDime cutover routes and isolated Compose services
+        run: python3 deploy/nasqo/vpsdime/test_cutover.py
       - name: Check entrypoint syntax
         run: bash -n backend/deploy/initstart.sh
       - name: Check generated config is ignored

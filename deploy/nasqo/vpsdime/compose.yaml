@@ -1,0 +1,111 @@
+# NASQO ERP deployment on the existing VPSDime host.
+# Caddy is ALREADY deployed on indexes-waha_default. Do not bind ports 80 or 443 here.
+# Use the reviewed prebuilt NASQO images, never GrowERP upstream images.
+name: nasqo-production
+
+x-db-env: &db-env
+  POSTGRES_DB: nasqo
+  POSTGRES_USER: nasqo
+  POSTGRES_PASSWORD: ${NASQO_DB_PASSWORD:?Generate a separate strong database password}
+
+x-moqui-env: &moqui-env
+  instance_purpose: production
+  DB_DATA: NONE
+  entity_ds_db_conf: postgres
+  entity_ds_host: database
+  entity_ds_port: "5432"
+  entity_ds_database: nasqo
+  entity_ds_schema: public
+  entity_ds_user: nasqo
+  entity_ds_password: ${NASQO_DB_PASSWORD:?Set NASQO_DB_PASSWORD}
+  entity_ds_crypt_pass: ${NASQO_CRYPT_PASSWORD:?Set NASQO_CRYPT_PASSWORD}
+  webapp_https_enabled: "true"
+  webapp_https_host: erp.indexesstore.com
+  webapp_https_port: "443"
+  webapp_http_port: "80"
+  webapp_allow_origins: https://erp.indexesstore.com
+  default_locale: ar
+  default_time_zone: Asia/Aden
+
+services:
+  database:
+    image: postgres:17.2
+    restart: unless-stopped
+    environment: *db-env
+    volumes:
+      - nasqo_database:/var/lib/postgresql/data
+    networks: [private]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U nasqo -d nasqo"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+
+  backend:
+    image: nasqo/backend:release-31e58d1
+    pull_policy: never
+    restart: unless-stopped
+    stop_grace_period: 90s
+    environment: *moqui-env
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - nasqo_sessions:/opt/moqui/runtime/sessions
+      - nasqo_txlog:/opt/moqui/runtime/txlog
+      - nasqo_logs:/opt/moqui/runtime/log
+    networks:
+      private: {}
+      existing_caddy:
+        aliases: [nasqo-backend]
+
+  # Explicit, one-time system/reference data load. No demo loader.
+  bootstrap:
+    profiles: [bootstrap]
+    image: nasqo/backend:release-31e58d1
+    pull_policy: never
+    restart: "no"
+    environment: *moqui-env
+    command:
+      - java
+      - -cp
+      - .
+      - MoquiStart
+      - load
+      - types=seed,seed-initial,install
+      - conf=conf/MoquiProductionConf.xml
+      - no-run-es
+    depends_on:
+      database:
+        condition: service_healthy
+    volumes:
+      - nasqo_sessions:/opt/moqui/runtime/sessions
+      - nasqo_txlog:/opt/moqui/runtime/txlog
+      - nasqo_logs:/opt/moqui/runtime/log
+    networks: [private]
+
+  web:
+    image: nasqo/web:release-ae4562
+    pull_policy: never
+    restart: unless-stopped
+    networks:
+      existing_caddy:
+        aliases: [nasqo-web]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1/ >/dev/null"]
+      interval: 20s
+      timeout: 5s
+      retries: 10
+
+networks:
+  private:
+    internal: true
+  existing_caddy:
+    external: true
+    name: indexes-waha_default
+
+volumes:
+  nasqo_database:
+  nasqo_sessions:
+  nasqo_txlog:
+  nasqo_logs:
