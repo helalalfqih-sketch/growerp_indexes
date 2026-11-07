@@ -2,7 +2,7 @@
 # Never clones the upstream growerp/growerp app in place of NASQO.
 FROM eclipse-temurin:21-jdk AS build
 RUN apt-get update && apt-get install -y --no-install-recommends \
-    git curl unzip zip ca-certificates && rm -rf /var/lib/apt/lists/*
+    git curl unzip zip ca-certificates python3 && rm -rf /var/lib/apt/lists/*
 ARG NASQO_REF=master
 ARG NASQO_COMMIT
 RUN test -n "$NASQO_COMMIT"
@@ -12,6 +12,9 @@ RUN git config --global url."https://github.com/".insteadOf "git@github.com:" &&
     cd /src/nasqo && test "$(git rev-parse HEAD)" = "$NASQO_COMMIT" && \
     git submodule update --init --recursive && \
     bash setup-backend.sh
+# Mantle's upstream TimePeriod service parses locale-formatted Arabic digits with
+# LocalDate.parse (ISO ASCII), which prevents Arabic users completing setup.
+RUN python3 /src/nasqo/deploy/nasqo/patch_time_period_locale.py /src/nasqo
 
 WORKDIR /src/nasqo/moqui
 RUN mkdir -p runtime/lib && \
