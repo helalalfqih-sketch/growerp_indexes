@@ -1,0 +1,15 @@
+{
+  "version": 2,
+  "buildCommand": "bash ci/build-admin-web-vercel.sh",
+  "installCommand": "echo 'Flutter dependencies are installed by the pinned build script'",
+  "outputDirectory": "flutter/packages/admin/build/web",
+  "routes": [
+    {
+      "handle": "filesystem"
+    },
+    {
+      "src": "/.*",
+      "dest": "/index.html"
+    }
+  ]
+}
