@@ -172,7 +172,23 @@ servers** and attaching them to agents.
    * **Auth headers**: optional name/value pairs sent on connect (e.g.
      `Authorization: Bearer …`). Header values are stored encrypted and are never shown
      again — re-enter a value to change it.
-   * **Enabled**: turn the whole server on/off without deleting it.
+   * **Enabled**: turn the whole server on/off without deleting it. New registrations
+     start disabled; enable one only after connection and authorization testing.
+
+The backend now honours the selected transport: **HTTP** uses the Streamable HTTP
+client and a full `https://.../mcp` URL; **SSE** uses the legacy event-stream
+client and a server-specific `https://.../mcp/sse` URL. Only HTTPS endpoints are
+accepted, except HTTP to loopback for local tests. Avoid embedding access tokens
+or credentials in URLs.
+
+**OAuth limitation:** this external-server form currently supports **static auth
+headers only**. It does not register an OAuth client, open a user-consent screen,
+perform Authorization Code + PKCE, store a renewable grant, or refresh access
+tokens. A gateway advertising DCR (such as SerpApi OAuth) cannot be connected
+reliably merely by selecting HTTP or pasting a temporary Bearer token. A separate
+outbound OAuth authorization feature and provider-allowlisted callback are
+required before enabling such a server. Do not copy ChatGPT access tokens into
+the GrowERP server registry.
 
 Servers are scoped to your company; other tenants never see or use them.
 

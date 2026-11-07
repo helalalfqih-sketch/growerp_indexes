@@ -18,6 +18,26 @@ import 'package:growerp_core/growerp_core.dart';
 import 'adk_config_service.dart';
 import 'package:growerp_adk/l10n/generated/adk_localizations.dart';
 
+/// Validate endpoints before saving credentials to an external MCP destination.
+/// OAuth is not handled by this dialog; a bearer header alone will not renew.
+String? validateExternalMcpUrl(String? value) {
+  if (value == null || value.trim().isEmpty) return 'Required';
+  final uri = Uri.tryParse(value.trim());
+  if (uri == null ||
+      uri.host.isEmpty ||
+      uri.userInfo.isNotEmpty ||
+      uri.hasFragment ||
+      !uri.hasScheme) {
+    return 'Enter a valid MCP URL without credentials or fragment';
+  }
+  if (uri.scheme == 'https') return null;
+  if (uri.scheme == 'http' &&
+      const {'localhost', '127.0.0.1', '::1'}.contains(uri.host)) {
+    return null;
+  }
+  return 'External MCP servers must use HTTPS';
+}
+
 /// Dialog to create or edit an [AdkMcpServer] (a tenant-registered external MCP server).
 /// Returns the saved [AdkMcpServer] or null if cancelled.
 class AdkMcpServerDialog extends StatefulWidget {
@@ -43,7 +63,8 @@ class _AdkMcpServerDialogState extends State<AdkMcpServerDialog> {
   final _nameCtrl = TextEditingController();
   final _urlCtrl = TextEditingController();
   String _transport = 'sse'; // sse | http
-  bool _enabled = true;
+  // New external servers stay disabled until connectivity and authorization are verified.
+  bool _enabled = false;
   bool _saving = false;
 
   /// Header rows the user enters (name + value). Sent on connect; write-only —
@@ -158,8 +179,7 @@ class _AdkMcpServerDialogState extends State<AdkMcpServerDialog> {
                           labelText: 'URL *',
                           hintText: 'https://host/mcp/sse',
                         ),
-                        validator: (v) =>
-                            (v == null || v.trim().isEmpty) ? 'Required' : null,
+                        validator: validateExternalMcpUrl,
                       ),
                       const SizedBox(height: 8),
                       DropdownButtonFormField<String>(
@@ -189,6 +209,15 @@ class _AdkMcpServerDialogState extends State<AdkMcpServerDialog> {
                             onPressed: _addHeaderRow,
                           ),
                         ],
+                      ),
+                      const Padding(
+                        padding: EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          'OAuth sign-in and token renewal are not supported by this form. '
+                          'Do not paste temporary ChatGPT access tokens. '
+                          'Leave the server disabled until authentication is configured.',
+                          style: TextStyle(fontSize: 12),
+                        ),
                       ),
                       if (!isNew)
                         Text(AdkLocalizations.of(context)!.adk_existingHeaderValuesAre,

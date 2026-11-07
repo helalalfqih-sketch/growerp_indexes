@@ -43,6 +43,16 @@ dependencies {
 
     // Dev module — only used to extract the Angular DevUI browser assets at build time
     adkDevAssets 'com.google.adk:google-adk-dev:1.10.1'
+
+    // Tests exercise the real parsed external-MCP config (no remote network calls).
+    testImplementation project(':framework')
+    testImplementation 'com.google.adk:google-adk:1.10.1'
+    testImplementation 'org.junit.jupiter:junit-jupiter:5.11.4'
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher:1.11.4'
+}
+
+test {
+    useJUnitPlatform()
 }
 
 check.dependsOn.clear()
