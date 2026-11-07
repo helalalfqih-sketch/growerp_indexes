@@ -1,0 +1,23 @@
+name: Android independent release preflight
+
+on:
+  pull_request:
+    paths:
+      - 'ci/android_production_preflight.py'
+      - 'tests/test_android_production_preflight.py'
+      - 'docs/Android_Production_Readiness.md'
+      - '.github/workflows/android-production-preflight.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  static-audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test production gate logic
+        run: python3 -m unittest discover -s tests -p test_android_production_preflight.py -v
+      - name: Report current production configuration blockers
+        run: python3 ci/android_production_preflight.py
