@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:go_router/go_router.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:growerp_sales/growerp_sales.dart';
@@ -24,6 +25,9 @@ import 'package:growerp_activity/growerp_activity.dart';
 import 'package:growerp_catalog/growerp_catalog.dart';
 import 'package:growerp_inventory/growerp_inventory.dart';
 import 'package:growerp_manufacturing/growerp_manufacturing.dart';
+
+import '../l10n/generated/admin_localizations.dart';
+import 'nasqo_quick_access.dart';
 
 /// Admin dashboard content - displays dashboard panels with statistics.
 /// This is the content-only version for use with ShellRoute.
@@ -60,6 +64,11 @@ class AdminDashboardContent extends StatelessWidget {
                     .where(
                       (option) =>
                           option.isActive &&
+                          (option.userGroups == null ||
+                              option.userGroups!.isEmpty ||
+                              option.userGroups!.contains(
+                                authState.authenticate?.user?.userGroup,
+                              )) &&
                           option.route != null &&
                           option.route != '/' &&
                           option.route != '/about' &&
@@ -69,81 +78,106 @@ class AdminDashboardContent extends StatelessWidget {
                     .toList()
                   ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
 
-            return Scaffold(
-              backgroundColor: Colors.transparent,
-              body: DashboardGrid(
-                items: dashboardOptions,
-                stats: stats,
-                onToggleMinimize: (id) => context
-                    .read<MenuConfigBloc>()
-                    .add(MenuItemToggleMinimize(id)),
-                onRefresh: () async {
-                  context.read<AuthBloc>().add(AuthLoad());
-                },
-                compactGraphicRoutes: const {
-                  '/tasks',
-                  '/marketing',
-                  '/outreach',
-                  '/crm',
-                  '/catalog',
-                  '/orders',
-                  '/inventory',
-                  '/acct-sales',
-                  '/acct-purchase',
-                  '/acct-ledger',
-                  '/manufacturing',
-                  '/agent-control',
-                  '/knowledge',
-                },
-                // Provide the revenue/expense mini-chart for the accounting tile.
-                // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
-                chartBuilder: (route) {
-                  if (route == '/acct-reports' ||
-                      route == '/accounting' ||
-                      route == '/accounting/reports') {
-                    return const RevenueExpenseChartMini();
-                  }
-                  if (route == '/tasks') {
-                    return const TaskDashboardChartMini();
-                  }
-                  if (route == '/marketing') {
-                    return const MarketingDashboardChartMini();
-                  }
-                  if (route == '/outreach') {
-                    return const OutreachDashboardChartMini();
-                  }
-                  if (route == '/crm') {
-                    return const CrmDashboardChartMini();
-                  }
-                  if (route == '/catalog') {
-                    return const CatalogDashboardChartMini();
-                  }
-                  if (route == '/orders') {
-                    return const OrderDashboardChartMini();
-                  }
-                  if (route == '/inventory') {
-                    return const InventoryDashboardChartMini();
-                  }
-                  if (route == '/acct-sales') {
-                    return const AcctSalesDashboardChartMini();
-                  }
-                  if (route == '/acct-purchase') {
-                    return const AcctPurchaseDashboardChartMini();
-                  }
-                  if (route == '/acct-ledger') {
-                    return const LedgerDashboardChartMini();
-                  }
-                  if (route == '/manufacturing') {
-                    return const ManufacturingDashboardChartMini();
-                  }
-                  if (route == '/agent-control') {
-                    return const AgentControlDashboardChartMini();
-                  }
-                  if (route == '/knowledge') {
-                    return const AdkKnowledgeDashboardChartMini();
-                  }
-                  return null;
-                },
+            final l10n = AdminLocalizations.of(context)!;
+            return DefaultTabController(
+              length: 2,
+              child: Scaffold(
+                backgroundColor: Colors.transparent,
+                body: Column(
+                  children: [
+                    TabBar(
+                      tabs: [
+                        Tab(text: l10n.nasqoHomeTab),
+                        Tab(text: l10n.nasqoAllModulesTab),
+                      ],
+                    ),
+                    Expanded(
+                      child: TabBarView(
+                        children: [
+                          NasqoQuickAccess(
+                            items: dashboardOptions,
+                            userGroup: authState.authenticate?.user?.userGroup,
+                            onNavigate: (route) => context.go(route),
+                          ),
+                          DashboardGrid(
+                            items: dashboardOptions,
+                            stats: stats,
+                            onToggleMinimize: (id) => context
+                                .read<MenuConfigBloc>()
+                                .add(MenuItemToggleMinimize(id)),
+                            onRefresh: () async {
+                              context.read<AuthBloc>().add(AuthLoad());
+                            },
+                            compactGraphicRoutes: const {
+                              '/tasks',
+                              '/marketing',
+                              '/outreach',
+                              '/crm',
+                              '/catalog',
+                              '/orders',
+                              '/inventory',
+                              '/acct-sales',
+                              '/acct-purchase',
+                              '/acct-ledger',
+                              '/manufacturing',
+                              '/agent-control',
+                              '/knowledge',
+                            },
+                            // Provide the revenue/expense mini-chart for the accounting tile.
+                            // DashboardGrid auto-upgrades it to full-width 4-row graphic tile.
+                            chartBuilder: (route) {
+                              if (route == '/acct-reports' ||
+                                  route == '/accounting' ||
+                                  route == '/accounting/reports') {
+                                return const RevenueExpenseChartMini();
+                              }
+                              if (route == '/tasks') {
+                                return const TaskDashboardChartMini();
+                              }
+                              if (route == '/marketing') {
+                                return const MarketingDashboardChartMini();
+                              }
+                              if (route == '/outreach') {
+                                return const OutreachDashboardChartMini();
+                              }
+                              if (route == '/crm') {
+                                return const CrmDashboardChartMini();
+                              }
+                              if (route == '/catalog') {
+                                return const CatalogDashboardChartMini();
+                              }
+                              if (route == '/orders') {
+                                return const OrderDashboardChartMini();
+                              }
+                              if (route == '/inventory') {
+                                return const InventoryDashboardChartMini();
+                              }
+                              if (route == '/acct-sales') {
+                                return const AcctSalesDashboardChartMini();
+                              }
+                              if (route == '/acct-purchase') {
+                                return const AcctPurchaseDashboardChartMini();
+                              }
+                              if (route == '/acct-ledger') {
+                                return const LedgerDashboardChartMini();
+                              }
+                              if (route == '/manufacturing') {
+                                return const ManufacturingDashboardChartMini();
+                              }
+                              if (route == '/agent-control') {
+                                return const AgentControlDashboardChartMini();
+                              }
+                              if (route == '/knowledge') {
+                                return const AdkKnowledgeDashboardChartMini();
+                              }
+                              return null;
+                            },
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
               ),
             );
           },

@@ -161,7 +161,7 @@ class _AdminAppState extends State<AdminApp> {
                   mainConfigId: 'ADMIN_DEFAULT',
                   dashboardBuilder: () => const AdminDashboardContent(),
                   widgetLoader: WidgetRegistry.getWidget,
-                  appTitle: 'GrowERP Administrator',
+                  appTitle: 'NASQO ERP',
                   deepLinkService: _deepLinkService,
                   dashboardFabBuilder: (_) => Builder(
                     builder: (ctx) => FloatingActionButton(
@@ -184,14 +184,14 @@ class _AdminAppState extends State<AdminApp> {
                 GoRoute(
                   path: '/',
                   builder: (context, state) => AppSplashScreen.simple(
-                    appTitle: 'GrowERP Administrator',
+                    appTitle: 'NASQO ERP',
                     appId: 'admin',
                   ),
                 ),
                 GoRoute(
                   path: '/:path',
                   builder: (context, state) => AppSplashScreen.simple(
-                    appTitle: 'GrowERP Administrator',
+                    appTitle: 'NASQO ERP',
                     appId: 'admin',
                   ),
                 ),
@@ -211,7 +211,7 @@ class _AdminAppState extends State<AdminApp> {
             applicationId: widget.applicationId,
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
-            title: 'GrowERP Administrator',
+            title: 'NASQO ERP',
             router: router,
             extraDelegates: widget.extraDelegates,
             extraBlocProviders: getAdminBlocProviders(
