@@ -42,7 +42,7 @@ services:
       retries: 12
 
   backend:
-    image: nasqo/backend:release-31e58d1
+    image: nasqo/backend:arabic-fiscal-c08142f
     pull_policy: never
     restart: unless-stopped
     stop_grace_period: 90s
@@ -62,7 +62,7 @@ services:
   # Explicit, one-time system/reference data load. No demo loader.
   bootstrap:
     profiles: [bootstrap]
-    image: nasqo/backend:release-31e58d1
+    image: nasqo/backend:arabic-fiscal-c08142f
     pull_policy: never
     restart: "no"
     environment: *moqui-env

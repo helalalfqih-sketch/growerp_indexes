@@ -46,7 +46,7 @@ else:
 compose_text = (HERE / "compose.yaml").read_text()
 assert "indexes-waha_default" in compose_text
 assert "postgres:17.2" in compose_text
-assert "nasqo/backend:release-31e58d1" in compose_text
+assert "nasqo/backend:arabic-fiscal-c08142f" in compose_text
 assert "nasqo/web:release-ae4562" in compose_text
 assert "DB_DATA: NONE" in compose_text
 assert "types=seed,seed-initial,install" in compose_text
