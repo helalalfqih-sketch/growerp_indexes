@@ -42,7 +42,22 @@ assert "final configuredBaseUrl = GlobalConfiguration().get('databaseUrl');" in 
 example = (root / ".env.example").read_text()
 for secret in ("NASQO_DB_PASSWORD", "NASQO_CRYPT_PASSWORD"):
     assert re.search(rf"(?m)^{secret}=\s*$", example), "Do not ship default secrets"
-assert not (root / "private/app_settings.json").is_file(), "Private output must not be committed"
+# The file is intentionally generated locally before deployment. Its presence
+# is valid; only tracking or exposing it in the repository is forbidden.
+settings_path = "deploy/nasqo/private/app_settings.json"
+assert subprocess.run(
+    ["git", "check-ignore", "-q", settings_path],
+    cwd=repo, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+).returncode == 0, "Generated web settings must be gitignored"
+assert subprocess.run(
+    ["git", "ls-files", "--error-unmatch", settings_path],
+    cwd=repo, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL,
+).returncode != 0, "Private web settings must never be committed"
+if (root / "private/app_settings.json").is_file():
+    runtime_config = json.loads((root / "private/app_settings.json").read_text())
+    assert runtime_config.get("test") is False
+    assert str(runtime_config.get("databaseUrl", "")).startswith("https://")
+    assert str(runtime_config.get("chatUrl", "")).startswith("wss://")
 
 env = dict(os.environ)
 env.update({
