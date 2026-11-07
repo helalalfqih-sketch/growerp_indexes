@@ -42,9 +42,11 @@ if [ "$DISABLE_SECA" == "true" ] ; then
 fi
 
 
-# Never allow demo data into the commercial NASQO production environment.
-if [ "${instance_purpose:-}" = "production" ] && [ "${DB_DATA:-}" = "DEMO" ]; then
-    echo "Refusing demo data in production" >&2
+# Production runtime never loads data implicitly. The one-time installer is
+# an explicit, separate bootstrap service and only loads required system data.
+# This also prevents accidental conversion, demo or re-seeding at restart.
+if [ "${instance_purpose:-}" = "production" ] && [ "${DB_DATA:-NONE}" != "NONE" ]; then
+    echo "Refusing demo data in production or any automatic data load" >&2
     exit 1
 fi
 

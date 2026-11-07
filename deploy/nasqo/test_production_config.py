@@ -53,4 +53,41 @@ run = subprocess.run(
 if run.returncode:
     print("Compose validation failed:", run.stderr[:2000], file=sys.stderr)
     sys.exit(run.returncode)
+# Exercise the actual runtime guard without a database, JVM or network.
+# A temporary java stub proves that normal startup can continue, while any
+# implicit production data loading fails before the JVM is called.
+with tempfile.TemporaryDirectory(prefix="nasqo-prod-guard-") as td:
+    bin_dir = Path(td)
+    java = bin_dir / "java"
+    java.write_text("#!/bin/sh\nexit 0\n")
+    java.chmod(0o700)
+    guard_env = dict(os.environ)
+    guard_env.update({
+        "PATH": td + os.pathsep + os.environ.get("PATH", ""),
+        "instance_purpose": "production",
+        "TAG": "",
+        "SMTP_USER": "",
+        "SMTP_PASSWORD": "",
+        "BIRDSEND_API_KEY": "",
+        "BIRDSEND_AUTM_SEQUENCE": "",
+        "OPENMRS_PASSWORD": "",
+        "OPENMRS_USERNAME": "",
+        "OPENMRS_BASE_URL": "",
+        "DISABLE_SECA": "",
+    })
+    for data_mode in ("DEMO", "CONVERSION", "INSTALL", "SEED", "SEED-INITIAL"):
+        guard_env["DB_DATA"] = data_mode
+        attempt = subprocess.run(
+            ["bash", str(repo / "backend/deploy/initstart.sh")],
+            cwd=td, env=guard_env, capture_output=True, text=True,
+        )
+        assert attempt.returncode != 0, f"Production unexpectedly permitted {data_mode}"
+        assert "Refusing demo data in production" in attempt.stderr
+    guard_env["DB_DATA"] = "NONE"
+    normal = subprocess.run(
+        ["bash", str(repo / "backend/deploy/initstart.sh")],
+        cwd=td, env=guard_env, capture_output=True, text=True,
+    )
+    assert normal.returncode == 0, "Production runtime should allow DB_DATA=NONE"
+
 print("NASQO production foundation lint passed: no demo loader, no exposed DB port, pinned owner source")
