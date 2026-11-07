@@ -1,3 +1,16 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "nasqoHomeTab": "الرئيسية",
+  "nasqoAllModulesTab": "جميع الوحدات",
+  "nasqoWelcomeTitle": "نسقو ERP",
+  "nasqoWelcomeSubtitle": "مساحة عمل أبسط للمبيعات والمخزون والمحاسبة.",
+  "nasqoQuickAccessTitle": "وصول سريع",
+  "nasqoQuickAccessSubtitle": "تظهر هنا الوحدات المتاحة لحسابك فقط.",
+  "nasqoNoQuickActions": "لا توجد وحدات متاحة لهذا الحساب حاليًا.",
+  "nasqoOrders": "الطلبات",
+  "nasqoInvoices": "فواتير المبيعات",
+  "nasqoInventory": "المخزون",
+  "nasqoProducts": "المنتجات",
+  "nasqoCrm": "العملاء والفرص",
+  "nasqoAccounting": "دفتر الأستاذ"
 }

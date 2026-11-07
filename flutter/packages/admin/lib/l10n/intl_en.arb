@@ -1,3 +1,16 @@
 {
-  "@@locale": "en"
+  "@@locale": "en",
+  "nasqoHomeTab": "Overview",
+  "nasqoAllModulesTab": "All modules",
+  "nasqoWelcomeTitle": "NASQO ERP",
+  "nasqoWelcomeSubtitle": "A simpler workspace for sales, inventory and accounting.",
+  "nasqoQuickAccessTitle": "Quick access",
+  "nasqoQuickAccessSubtitle": "Only modules available to your account appear here.",
+  "nasqoNoQuickActions": "No modules are currently available for this account.",
+  "nasqoOrders": "Orders",
+  "nasqoInvoices": "Sales invoices",
+  "nasqoInventory": "Inventory",
+  "nasqoProducts": "Products",
+  "nasqoCrm": "Customers and opportunities",
+  "nasqoAccounting": "General ledger"
 }
