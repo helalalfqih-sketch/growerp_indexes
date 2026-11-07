@@ -19,6 +19,15 @@ assert "postgres:17.2" in compose
 assert "DB_DATA: NONE" in compose, "Runtime must never install or demo-load data"
 assert "types=seed,seed-initial,install" in compose, "System bootstrap required"
 assert "types=seed,seed-initial,demo" not in compose
+# Some upstream "Demo" files were incorrectly classified as "seed", causing
+# sample Agent records to load even when the bootstrap omitted the demo type.
+# Fail closed if a future change reclassifies a demo-named source as seed/install.
+demo_sources = list((repo / "backend/data").glob("*Demo*.xml"))
+assert demo_sources, "Expected demo data source files were not found"
+for source in demo_sources:
+    assert re.search(r'<entity-facade-xml\s+type="demo"', source.read_text()), (
+        f"Demo data source must be type=demo, not seed/install: {source.name}"
+    )
 assert "5432:5432" not in compose, "PostgreSQL port must be private"
 assert "webapp_allow_origins: https://" in compose
 assert "backend.growerp.com" not in compose, "No upstream backend"
