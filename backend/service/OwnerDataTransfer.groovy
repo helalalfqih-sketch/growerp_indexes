@@ -35,7 +35,7 @@ import java.util.zip.ZipOutputStream
    another system that has the seed data and the GROWERP owner already loaded.
 
    Which entities: service/ownerDataEntities.json, made by ci/owner_data_entities.py
-   from the entities the GrowERP programs use.
+   from the entities the NASQO programs use.
 
    Export: starting from the owner's parties, every row of a tenant entity that points
    (relationship or implicit id field) at an already selected row is taken, until
@@ -453,7 +453,7 @@ class OwnerDataTransfer {
     Map load(ZipFile zip, File workDir) {
         Map manifest = manifest(zip)
         if (!manifest || (manifest.formatVersion as int) > FORMAT_VERSION)
-            throw new IllegalArgumentException('This is not a GrowERP owner data file, or from a newer version')
+            throw new IllegalArgumentException('This is not a NASQO owner data file, or from a newer version')
         String oldOwner = manifest.ownerPartyId
         Map<String, ZipEntry> entries = entityEntries(zip)
         List<ZipEntry> fileEntries = zip.entries().toList().findAll { ZipEntry e -> !e.isDirectory() && e.name.startsWith('files/') }

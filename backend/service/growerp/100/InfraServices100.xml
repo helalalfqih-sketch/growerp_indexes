@@ -33,7 +33,7 @@ limitations under the License.
     <service verb="get" noun="InfraMetrics">
         <description>Host, JVM and database metrics for this Moqui instance, read
             directly from the JVM and the database - no external monitoring stack.
-            Restricted to GrowERP system support users.</description>
+            Restricted to NASQO system support users.</description>
         <out-parameters>
             <parameter name="available" type="Boolean"/>
             <parameter name="message"/>

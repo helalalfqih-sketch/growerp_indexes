@@ -46,7 +46,7 @@
   <!-- Credibility Section -->
   <growerp.landing.CredibilityInfo credibilityInfoId="ERP_CRED_INFO" pseudoId="erp-cred-info"
     landingPageId="ERP_LANDING_PAGE"
-    creatorBio="This assessment is built by the creators of GrowERP, a modern, open-source, multi-platform ERP. We designed it specifically to be extensible and adaptable, from small businesses to large enterprises."
+    creatorBio="This assessment is built by the creators of NASQO, a modern, open-source, multi-platform ERP. We designed it specifically to be extensible and adaptable, from small businesses to large enterprises."
     backgroundText="Our platform is built on a powerful and modern Flutter (frontend) and Moqui (backend) tech stack, and it's already used to power diverse applications for: Complete Admin &amp; Business Management, Hotel &amp; Hospitality, and Freelancer &amp; Project Management. This assessment uses our experience to benchmark your business against high-efficiency standards and provides a clear roadmap for your specific needs." />
 
   <growerp.landing.CredibilityStatistic

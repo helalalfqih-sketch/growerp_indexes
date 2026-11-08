@@ -6,10 +6,10 @@
 
          Today's mantle-stripe integration is a single GLOBAL Stripe account
          (Stripe.PaymentGatewayStripe has no ownerPartyId; it's resolved from a JVM
-         System property) used for GrowERP's own SaaS subscription / course / store
+         System property) used for NASQO's own SaaS subscription / course / store
          billing. It is not a "each tenant connects their own Stripe" gateway, so this
          agent only makes sense for the GROWERP owner — see the note in
-         GrowerpOperationsTeamData.xml for why it is not part of that per-tenant team.
+         NASQOOperationsTeamData.xml for why it is not part of that per-tenant team.
 
          The actual reconciliation (growerp.100.AccountingServices100.import#StripePayments)
          is a deterministic service, never an LLM tool call: misapplying a payment to the
@@ -37,8 +37,8 @@ ownerPartyId=GROWERP. It automatically matches and applies confident payments to
 itself — you never decide a match yourself. Report how many payments were imported and applied
 (importedCount), and list any in unmatchedPayments with enough detail (chargeId, amount, date,
 customerEmail) for a human to match by hand via team chat (growerp.100.ChatServices100.create#ChatMessage)."
-        description="GrowERP's own Stripe payment import status and unmatched-payment monitor. Never matches a payment to an invoice itself.">
-        <instruction><![CDATA[You monitor Stripe payment import for GrowERP's own billing.
+        description="NASQO's own Stripe payment import status and unmatched-payment monitor. Never matches a payment to an invoice itself.">
+        <instruction><![CDATA[You monitor Stripe payment import for NASQO's own billing.
 
 The actual matching of a Stripe payment to an invoice happens inside `growerp.100.AccountingServices100.import#StripePayments` itself — a deterministic service, not your judgment — because misapplying a payment is a real-money mistake.
 

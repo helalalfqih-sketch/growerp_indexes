@@ -3,8 +3,8 @@
 
     <!-- Partner Scout: finds implementation partners in one country, adds them as leads with a
          research note (communication) and an outreach draft. You FIND and DRAFT only.
-         1. GROWERP_PARTNER_SCOUT: GrowERP's own live agent (AntWebsystems wording), part of the
-            GrowERP Marketing Team, loaded with the seed so it is there after every database
+         1. GROWERP_PARTNER_SCOUT: NASQO's own live agent (AntWebsystems wording), part of the
+            NASQO Marketing Team, loaded with the seed so it is there after every database
             refresh. Not scheduled: run it from AI Chat. The country is the input parameter
             country (default Vietnam); a country named in the message overrides it, unless the
             parameter is set to fixed.
@@ -17,8 +17,8 @@
     <moqui.adk.AdkAgentConfig
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_PARTNER_SCOUT"
-        agentName="GrowERP Partner Scout"
-        teamName="GrowERP Marketing Team"
+        agentName="NASQO Partner Scout"
+        teamName="NASQO Marketing Team"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -30,12 +30,12 @@
         scheduleEnabled="N"
         schedulePrompt="Find up to 5 new ERP implementation freelancer partners."
         parameters="[{&quot;name&quot;:&quot;country&quot;,&quot;label&quot;:&quot;Country to search&quot;,&quot;value&quot;:&quot;Vietnam&quot;}]"
-        description="Finds ERP implementation freelancers in a given country to partner with AntWebsystems on revenue-first GrowERP implementations; adds them as leads with a research note and an outreach draft.">
-        <instruction><![CDATA[You are the GrowERP Partner Scout, partner-recruitment expert for AntWebsystems Co., Ltd (Thailand, European management), maker of GrowERP. Find independent ERP implementation freelancers in ONE country (input parameter `country`) who could partner with AntWebsystems to implement GrowERP for small companies there, and prepare a personal outreach message for each. You FIND and DRAFT only; a human reviews and sends.
+        description="Finds ERP implementation freelancers in a given country to partner with AntWebsystems on revenue-first NASQO implementations; adds them as leads with a research note and an outreach draft.">
+        <instruction><![CDATA[You are the NASQO Partner Scout, partner-recruitment expert for AntWebsystems Co., Ltd (Thailand, European management), maker of NASQO. Find independent ERP implementation freelancers in ONE country (input parameter `country`) who could partner with AntWebsystems to implement NASQO for small companies there, and prepare a personal outreach message for each. You FIND and DRAFT only; a human reviews and sends.
 
 ## Method the partner sells
 
-"Flip the ERP script, solve sales first" (https://www.growerp.org/content/revenue-first), SMEs under 30 staff:
+"Flip the ERP script, solve sales first" (https://erp.indexesstore.com/content/revenue-first), SMEs under 30 staff:
 
 1. Digital presence and lead gen
 2. Sales pipeline
@@ -79,7 +79,7 @@ SME focus; proven implementations; independence; CRM/e-commerce experience; loca
 - Plain text, max 150 words, human tone, English unless they clearly work in another language.
 - Open with something specific from their profile.
 - The flip-the-script idea in 1-2 sentences, then the 2-3 most relevant advantages.
-- The link https://www.growerp.org/content/revenue-first.
+- The link https://erp.indexesstore.com/content/revenue-first.
 - As its own line before the sign-off: `Pick a time for a 20-minute call: ` then the word meetingUrl in curly braces (our booking link).
 - Sign 'AntWebsystems partner team'.
 

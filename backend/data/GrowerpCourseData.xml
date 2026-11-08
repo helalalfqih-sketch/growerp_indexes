@@ -2,17 +2,17 @@
 
 <entity-facade-xml type="seed">
     <!-- Service products backing each course (required for subscriptions) -->
-    <mantle.product.Product productId="ProductCourseGrowerp" pseudoId="course-creation" productTypeEnumId="PtService"
-        productName="How to Create a Course with GrowERP: The Curriculum"
+    <mantle.product.Product productId="ProductCourseNASQO" pseudoId="course-creation" productTypeEnumId="PtService"
+        productName="How to Create a Course with NASQO: The Curriculum"
         ownerPartyId="GROWERP" requireInventory="N" />
     <mantle.product.Product productId="ProductCourseMarketingSales" pseudoId="marketing-sales" productTypeEnumId="PtService"
-        productName="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
+        productName="Marketing, Outreach and Sales: Your Complete NASQO Growth Pipeline"
         ownerPartyId="GROWERP" requireInventory="N" />
     <!-- their pictures on the website (product image) and in the academy app (course cover) -->
-    <mantle.product.ProductContent productContentId="ProductCourseGrowerpImg" productId="ProductCourseGrowerp"
+    <mantle.product.ProductContent productContentId="ProductCourseNASQOImg" productId="ProductCourseNASQO"
         productContentTypeEnumId="PcntImageMedium" fromDate="1790000000000"
         contentLocation="component://PopRestStore/screen/store/assets/courses/course-creation.png" />
-    <mantle.product.ProductContent productContentId="ProductCourseGrowerpImgSmall" productId="ProductCourseGrowerp"
+    <mantle.product.ProductContent productContentId="ProductCourseNASQOImgSmall" productId="ProductCourseNASQO"
         productContentTypeEnumId="PcntImageSmall" fromDate="1790000000000"
         contentLocation="component://PopRestStore/screen/store/assets/courses/course-creation.png" />
     <mantle.product.ProductContent productContentId="ProductCourseMarketingSalesImg" productId="ProductCourseMarketingSales"
@@ -22,21 +22,21 @@
         productContentTypeEnumId="PcntImageSmall" fromDate="1790000000000"
         contentLocation="component://PopRestStore/screen/store/assets/courses/marketing-sales.png" />
 
-    <growerp.course.Course courseId="CourseGrowerp" coverImageUrl="/assets/courses/course-creation.png" pseudoId="course-creation" ownerPartyId="GROWERP"
-        productId="ProductCourseGrowerp"
-        title="How to Create a Course with GrowERP: The Curriculum"
-        description="This curriculum outlines the process of building, validating, and selling a course using the GrowERP ecosystem. It combines industry best practices with the specific tools and strategies found in the GrowERP architecture (Assessments, Landing Pages, and Outreach)."
-        objectives="To take a course creator from &quot;Idea&quot; to &quot;Automated Sales Funnel&quot; using GrowERP."
+    <growerp.course.Course courseId="CourseNASQO" coverImageUrl="/assets/courses/course-creation.png" pseudoId="course-creation" ownerPartyId="GROWERP"
+        productId="ProductCourseNASQO"
+        title="How to Create a Course with NASQO: The Curriculum"
+        description="This curriculum outlines the process of building, validating, and selling a course using the NASQO ecosystem. It combines industry best practices with the specific tools and strategies found in the NASQO architecture (Assessments, Landing Pages, and Outreach)."
+        objectives="To take a course creator from &quot;Idea&quot; to &quot;Automated Sales Funnel&quot; using NASQO."
         status="PUBLISHED" difficulty="INTERMEDIATE" estimatedDuration="1200" />
 
     <!-- Module 1: Strategy & Validation (The "Why") -->
-    <growerp.course.CourseModule moduleId="GrowerpMod01" courseId="CourseGrowerp"
+    <growerp.course.CourseModule moduleId="NASQOMod01" courseId="CourseNASQO"
         title="Strategy &amp; Validation (The &quot;Why&quot;)"
-        description="Based on &quot;GrowERP Course Media Strategy.md&quot; and &quot;Marketing hooks.md&quot;"
+        description="Based on &quot;NASQO Course Media Strategy.md&quot; and &quot;Marketing hooks.md&quot;"
         sequenceNum="1" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0101" moduleId="GrowerpMod01"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0101" moduleId="NASQOMod01"
+        courseId="CourseNASQO"
         title="Identifying the Pain Point"
         sequenceNum="1">
         <content><![CDATA[
@@ -47,8 +47,8 @@
 *   **Action Project**: Write 3 &quot;Agitator&quot; hooks for your course topic.]]></content>
     </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0102" moduleId="GrowerpMod01"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0102" moduleId="NASQOMod01"
+        courseId="CourseNASQO"
         title="The &quot;Why-What-How&quot; Framework"
         sequenceNum="2">
         <content><![CDATA[
@@ -60,12 +60,12 @@
     </growerp.course.CourseLesson>
 
     <!-- Module 2: The Assessment Engine (The "Pre-Sell") -->
-    <growerp.course.CourseModule moduleId="GrowerpMod02" courseId="CourseGrowerp"
+    <growerp.course.CourseModule moduleId="NASQOMod02" courseId="CourseNASQO"
         title="The Assessment Engine (The &quot;Pre-Sell&quot;)"
-        description="Based on `GrowerpSuggestedCourses.xml` - Assessment Entities" sequenceNum="2" />
+        description="Based on `NASQOSuggestedCourses.xml` - Assessment Entities" sequenceNum="2" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0201" moduleId="GrowerpMod02"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0201" moduleId="NASQOMod02"
+        courseId="CourseNASQO"
         title="Why Assessments Beat Standard Opt-ins"
         sequenceNum="1">
         <content><![CDATA[
@@ -73,8 +73,8 @@
 *   **Strategy**: Use the assessment to qualify leads *before* they buy.]]></content>
     </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0202" moduleId="GrowerpMod02"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0202" moduleId="NASQOMod02"
+        courseId="CourseNASQO"
         title="Building the Assessment in XML"
         sequenceNum="2">
         <content><![CDATA[
@@ -87,12 +87,12 @@
     </growerp.course.CourseLesson>
 
     <!-- Module 3: Curriculum Design & Content -->
-    <growerp.course.CourseModule moduleId="GrowerpMod03" courseId="CourseGrowerp"
+    <growerp.course.CourseModule moduleId="NASQOMod03" courseId="CourseNASQO"
         title="Curriculum Design &amp; Content"
         description="Based on Digital Product Best Practices" sequenceNum="3" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0301" moduleId="GrowerpMod03"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0301" moduleId="NASQOMod03"
+        courseId="CourseNASQO"
         title="Structuring for Success"
         sequenceNum="1">
         <content><![CDATA[
@@ -104,23 +104,23 @@
 *   **Ref**: &quot;8 Steps to Your First Mini-Course.md&quot;.]]></content>
     </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0302" moduleId="GrowerpMod03"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0302" moduleId="NASQOMod03"
+        courseId="CourseNASQO"
         title="Production Formats"
         sequenceNum="2">
         <content><![CDATA[
 *   **Video**: Keep under 6 minutes (Micro-learning).
 *   **Text/Guide**: For referencing complex configurations.
-*   **Quizzes**: Reinforce learning (GrowERP supports `Assessment` types for quizzes too).]]></content>
+*   **Quizzes**: Reinforce learning (NASQO supports `Assessment` types for quizzes too).]]></content>
     </growerp.course.CourseLesson>
 
     <!-- Module 4: The Launch Funnel & Automation -->
-    <growerp.course.CourseModule moduleId="GrowerpMod04" courseId="CourseGrowerp"
+    <growerp.course.CourseModule moduleId="NASQOMod04" courseId="CourseNASQO"
         title="The Launch Funnel &amp; Automation"
         description="Based on Landing Pages and Marketing Service definitions" sequenceNum="4" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0401" moduleId="GrowerpMod04"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0401" moduleId="NASQOMod04"
+        courseId="CourseNASQO"
         title="The Landing Page"
         sequenceNum="1">
         <content><![CDATA[
@@ -132,8 +132,8 @@
 *   **Example**: Analyzing `B2B_LANDING` (&quot;Scale Your Sales Team Without Scaling Your Software Bill&quot;).]]></content>
     </growerp.course.CourseLesson>
 
-    <growerp.course.CourseLesson lessonId="GrowerpLess0402" moduleId="GrowerpMod04"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLess0402" moduleId="NASQOMod04"
+        courseId="CourseNASQO"
         title="Automated Outreach"
         sequenceNum="2">
         <content><![CDATA[
@@ -145,12 +145,12 @@
     </growerp.course.CourseLesson>
 
     <!-- Final Project -->
-    <growerp.course.CourseModule moduleId="GrowerpModFinal" courseId="CourseGrowerp"
+    <growerp.course.CourseModule moduleId="NASQOModFinal" courseId="CourseNASQO"
         title="Final Project"
         description="Build Your Prototype" sequenceNum="5" />
 
-    <growerp.course.CourseLesson lessonId="GrowerpLessFinal" moduleId="GrowerpModFinal"
-        courseId="CourseGrowerp"
+    <growerp.course.CourseLesson lessonId="NASQOLessFinal" moduleId="NASQOModFinal"
+        courseId="CourseNASQO"
         title="Build Your Prototype"
         sequenceNum="1">
         <content><![CDATA[
@@ -163,9 +163,9 @@
 
     <growerp.course.Course courseId="CourseMarketingSales" coverImageUrl="/assets/courses/marketing-sales.png" pseudoId="marketing-sales" ownerPartyId="GROWERP"
         productId="ProductCourseMarketingSales"
-        title="Marketing, Outreach and Sales: Your Complete GrowERP Growth Pipeline"
+        title="Marketing, Outreach and Sales: Your Complete NASQO Growth Pipeline"
         description="A comprehensive guide for marketers and sales reps covering every screen, workflow, and integration point across the growerp_marketing, growerp_outreach, and growerp_sales packages. By the end you will have a fully operational funnel: from a public landing page that captures leads, through an automated outreach sequence that warms them up, to a closed sales opportunity with a quote ready for the customer."
-        objectives="Build a complete automated sales funnel in GrowERP: create a persona and landing page, capture leads via an assessment, nurture them with an outreach campaign, manage the pipeline through to Closed Won, and convert the opportunity to a quote."
+        objectives="Build a complete automated sales funnel in NASQO: create a persona and landing page, capture leads via an assessment, nurture them with an outreach campaign, manage the pipeline through to Closed Won, and convert the opportunity to a quote."
         status="PUBLISHED" difficulty="BEGINNER" estimatedDuration="2400" />
 
     <!-- ═══════════════════════════════════════════════════
@@ -178,12 +178,12 @@
 
     <growerp.course.CourseLesson lessonId="MarketLess0101" moduleId="MarketMod01"
         courseId="CourseMarketingSales"
-        title="The GrowERP Growth Ecosystem"
+        title="The NASQO Growth Ecosystem"
         keyPoints="[&quot;Marketing owns Top-of-Funnel: landing pages, lead capture, assessments&quot;, &quot;Outreach owns Middle-of-Funnel: warm lead campaigns AND cold lead scraping (PENDING→CONTACTED→RESPONDED→CONVERTED)&quot;, &quot;Sales owns Bottom-of-Funnel: opportunities, pipeline stages, quote conversion&quot;, &quot;Warm track: landing page assessment → campaign → opportunity; Cold track: scraper → OutreachMessage → Convert to Lead → opportunity&quot;]"
         sequenceNum="1">
         <content><![CDATA[## The Three-Package Growth Model
 
-Every paying customer passes through three stages. GrowERP maps each stage to a dedicated package so your team always knows where a lead is and what to do next.
+Every paying customer passes through three stages. NASQO maps each stage to a dedicated package so your team always knows where a lead is and what to do next.
 
 ### Top of Funnel (ToFu) - growerp_marketing
 The marketing package is responsible for making strangers aware of your offer and capturing their contact details. It provides:
@@ -267,7 +267,7 @@ Before continuing, confirm you can open all three sections without a blank scree
         sequenceNum="1">
         <content><![CDATA[## Creating Your First Persona
 
-A Persona is a semi-fictional representation of your ideal customer. In GrowERP every landing page and course can be linked to a persona so your messaging is always consistent.
+A Persona is a semi-fictional representation of your ideal customer. In NASQO every landing page and course can be linked to a persona so your messaging is always consistent.
 
 ### Opening Personas
 1. Navigate to **Marketing** in the sidebar
@@ -409,7 +409,7 @@ These leads can be exported or directly linked to an Outreach campaign.]]></cont
     <growerp.course.CourseLesson lessonId="MarketLess0204" moduleId="MarketMod02"
         courseId="CourseMarketingSales"
         title="Content Planning and Social Posts"
-        keyPoints="[&quot;Content Plans organise what to publish and when across all channels&quot;, &quot;Social Posts are the individual pieces of content tied to a plan&quot;, &quot;Use AI drafting to generate platform-specific post text&quot;, &quot;Track status from DRAFT through READY to PUBLISHED&quot;, &quot;GrowERP can publish directly to Substack (creates a draft) and LinkedIn (posts live) — no copy-paste needed&quot;, &quot;Platform credentials are stored once in Platform Configuration and reused for every post&quot;]"
+        keyPoints="[&quot;Content Plans organise what to publish and when across all channels&quot;, &quot;Social Posts are the individual pieces of content tied to a plan&quot;, &quot;Use AI drafting to generate platform-specific post text&quot;, &quot;Track status from DRAFT through READY to PUBLISHED&quot;, &quot;NASQO can publish directly to Substack (creates a draft) and LinkedIn (posts live) — no copy-paste needed&quot;, &quot;Platform credentials are stored once in Platform Configuration and reused for every post&quot;]"
         sequenceNum="4">
         <content><![CDATA[## Content Planning and Social Posts
 
@@ -446,9 +446,9 @@ Posts move through statuses:
 - **READY** - content approved and ready to send
 - **PUBLISHED** - successfully pushed to the platform
 
-### Publishing Directly from GrowERP
+### Publishing Directly from NASQO
 
-For **Substack** and **LinkedIn**, GrowERP can publish in one tap — no copy-paste into another tool needed.
+For **Substack** and **LinkedIn**, NASQO can publish in one tap — no copy-paste into another tool needed.
 
 #### Step 1 — Configure your platform credentials (one-time)
 
@@ -463,7 +463,7 @@ Go to **Outreach** → **Platform Configuration** and add a record for each plat
 
 **For LinkedIn:**
 - **Platform** — select LINKEDIN
-- Press **Connect with LinkedIn**, sign in to LinkedIn in the browser window that opens and allow GrowERP to post on your behalf
+- Press **Connect with LinkedIn**, sign in to LinkedIn in the browser window that opens and allow NASQO to post on your behalf
 - The dialog then shows **Connected** with the date the connection is valid until (60 days); after that press **Reconnect LinkedIn**
 
 #### Step 2 — Write and finalise your post
@@ -477,8 +477,8 @@ Open a Social Post with **Platform** set to SUBSTACK or LINKEDIN. Make sure:
 Tap the **Publish to SUBSTACK** (orange) or **Publish to LINKEDIN** (blue) button at the bottom of the post detail screen.
 
 What happens:
-- **Substack** — GrowERP creates a *draft* in your Substack dashboard. You can review it at the link shown under the button, then hit Publish inside Substack when ready.
-- **LinkedIn** — GrowERP posts *immediately* as a public update on your profile. A link to the live post appears under the button.
+- **Substack** — NASQO creates a *draft* in your Substack dashboard. You can review it at the link shown under the button, then hit Publish inside Substack when ready.
+- **LinkedIn** — NASQO posts *immediately* as a public update on your profile. A link to the live post appears under the button.
 
 If the publish fails (expired token, wrong URL etc.) the error is shown in red under the button and the post status is not changed, so you can fix the credentials and retry.
 
@@ -530,7 +530,7 @@ Email is the most reliable starting point for outreach.
 LinkedIn does not offer a public API for direct messaging, so outreach campaigns use a browser extension (the MCP bridge) that drives your LinkedIn session.
 
 Requirements:
-- Install the GrowERP MCP browser extension in Chrome or Edge
+- Install the NASQO MCP browser extension in Chrome or Edge
 - Be logged into LinkedIn in that same browser
 - The browser window must remain open while campaigns run
 
@@ -545,13 +545,13 @@ Schedule LinkedIn campaigns during business hours when your computer is on.
 Publishing a Social Post to LinkedIn uses the official LinkedIn API v2 — no browser extension needed.
 
 1. Open the **LINKEDIN** platform row
-2. Press **Connect with LinkedIn**, sign in to LinkedIn in the browser window that opens and allow GrowERP to post on your behalf — no developer app or token needed, GrowERP connects through its own LinkedIn app
+2. Press **Connect with LinkedIn**, sign in to LinkedIn in the browser window that opens and allow NASQO to post on your behalf — no developer app or token needed, NASQO connects through its own LinkedIn app
 3. The dialog shows **Connected** with the date the connection is valid until; LinkedIn connections last 60 days, after that press **Reconnect LinkedIn**
 
 ---
 
 ### Substack (direct draft creation from Social Posts)
-GrowERP can push a Social Post directly into your Substack draft queue using Substack&apos;s internal API authenticated by your browser session cookie.
+NASQO can push a Social Post directly into your Substack draft queue using Substack&apos;s internal API authenticated by your browser session cookie.
 
 1. Tap **+** → select **Platform Type: SUBSTACK**
 2. Fill in:
@@ -670,7 +670,7 @@ For automated campaign messages the automation service advances status from PEND
     <growerp.course.CourseLesson lessonId="MarketLess0304" moduleId="MarketMod03"
         courseId="CourseMarketingSales"
         title="Automation and Monitoring"
-        keyPoints="[&quot;The Automation screen shows live execution status for all active campaigns&quot;, &quot;Use Pause/Resume to temporarily halt a campaign without losing progress&quot;, &quot;The Campaign Execution Dialog shows per-lead delivery status&quot;, &quot;Emails for non-growerp.com deployments may need the base URL updated in OutreachServices100.xml&quot;]"
+        keyPoints="[&quot;The Automation screen shows live execution status for all active campaigns&quot;, &quot;Use Pause/Resume to temporarily halt a campaign without losing progress&quot;, &quot;The Campaign Execution Dialog shows per-lead delivery status&quot;, &quot;Emails for non-erp.indexesstore.com deployments may need the base URL updated in OutreachServices100.xml&quot;]"
         sequenceNum="4">
         <content><![CDATA[## Automation and Monitoring
 
@@ -702,7 +702,7 @@ To resume:
 3. Status returns to ACTIVE. Pending messages resume from where they stopped.
 
 ### Known Limitation: Landing Page URLs in Emails
-If you are running GrowERP on your own domain (not growerp.com), outreach emails that include landing page links will currently use a hardcoded growerp.com base URL. This is a known issue in OutreachServices100.xml line 1016. To fix it, edit that line in the Moqui backend and replace the hardcoded URL with your deployment&apos;s base URL, then restart the server.
+If you are running NASQO on your own domain (not erp.indexesstore.com), outreach emails that include landing page links will currently use a hardcoded erp.indexesstore.com base URL. This is a known issue in OutreachServices100.xml line 1016. To fix it, edit that line in the Moqui backend and replace the hardcoded URL with your deployment&apos;s base URL, then restart the server.
 
 ### Monitoring Delivery Errors
 If a lead shows a delivery error:
@@ -918,7 +918,7 @@ Return to the opportunity and change the stage to **Closed Lost**. The order in 
         sequenceNum="1">
         <content><![CDATA[## The Complete Funnel: Step-by-Step Guided Session
 
-This is your capstone exercise. Work through each step in order. By the end you will have a live end-to-end funnel on your GrowERP instance.
+This is your capstone exercise. Work through each step in order. By the end you will have a live end-to-end funnel on your NASQO instance.
 
 ---
 
@@ -1005,7 +1005,7 @@ This is your capstone exercise. Work through each step in order. By the end you 
 ---
 
 ### Congratulations
-You now have a fully operational Marketing to Outreach to Sales funnel in GrowERP. Return to each module to deepen your knowledge of the advanced features in each package.]]></content>
+You now have a fully operational Marketing to Outreach to Sales funnel in NASQO. Return to each module to deepen your knowledge of the advanced features in each package.]]></content>
     </growerp.course.CourseLesson>
 
     <!-- ═══════════════════════════════════════════════════
@@ -1013,7 +1013,7 @@ You now have a fully operational Marketing to Outreach to Sales funnel in GrowER
          docs/ERP_Implementation_Engineer_Curriculum.md) - sold for $29
     ═══════════════════════════════════════════════════ -->
     <mantle.product.Product productId="ProductCourseImplC01" pseudoId="implementation-foundations" productTypeEnumId="PtService"
-        productName="GrowERP Foundations: Architecture, Apps and Data Model"
+        productName="NASQO Foundations: Architecture, Apps and Data Model"
         ownerPartyId="GROWERP" requireInventory="N" />
     <mantle.product.ProductPrice productPriceId="ProductCourseImplC01Price" productId="ProductCourseImplC01"
         priceTypeEnumId="PptCurrent" pricePurposeEnumId="PppPurchase" priceUomId="USD"
@@ -1027,27 +1027,27 @@ You now have a fully operational Marketing to Outreach to Sales funnel in GrowER
 
     <growerp.course.Course courseId="CourseImplC01" coverImageUrl="/assets/courses/implementation-foundations.png" pseudoId="implementation-foundations" ownerPartyId="GROWERP"
         productId="ProductCourseImplC01"
-        title="GrowERP Foundations: Architecture, Apps and Data Model"
-        description="The first course of the ERP Implementation Engineer curriculum. Learn what GrowERP is, how it is built and which application fits which customer: the open source platform and how it is delivered, the Flutter and Moqui architecture behind every screen, the family of applications, and the data model an implementer works with every day. The course ends with a hands-on lab in which you follow one sales order from order to ledger."
-        objectives="Explain GrowERP's architecture to a customer, choose the right GrowERP application for a business, and trace a sales order through orders, shipments, payments and the ledger."
+        title="NASQO Foundations: Architecture, Apps and Data Model"
+        description="The first course of the ERP Implementation Engineer curriculum. Learn what NASQO is, how it is built and which application fits which customer: the open source platform and how it is delivered, the Flutter and Moqui architecture behind every screen, the family of applications, and the data model an implementer works with every day. The course ends with a hands-on lab in which you follow one sales order from order to ledger."
+        objectives="Explain NASQO's architecture to a customer, choose the right NASQO application for a business, and trace a sales order through orders, shipments, payments and the ledger."
         status="PUBLISHED" difficulty="BEGINNER" estimatedDuration="360" />
 
     <growerp.course.CourseModule moduleId="ImplC01Mod01" courseId="CourseImplC01"
         title="Platform Overview"
-        description="What GrowERP is, how it is licensed and delivered, and the two ways it is installed."
+        description="What NASQO is, how it is licensed and delivered, and the two ways it is installed."
         sequenceNum="1" estimatedDuration="65" />
 
     <growerp.course.CourseLesson lessonId="ImplC01Less0101" moduleId="ImplC01Mod01"
         courseId="CourseImplC01"
         title="Open Source ERP and Its Licence"
-        keyPoints='["GrowERP is open source under the Apache License 2.0", "You may use, change and redistribute it, also commercially", "Customisations do not have to be published, but keep the licence notices", "Source, issues and releases live in the public growerp repository"]'
+        keyPoints='["NASQO is open source under the Apache License 2.0", "You may use, change and redistribute it, also commercially", "Customisations do not have to be published, but keep the licence notices", "Source, issues and releases live in the public growerp repository"]'
         sequenceNum="1" estimatedDuration="20">
         <content><![CDATA[## An ERP You Can Look Inside
 
-GrowERP is a fully open-source ERP system. The whole code base, the Flutter apps as well as the Moqui backend components, is published under the **Apache License 2.0**.
+NASQO is a fully open-source ERP system. The whole code base, the Flutter apps as well as the Moqui backend components, is published under the **Apache License 2.0**.
 
 ### What the Apache 2.0 licence allows
-- **Use** GrowERP for any purpose, including running it for paying customers.
+- **Use** NASQO for any purpose, including running it for paying customers.
 - **Change** it: add fields, screens, services or complete applications.
 - **Redistribute** it, changed or unchanged, as long as the licence and copyright notices stay with the code.
 - Keep your own changes **private**: the licence does not force you to publish them.
@@ -1068,7 +1068,7 @@ Customisation and improvements flow back through the public repository. As an im
         sequenceNum="2" estimatedDuration="20">
         <content><![CDATA[## One System, Every Device
 
-GrowERP's user interface is built with **Flutter**, which compiles one code base into apps for many platforms:
+NASQO's user interface is built with **Flutter**, which compiles one code base into apps for many platforms:
 
 | Platform | How users get it |
 |---|---|
@@ -1091,20 +1091,20 @@ During discovery, list who works where: at a desk, on the move, or on a shared d
     <growerp.course.CourseLesson lessonId="ImplC01Less0103" moduleId="ImplC01Mod01"
         courseId="CourseImplC01"
         title="SaaS Multi-Tenant or Single Company"
-        keyPoints='["SaaS: many organizations share one installation, each fully separated", "Every organization gets its own owner; all its data is tagged with that owner", "Single company: GrowERP runs for one organization only", "An app can start preset to one company (companyPartyId), e.g. for its customers"]'
+        keyPoints='["SaaS: many organizations share one installation, each fully separated", "Every organization gets its own owner; all its data is tagged with that owner", "Single company: NASQO runs for one organization only", "An app can start preset to one company (companyPartyId), e.g. for its customers"]'
         sequenceNum="3" estimatedDuration="25">
-        <content><![CDATA[## Two Ways to Install GrowERP
+        <content><![CDATA[## Two Ways to Install NASQO
 
 ### SaaS: many organizations in one installation
-GrowERP supports **multi-company, multi-currency and multi-language** SaaS installations. Every organization that registers becomes a separate **tenant**:
+NASQO supports **multi-company, multi-currency and multi-language** SaaS installations. Every organization that registers becomes a separate **tenant**:
 - a new **owner** is created for the organization;
 - everything the organization creates (users, products, orders, invoices, ledger entries) belongs to that owner;
 - users only ever see the data of their own organization.
 
-This is how the public GrowERP service works: a company registers in an app, answers a few set-up questions (company name, currency, fiscal year start, optional demo data) and can start working.
+This is how the public NASQO service works: a company registers in an app, answers a few set-up questions (company name, currency, fiscal year start, optional demo data) and can start working.
 
 ### Single company
-GrowERP can also run for **one organization only**, for example on the customer's own server. The apps can be started preset to that company, so users never choose or register one. Web apps do this from the website address; other platforms from a start parameter or a setting.
+NASQO can also run for **one organization only**, for example on the customer's own server. The apps can be started preset to that company, so users never choose or register one. Web apps do this from the website address; other platforms from a start parameter or a setting.
 
 ### Choosing for a customer
 | Question | Points to |
@@ -1156,7 +1156,7 @@ All communication between the apps and the backend goes through a **REST API**: 
 
 ### What happens on every request
 1. The server checks **who** is calling (the logged-in user).
-2. It checks the user **may** use this endpoint. In GrowERP this follows from the menu: a user may call the endpoints behind the screens their user group can open.
+2. It checks the user **may** use this endpoint. In NASQO this follows from the menu: a user may call the endpoints behind the screens their user group can open.
 3. The service runs **for the user's own organization** only.
 4. The result goes back as JSON and the app shows it.
 
@@ -1177,7 +1177,7 @@ The Security, Users and Menus course goes deeper into access rights; the Integra
         sequenceNum="3" estimatedDuration="20">
         <content><![CDATA[## Lego for ERP
 
-The Flutter side of GrowERP is split into two kinds of packages.
+The Flutter side of NASQO is split into two kinds of packages.
 
 ### Building blocks
 Each **building block** covers one business area and brings its screens and logic:
@@ -1226,17 +1226,17 @@ Prefer **configuration in the apps** over everything else: it is visible to the 
 
     <growerp.course.CourseModule moduleId="ImplC01Mod03" courseId="CourseImplC01"
         title="The Application Family"
-        description="The ready-made GrowERP applications and how to pick one for a customer."
+        description="The ready-made NASQO applications and how to pick one for a customer."
         sequenceNum="3" estimatedDuration="55" />
 
     <growerp.course.CourseLesson lessonId="ImplC01Less0301" moduleId="ImplC01Mod03"
         courseId="CourseImplC01"
-        title="The GrowERP Applications"
+        title="The NASQO Applications"
         keyPoints='["Admin: the complete ERP for a general business", "Hotel, Rental, Freelance: industry apps with their own screens", "Marketing, Support, Agents, Assessment: specialist apps", "Academy: learners take the courses an organization publishes"]'
         sequenceNum="1" estimatedDuration="30">
         <content><![CDATA[## One Platform, Many Apps
 
-GrowERP ships several applications, all built from the same building blocks and the same backend.
+NASQO ships several applications, all built from the same building blocks and the same backend.
 
 | Application | For | Highlights |
 |---|---|---|
@@ -1287,7 +1287,7 @@ Nothing stops a customer from using two apps on the same organization, for examp
 
     <growerp.course.CourseModule moduleId="ImplC01Mod04" courseId="CourseImplC01"
         title="Core Data Model"
-        description="The handful of business concepts that everything else in GrowERP builds on."
+        description="The handful of business concepts that everything else in NASQO builds on."
         sequenceNum="4" estimatedDuration="75" />
 
     <growerp.course.CourseLesson lessonId="ImplC01Less0401" moduleId="ImplC01Mod04"
@@ -1297,7 +1297,7 @@ Nothing stops a customer from using two apps on the same organization, for examp
         sequenceNum="1" estimatedDuration="25">
         <content><![CDATA[## Who Is Who: Parties
 
-Every actor in GrowERP is a **party**:
+Every actor in NASQO is a **party**:
 - a **person**: customer, employee, supplier contact, lead;
 - a **company**: customer company, supplier, or your own organization.
 
@@ -1320,12 +1320,12 @@ Decide early, per customer group, whether you sell B2C or B2B. It determines who
         sequenceNum="2" estimatedDuration="20">
         <content><![CDATA[## Keeping Organizations Apart
 
-In a multi-tenant installation, many organizations share one database. GrowERP keeps them apart with an **owner**:
+In a multi-tenant installation, many organizations share one database. NASQO keeps them apart with an **owner**:
 - when an organization registers, an owner is created for it;
 - every party, product, order, invoice and ledger entry it creates is tagged with that owner;
 - every service the apps call only works on records of the caller's own organization.
 
-This is why two customers on the same GrowERP service never see each other's customers, prices or accounts.
+This is why two customers on the same NASQO service never see each other's customers, prices or accounts.
 
 ### What an implementer should remember
 - Data entered through the apps is always tagged correctly.
@@ -1344,7 +1344,7 @@ This is why two customers on the same GrowERP service never see each other's cus
 Everything you buy or sell is a **product**, of one of three types: **physical** goods, **services** and **rental** items. Products are organized in categories, with separate categories for the website.
 
 ### Orders and the documents they create
-A **sales order** (to a customer) or **purchase order** (from a supplier) is the start of the chain. From an order GrowERP generates the follow-up documents:
+A **sales order** (to a customer) or **purchase order** (from a supplier) is the start of the chain. From an order NASQO generates the follow-up documents:
 - a **shipment** - goods going out or coming in;
 - an **invoice** - what is owed;
 - a **payment** - money received or paid.
@@ -1353,7 +1353,7 @@ A **sales order** (to a customer) or **purchase order** (from a supplier) is the
 Documents move through statuses. The common path is **Created - Approved - Completed** (the Hotel app shows Checked In and Checked Out instead). Approving and completing are the moments that trigger the next step, such as stock movements or payments.
 
 ### The ledger
-GrowERP has a complete **double-entry ledger**. Approving and completing documents **posts** the accounting transactions automatically according to the posting set-up, so the ledger, balance sheet and profit and loss are up to date without separate bookkeeping.
+NASQO has a complete **double-entry ledger**. Approving and completing documents **posts** the accounting transactions automatically according to the posting set-up, so the ledger, balance sheet and profit and loss are up to date without separate bookkeeping.
 
 In the lab that follows you will watch this chain happen for one sales order.]]></content>
     </growerp.course.CourseLesson>
@@ -1401,8 +1401,8 @@ Write down your answers: you will need this understanding in every implementatio
 
 Answer these questions, then check them against the lessons.
 
-1. Under which licence is GrowERP published, and may a customer keep its own changes private?
-2. Name four platforms on which the GrowERP apps are available.
+1. Under which licence is NASQO published, and may a customer keep its own changes private?
+2. Name four platforms on which the NASQO apps are available.
 3. What is the difference between a SaaS installation and a single-company installation?
 4. Where does the business logic run: in the app or in the backend?
 5. A user gets a **403** answer when opening a screen. Where do you look first?
@@ -1423,7 +1423,7 @@ Continue with **Requirements Gathering for ERP**, the second course of the ERP I
          listed first on the website (free courses come first, see sync#CourseProduct)
     ═══════════════════════════════════════════════════ -->
     <mantle.product.Product productId="ProductCourseGettingStarted" pseudoId="getting-started" productTypeEnumId="PtService"
-        productName="Getting Started with GrowERP"
+        productName="Getting Started with NASQO"
         ownerPartyId="GROWERP" requireInventory="N" />
     <mantle.product.ProductContent productContentId="ProductCourseGettingStartedImg" productId="ProductCourseGettingStarted"
         productContentTypeEnumId="PcntImageMedium" fromDate="1790000000000"
@@ -1434,9 +1434,9 @@ Continue with **Requirements Gathering for ERP**, the second course of the ERP I
 
     <growerp.course.Course courseId="CourseGettingStarted" coverImageUrl="/assets/courses/getting-started.png" pseudoId="getting-started" ownerPartyId="GROWERP"
         productId="ProductCourseGettingStarted"
-        title="Getting Started with GrowERP"
-        description="A free, hands-on introduction for everyone who runs a business with GrowERP. Register your company, find your way around the Admin app, set up your company and team, add products and customers, and follow your first sale from order to payment. You finish with a working company, the reports that show how it is doing and an AI assistant that helps you along."
-        objectives="Register and set up your company in GrowERP, add products, customers and users, take a sales order through shipment and payment, and read your revenue and balance sheet."
+        title="Getting Started with NASQO"
+        description="A free, hands-on introduction for everyone who runs a business with NASQO. Register your company, find your way around the Admin app, set up your company and team, add products and customers, and follow your first sale from order to payment. You finish with a working company, the reports that show how it is doing and an AI assistant that helps you along."
+        objectives="Register and set up your company in NASQO, add products, customers and users, take a sales order through shipment and payment, and read your revenue and balance sheet."
         status="PUBLISHED" difficulty="BEGINNER" estimatedDuration="165" />
 
     <!-- Module 1: First Steps -->
@@ -1452,16 +1452,16 @@ Continue with **Requirements Gathering for ERP**, the second course of the ERP I
         sequenceNum="1" estimatedDuration="15">
         <content><![CDATA[## Your Own Company in a Few Minutes
 
-GrowERP runs in the browser and as an app on your phone, tablet or desktop. Every business gets its **own company**, with its own data, users and settings.
+NASQO runs in the browser and as an app on your phone, tablet or desktop. Every business gets its **own company**, with its own data, users and settings.
 
 ### Register
-1. Open the **GrowERP Admin** app: in your browser via the GrowERP website (**Start Free Trial**), or install it from the app store.
+1. Open the **NASQO Admin** app: in your browser via the NASQO website (**Start Free Trial**), or install it from the app store.
 2. Choose **Register new company and admin**.
 3. Enter your company name, your own name and your email address.
 4. After registering you receive an email with your **password**.
 
 ### The trial
-- You can use GrowERP **free for two weeks**. No credit card is required during the trial.
+- You can use NASQO **free for two weeks**. No credit card is required during the trial.
 - The app shows how many days of the trial are left. Before it ends you choose a plan to continue.
 
 ### Demo data
@@ -1643,7 +1643,7 @@ Search before you add: one record per company keeps all its orders and invoices 
 4. Check the total and save. The order is now **in preparation**: you can still change it.
 
 ### Approve
-When the customer confirms, **approve** the order. GrowERP then prepares the follow-up documents for you:
+When the customer confirms, **approve** the order. NASQO then prepares the follow-up documents for you:
 - a **shipment** for physical products,
 - an **invoice** and a **payment** to be received.
 
@@ -1739,7 +1739,7 @@ The assistant answers and can open the right screen for you.
 **System Setup**, tab **Guides**, has step-by-step guides for setting up each part of the system.
 
 ### Chat
-The **chat** button at the top of the screen lets you message your colleagues inside GrowERP.]]></content>
+The **chat** button at the top of the screen lets you message your colleagues inside NASQO.]]></content>
     </growerp.course.CourseLesson>
 
     <growerp.course.CourseLesson lessonId="GetStartLess0503" moduleId="GetStartMod05"

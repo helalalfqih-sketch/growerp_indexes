@@ -2,12 +2,12 @@
 <entity-facade-xml type="demo">
 
     <!-- ════════════════════════════════════════════════════════════════════════
-         GrowERP self-marketing sprint — personas, outreach campaigns + week-1 newsletter.
+         NASQO self-marketing sprint — personas, outreach campaigns + week-1 newsletter.
          Owner: GROWERP. type="demo" (not bulk "install"): MarketingCampaign here
          references landingPageId=ERP_LANDING_PAGE, which only exists after the
          GROWERP tenant is set up. Loaded explicitly by TenantServices100.xml
          alongside ErpLandingPageData.xml — see the ownerPartyId=='GROWERP' block.
-         Personas: docs/GrowERP_Marketing_Sales_Plan.md §3 (4 sprint personas).
+         Personas: docs/NASQO_Marketing_Sales_Plan.md §3 (4 sprint personas).
          Channel rules (Outreach Personalizer): LINKEDIN DM ≤400 chars, ends on a
          question, NO URL until reply; EMAIL ≤120 words, assessment link + sign-off.
          Campaigns load as MKTG_CAMP_PLANNED / isActive=N — a human activates them.
@@ -58,8 +58,8 @@
         targetAudience="Owners and general managers of 5–50 person product or service businesses running operations on spreadsheets plus a separate accounting package."
         landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
         emailSubject="How many times does {companyName} re-key the same order?">
-        <messageTemplate><![CDATA[GrowERP replaces the spreadsheet + accounting package + email-thread patchwork with one open-source ERP: orders, stock, invoices and accounting in one system. Live in a day, free 2-week trial, no card. Hook: the 2-minute assessment "5 Signs You've Outgrown Spreadsheets".]]></messageTemplate>
-        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — quick question about {companyName}: when an order comes in, how many places does someone type it? Most 5–50 person teams tell us three — the spreadsheet, the accounting package, and an email thread. We built an open-source ERP that makes it one. How are you keeping stock, orders and the books in sync today?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nMost owners of 5–50 person businesses tell us the same thing: orders live in a spreadsheet, money lives in the accounting package, and the truth lives in someone's head. Double entry, no stock visibility, month-end chaos.\n\nGrowERP is an open-source ERP that puts orders, stock, invoices and accounting in one system — live in a day, free 2-week trial, no card.\n\nTake the 2-minute check: 5 Signs You've Outgrown Spreadsheets → https://growerp.com/landing/erp-landing-page\n\nHans, GrowERP"}}]]></platformSettings>
+        <messageTemplate><![CDATA[NASQO replaces the spreadsheet + accounting package + email-thread patchwork with one open-source ERP: orders, stock, invoices and accounting in one system. Live in a day, free 2-week trial, no card. Hook: the 2-minute assessment "5 Signs You've Outgrown Spreadsheets".]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — quick question about {companyName}: when an order comes in, how many places does someone type it? Most 5–50 person teams tell us three — the spreadsheet, the accounting package, and an email thread. We built an open-source ERP that makes it one. How are you keeping stock, orders and the books in sync today?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nMost owners of 5–50 person businesses tell us the same thing: orders live in a spreadsheet, money lives in the accounting package, and the truth lives in someone's head. Double entry, no stock visibility, month-end chaos.\n\nNASQO is an open-source ERP that puts orders, stock, invoices and accounting in one system — live in a day, free 2-week trial, no card.\n\nTake the 2-minute check: 5 Signs You've Outgrown Spreadsheets → https://erp.indexesstore.com/landing/erp-landing-page\n\nHans, NASQO"}}]]></platformSettings>
         <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
     </mantle.marketing.campaign.MarketingCampaign>
 
@@ -70,8 +70,8 @@
         targetAudience="Managers and owners of independent hotels and guesthouses, 5–80 rooms, running reservations, housekeeping and bookkeeping in separate systems."
         landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
         emailSubject="Reservations, housekeeping and the books — one screen">
-        <messageTemplate><![CDATA[GrowERP's hotel app puts reservations, live room status and the general ledger in one open-source system, replacing the channel-manager + paper housekeeping + separate bookkeeping trio. Free 2-week trial, no card.]]></messageTemplate>
-        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — question for a fellow hotelier: when housekeeping finishes a room, how long before the front desk knows? If the answer involves paper or a phone call, you're in good company. We built an open-source system where reservations, housekeeping and the books share one screen. How does {companyName} handle it today?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nIndependent hotels usually run three systems that don't talk: the channel manager, a paper housekeeping list, and separate bookkeeping. Every gap between them costs a sold room or an evening of re-typing.\n\nGrowERP's hotel app puts reservations, room status and the general ledger in one open-source system — free 2-week trial, no card.\n\nSee where your setup stands in 2 minutes → https://growerp.com/landing/erp-landing-page\n\nHans, GrowERP"}}]]></platformSettings>
+        <messageTemplate><![CDATA[NASQO's hotel app puts reservations, live room status and the general ledger in one open-source system, replacing the channel-manager + paper housekeeping + separate bookkeeping trio. Free 2-week trial, no card.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — question for a fellow hotelier: when housekeeping finishes a room, how long before the front desk knows? If the answer involves paper or a phone call, you're in good company. We built an open-source system where reservations, housekeeping and the books share one screen. How does {companyName} handle it today?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nIndependent hotels usually run three systems that don't talk: the channel manager, a paper housekeeping list, and separate bookkeeping. Every gap between them costs a sold room or an evening of re-typing.\n\nNASQO's hotel app puts reservations, room status and the general ledger in one open-source system — free 2-week trial, no card.\n\nSee where your setup stands in 2 minutes → https://erp.indexesstore.com/landing/erp-landing-page\n\nHans, NASQO"}}]]></platformSettings>
         <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
     </mantle.marketing.campaign.MarketingCampaign>
 
@@ -82,8 +82,8 @@
         targetAudience="Flutter or Java/Groovy developers, freelancers and small software houses building business apps for clients."
         landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
         emailSubject="Apache 2.0 Flutter + Moqui building blocks — ship a business app in a day">
-        <messageTemplate><![CDATA[GrowERP is an Apache 2.0 (open-source, patent-granted) stack: Flutter ERP building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose vertical apps in days, resell without restriction, 6 platforms from one codebase. CTA: github.com/growerp/growerp.]]></messageTemplate>
-        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — you build business apps in Flutter? We open-sourced a full set of ERP building blocks (Apache 2.0, no CLA): drop in accounting, catalog, orders and user management, and ship a vertical app in days instead of months. Resell without restriction. What are you building right now?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nWriting an ERP backend to ship one business app is the worst part of the job. GrowERP is an Apache 2.0 (open-source, patent-granted) stack: Flutter building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose them into your own vertical app and resell without restriction. Web, Android, iOS, Windows, macOS, Linux from one codebase.\n\nStart here: https://github.com/growerp/growerp — the \"build an app in a day\" tutorial is in the docs.\n\nHans, GrowERP"}}]]></platformSettings>
+        <messageTemplate><![CDATA[NASQO is an Apache 2.0 (open-source, patent-granted) stack: Flutter ERP building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose vertical apps in days, resell without restriction, 6 platforms from one codebase. CTA: erp.indexesstore.com/growerp.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — you build business apps in Flutter? We open-sourced a full set of ERP building blocks (Apache 2.0, no CLA): drop in accounting, catalog, orders and user management, and ship a vertical app in days instead of months. Resell without restriction. What are you building right now?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nWriting an ERP backend to ship one business app is the worst part of the job. NASQO is an Apache 2.0 (open-source, patent-granted) stack: Flutter building blocks — accounting, catalog, orders, users — on a Moqui REST backend. Compose them into your own vertical app and resell without restriction. Web, Android, iOS, Windows, macOS, Linux from one codebase.\n\nStart here: https://erp.indexesstore.com/growerp — the \"build an app in a day\" tutorial is in the docs.\n\nHans, NASQO"}}]]></platformSettings>
         <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
     </mantle.marketing.campaign.MarketingCampaign>
 
@@ -94,8 +94,8 @@
         targetAudience="Tech-savvy founders and operations leads evaluating software by its AI capabilities, wanting governed agents inside the business system."
         landingPageId="ERP_LANDING_PAGE" dailyLimitPerPlatform="25"
         emailSubject="Governed AI agents inside your ERP — not bolted on">
-        <messageTemplate><![CDATA[GrowERP puts governed AI agents inside the business system: they draft content, personalize outreach, triage replies and email a daily ops digest — every write approval-gated, every action logged. Open-source; GrowERP runs its own marketing on it.]]></messageTemplate>
-        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — if your business system could draft your campaigns, chase late invoices and send you a Monday-morning digest, what would you hand it first? We shipped an Agent Control Center inside our open-source ERP that does exactly that — with approval gates, so nothing sends itself. What's the most repetitive admin in your week?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nMost \"AI features\" are a chatbot next to your data. GrowERP puts governed agents inside the business system: they draft content, personalize outreach, triage replies and email you a daily ops digest — every write approval-gated, every action logged.\n\nIt's open-source, and we run our own marketing on it (this email included).\n\nSee your AI-readiness in 2 minutes → https://growerp.com/landing/erp-landing-page\n\nHans, GrowERP"}}]]></platformSettings>
+        <messageTemplate><![CDATA[NASQO puts governed AI agents inside the business system: they draft content, personalize outreach, triage replies and email a daily ops digest — every write approval-gated, every action logged. Open-source; NASQO runs its own marketing on it.]]></messageTemplate>
+        <platformSettings><![CDATA[{"linkedin":{"actionType":"send_dms","messageTemplate":"Hi {firstName} — if your business system could draft your campaigns, chase late invoices and send you a Monday-morning digest, what would you hand it first? We shipped an Agent Control Center inside our open-source ERP that does exactly that — with approval gates, so nothing sends itself. What's the most repetitive admin in your week?"},"email":{"actionType":"send_email","messageTemplate":"Hi {firstName},\n\nMost \"AI features\" are a chatbot next to your data. NASQO puts governed agents inside the business system: they draft content, personalize outreach, triage replies and email you a daily ops digest — every write approval-gated, every action logged.\n\nIt's open-source, and we run our own marketing on it (this email included).\n\nSee your AI-readiness in 2 minutes → https://erp.indexesstore.com/landing/erp-landing-page\n\nHans, NASQO"}}]]></platformSettings>
         <platforms><![CDATA[["LINKEDIN","EMAIL"]]]></platforms>
     </mantle.marketing.campaign.MarketingCampaign>
 
@@ -108,7 +108,7 @@
         ownerPartyId="GROWERP" contentType="ARTICLE" pnpType="PAIN" status="DRAFT"
         title="Your spreadsheet is a single point of failure"
         callToAction="Take the free 2-minute assessment: 5 Signs You've Outgrown Spreadsheets"
-        targetUrl="https://growerp.com/landing/erp-landing-page">
+        targetUrl="https://erp.indexesstore.com/landing/erp-landing-page">
         <body><![CDATA[Somewhere in your business there is a spreadsheet that everything depends on. Orders go into it. Stock counts come out of it. Someone copies numbers from it into the accounting package at month-end, and someone else keeps a private copy "just in case".
 
 That spreadsheet is a single point of failure — three ways at once.
@@ -121,7 +121,7 @@ One person. Every serious spreadsheet has exactly one person who knows why colum
 
 The usual "fix" makes it worse: add an accounting package for the money, email for the coordination, and now the same order is typed three times into three tools that don't talk. Double entry isn't just wasted hours — it's where the errors breed.
 
-The alternative isn't a two-year ERP project. GrowERP is an open-source ERP built for 5–50 person businesses: orders, stock, invoices and accounting in one system, with one source of truth. It's live in a day, the trial is free for two weeks, and there's no credit card wall.
+The alternative isn't a two-year ERP project. NASQO is an open-source ERP built for 5–50 person businesses: orders, stock, invoices and accounting in one system, with one source of truth. It's live in a day, the trial is free for two weeks, and there's no credit card wall.
 
 Not sure whether you're there yet? That's exactly what the assessment is for: five questions, two minutes, and an honest score of whether the spreadsheet still fits your business — or whether it's quietly running it.]]></body>
     </growerp.marketing.MasterContent>

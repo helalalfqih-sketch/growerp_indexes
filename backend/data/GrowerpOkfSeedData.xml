@@ -22,7 +22,7 @@ limitations under the License.
          growerp.100.OkfServices100.export#OkfBundle; that export refreshes the files from
          the live entity definitions and adds the WikiPage rows needed for wiki serving. -->
     <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_OKF"
-        description="GrowERP OKF knowledge bundle"
+        description="NASQO OKF knowledge bundle"
         restrictView="N"
         restrictUpdate="Y"
         rootPageLocation="component://growerp/okf/growerp.md"/>

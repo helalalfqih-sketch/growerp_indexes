@@ -20,15 +20,15 @@ limitations under the License.
             <text type="html"><![CDATA[
 <html>
 <body style="font-family: Arial, sans-serif; color: #222;">
-    <h2>Your GrowERP subscription payment failed</h2>
+    <h2>Your NASQO subscription payment failed</h2>
     <p>Hello ${firstName!''},</p>
-    <p>We tried to renew your GrowERP subscription but the payment could not be
+    <p>We tried to renew your NASQO subscription but the payment could not be
         processed. Your subscription expires on <b>${expiryDate!''}</b>.</p>
     <p>We will retry daily during the grace period. To keep access to your
-        system, please log in to GrowERP and update your payment details —
+        system, please log in to NASQO and update your payment details —
         you will be asked for them automatically when the subscription expires.</p>
     <p>Questions? Just reply to this email.</p>
-    <p>The GrowERP team</p>
+    <p>The NASQO team</p>
 </body>
 </html>
             ]]></text>

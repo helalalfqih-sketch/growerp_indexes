@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Demo Landing Page Data for GrowERP
+Demo Landing Page Data for NASQO
 This file contains comprehensive demo data for landing pages that can be integrated
 into PartyServices100.xml demo data loading process.
 
@@ -25,7 +25,7 @@ Usage: Include this data in the demo data loading process within PartyServices10
     headline="Is Your Business Operating at Peak Performance?"
     subheading="Discover hidden inefficiencies, unlock growth opportunities, and get a clear roadmap to success with our comprehensive business assessment"
     status="ACTIVE"
-    privacyPolicyUrl="https://www.growerp.com/privacy"
+    privacyPolicyUrl="https://erp.indexesstore.com/privacy"
     assessmentId="business-performance-assessment"
     createdDate="2024-10-26 00:00:00"
     createdByUserLogin="system"
@@ -122,7 +122,7 @@ Usage: Include this data in the demo data loading process within PartyServices10
     headline="From MVP to Market Leader in 18 Months"
     subheading="Join 500+ tech startups who used our assessment to identify critical growth levers and scale 3x faster than competitors"
     status="ACTIVE"
-    privacyPolicyUrl="https://www.growerp.com/privacy"
+    privacyPolicyUrl="https://erp.indexesstore.com/privacy"
     assessmentId="tech-startup-assessment"
     createdDate="2024-10-26 00:00:00"
     createdByUserLogin="system"
@@ -160,7 +160,7 @@ Usage: Include this data in the demo data loading process within PartyServices10
     headline="Tired of Competing on Price Alone?"
     subheading="Discover the 7 hidden profit leaks in your e-commerce business and learn how to increase customer lifetime value by 150%"
     status="ACTIVE"
-    privacyPolicyUrl="https://www.growerp.com/privacy"
+    privacyPolicyUrl="https://erp.indexesstore.com/privacy"
     assessmentId="ecommerce-optimization-assessment"
     createdDate="2024-10-26 00:00:00"
     createdByUserLogin="system"
@@ -198,7 +198,7 @@ Usage: Include this data in the demo data loading process within PartyServices10
     headline="Stop Trading Time for Money"
     subheading="Break free from the service business trap and build a scalable, profitable business that runs without your constant involvement"
     status="ACTIVE"
-    privacyPolicyUrl="https://www.growerp.com/privacy"
+    privacyPolicyUrl="https://erp.indexesstore.com/privacy"
     assessmentId="service-business-assessment"
     createdDate="2024-10-26 00:00:00"
     createdByUserLogin="system"

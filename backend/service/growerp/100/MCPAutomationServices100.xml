@@ -473,7 +473,7 @@
                             <service-call name="growerp.100.OutreachServices100.personalize#OutreachText"
                                 out-map="subjectOut"
                                 in-map="[text: message.emailSubject ?: campaign?.emailSubject
-                                             ?: 'Hello from GrowERP',
+                                             ?: 'Hello from NASQO',
                                          recipientName: message.recipientName,
                                          recipientCompany: message.recipientCompany,
                                          recipientTitle: message.recipientTitle,

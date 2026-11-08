@@ -16,11 +16,11 @@ limitations under the License.
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <service verb="check" noun="SupportUser">
-        <description>Error out unless the logged-in user is a GrowERP system support user.
+        <description>Error out unless the logged-in user is a NASQO system support user.
             Used to restrict the support app (AppSupport) services to system support.</description>
         <actions>
             <if condition="!ec.user.isInGroup('GROWERP_M_SYSTEM')">
-                <return error="true" message="Only available to GrowERP system support"/>
+                <return error="true" message="Only available to NASQO system support"/>
             </if>
         </actions>
     </service>
@@ -165,12 +165,12 @@ limitations under the License.
 
                     <!-- CASE 2: Versions are equal - use override URL only if request comes from
                     test system -->
-                    <!-- Detect test deployment from Origin header (e.g., https://admin.growerp.org) -->
+                    <!-- Detect test deployment from Origin header (e.g., https://erp.indexesstore.com) -->
                     <if condition="!incomingVersionIsGreater &amp;&amp; !incomingVersionIsLess">
                         <set field="originHeader" from="ec.web?.request?.getHeader('Origin')"/>
                         <set field="refererHeader" from="ec.web?.request?.getHeader('Referer')"/>
                         <set field="isTestDeployment"
-                            from="originHeader?.contains('.growerp.org') || refererHeader?.contains('.growerp.org')"
+                            from="originHeader?.contains('.erp.indexesstore.com') || refererHeader?.contains('.erp.indexesstore.com')"
                             type="Boolean"/>
                         <if condition="isTestDeployment">
                             <set field="backendUrl" from="apps[0].backendUrl"/>
@@ -1461,7 +1461,7 @@ limitations under the License.
                 in-map="[applicationId: applicationId]"
                 out-map="context"/>
 
-            <!-- Enroll every genuine first-time login in GrowERP's own welcome sequence
+            <!-- Enroll every genuine first-time login in NASQO's own welcome sequence
                  (the sequence itself is GROWERP-owned, see FIRST_LOGIN_GROWERP seed data).
                  Dedupes on sequence+email so this is a no-op after the first login. -->
             <service-call name="growerp.100.NurtureServices100.enroll#EmailSequence"
@@ -2919,7 +2919,7 @@ limitations under the License.
     </service>
 
     <service verb="get" noun="SystemDefault">
-        <description>GrowERP wide defaults. Readable by any logged-in user, only system
+        <description>NASQO wide defaults. Readable by any logged-in user, only system
             support can change them with update#SystemDefault.</description>
         <out-parameters>
             <parameter name="systemDefault" type="Map"/>
@@ -2939,7 +2939,7 @@ limitations under the License.
     </service>
 
     <service verb="update" noun="SystemDefault">
-        <description>Create or update the GrowERP wide defaults, system support only.</description>
+        <description>Create or update the NASQO wide defaults, system support only.</description>
         <in-parameters>
             <parameter name="llmMonthlyTokenLimit" type="Integer"/>
             <parameter name="aiModelName"/>
@@ -2979,7 +2979,7 @@ limitations under the License.
 
     <service verb="update" noun="OwnerTokenLimit">
         <description>Set or clear one tenant's monthly system LLM token limit, overriding the
-            GrowERP wide SystemDefault. System support only, used from the Support app owner
+            NASQO wide SystemDefault. System support only, used from the Support app owner
             list. An empty limit clears the override, 0 means unlimited for this tenant.</description>
         <in-parameters>
             <parameter name="ownerPartyId" required="true"/>
@@ -3288,7 +3288,7 @@ limitations under the License.
             <parameter name="subject" required="true"/>
             <parameter name="bodyHtml" allow-html="any"/>
             <parameter name="bodyText" allow-html="any"/>
-            <parameter name="fromAddress" default-value="support@growerp.com"/>
+            <parameter name="fromAddress" default-value="support@erp.indexesstore.com"/>
             <parameter name="fromName"/>
             <parameter name="attachmentBase64">
                 <description>Optional single attachment, base64-encoded (e.g. a PDF). Requires
@@ -3313,7 +3313,7 @@ limitations under the License.
             <set field="emailServerId" from="serverOut.emailServerId"/>
             <set field="emailConfigured" from="serverOut.emailConfigured"/>
             <!-- a tenant SMTP server rejects the default growerp sender domain -->
-            <if condition="serverOut.fromAddress &amp;&amp; fromAddress == 'support@growerp.com'">
+            <if condition="serverOut.fromAddress &amp;&amp; fromAddress == 'support@erp.indexesstore.com'">
                 <set field="fromAddress" from="serverOut.fromAddress"/>
             </if>
             <if condition="!emailConfigured">

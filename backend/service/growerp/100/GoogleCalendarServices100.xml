@@ -492,7 +492,7 @@ ${notesText.take(20000)}"""
         </actions>
     </service>
     <!-- ============ Google Sign in (Connect Google Workspace) ============
-         The tenant connects Drive, Gmail and/or Calendar with the GrowERP platform OAuth
+         The tenant connects Drive, Gmail and/or Calendar with the NASQO platform OAuth
          client (env GOOGLE_OAUTH_CLIENT_ID/GOOGLE_OAUTH_CLIENT_SECRET): start#GoogleSignIn
          returns the Google consent URL, Google redirects to /googleOAuth/callback
          (screen/googleOAuth.xml) which calls complete#GoogleSignIn. Incremental

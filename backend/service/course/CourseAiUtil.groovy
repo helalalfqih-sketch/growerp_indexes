@@ -17,7 +17,7 @@ import java.util.zip.ZipInputStream
 
 /** Helpers for the course AI jobs: source text extraction and the LLM call. */
 class CourseAiUtil {
-    static final String USER_AGENT = "Mozilla/5.0 (compatible; GrowERP course builder)"
+    static final String USER_AGENT = "Mozilla/5.0 (compatible; NASQO course builder)"
     static final int MAX_SOURCE_CHARS = 60000
     // every lesson prompt repeats the sources: keep them smaller there
     static final int MAX_LESSON_SOURCE_CHARS = 16000

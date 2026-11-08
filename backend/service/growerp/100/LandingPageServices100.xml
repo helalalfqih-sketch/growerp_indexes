@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Landing Page Services for GrowERP Landing Page System
+Landing Page Services for NASQO Landing Page System
 Service definitions for landing page, sections, credibility, and CTA management
 - Supports dual-ID lookup: pageId (system-wide) or pseudoId (tenant-unique)
 - All services enforce multi-tenant isolation via ownerPartyId
@@ -646,7 +646,7 @@ Service definitions for landing page, sections, credibility, and CTA management
       <set field="hostName" from="ec.web ? ec.web.getHostName(false) : null" />
       <set field="publicUrl"
         from="hostName ? ('https://' + hostName + '/landing/' + pseudoId)
-            : ('https://app.growerp.com/landing/' + pseudoId)" />
+            : ('https://app.erp.indexesstore.com/landing/' + pseudoId)" />
     </actions>
   </service>
 

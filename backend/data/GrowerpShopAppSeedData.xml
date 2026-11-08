@@ -15,7 +15,7 @@ limitations under the License.
 <entity-facade-xml type="seed">
     <!-- Application record -->
     <growerp.Application applicationId="AppShop"
-        description="GrowERP Shop: point of sale for shops" />
+        description="NASQO Shop: point of sale for shops" />
 
     <!-- Menu configuration -->
     <growerp.menu.MenuConfiguration menuConfigurationId="SHOP_DEFAULT" appId="shop"

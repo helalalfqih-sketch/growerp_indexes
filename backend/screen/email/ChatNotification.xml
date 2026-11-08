@@ -3,7 +3,7 @@
         <render-mode><text type="html"><![CDATA[<html><body>]]></text></render-mode>
         <container><label text="You have a new chat message from ${senderName}:"/></container>
         <container><label text="${messageContent}"/></container>
-        <container><label text="Log in to GrowERP to reply."/></container>
+        <container><label text="Log in to NASQO to reply."/></container>
         <render-mode><text type="html"><![CDATA[</body></html>]]></text></render-mode>
     </widgets>
 </screen>

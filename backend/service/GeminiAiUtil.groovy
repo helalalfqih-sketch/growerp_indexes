@@ -16,7 +16,7 @@ import groovy.json.JsonSlurper
 import groovy.json.JsonOutput
 
 /**
- * Unified Gemini AI API utility for GrowERP.
+ * Unified Gemini AI API utility for NASQO.
  * 
  * Usage in other scripts:
  *   def binding = new Binding([ec: ec])
@@ -128,7 +128,7 @@ price, customer case or link, and never invent ones that are not here):
      * Resolve which model to use and which provider serves it. Both always come from the SAME
      * level: a tenant that picked only a model must not inherit the system default's provider,
      * or its model gets posted to the wrong endpoint. Precedence: an explicit model (caller
-     * override) > the tenant's SystemSettings (System Setup) > the GrowERP wide SystemDefault
+     * override) > the tenant's SystemSettings (System Setup) > the NASQO wide SystemDefault
      * (Support app -> System Defaults) > a per-user Moqui preference / env var / system
      * property > DEFAULT_MODEL.
      */
@@ -210,7 +210,7 @@ price, customer case or link, and never invent ones that are not here):
         String ownerPartyId = options.ownerPartyId as String
         Map modelConfig = resolveModelConfig(ec, ownerPartyId, options.model as String,
             options.provider as String)
-        // the tenant's model choice only applies to its own key: on the GrowERP system key a
+        // the tenant's model choice only applies to its own key: on the NASQO system key a
         // pricier model would cost many times more under the same free token allowance
         if (!options.model && !hasOwnApiKey(ec, ownerPartyId, modelConfig.provider as String,
                 options.apiKey as String)) {
@@ -487,7 +487,7 @@ price, customer case or link, and never invent ones that are not here):
                 tokensTotal: (usage?.total_tokens ?: 0) as int]
     }
     
-    /** True when this call is paid for with the tenant's own key, not the GrowERP system key. */
+    /** True when this call is paid for with the tenant's own key, not the NASQO system key. */
     private static boolean hasOwnApiKey(def ec, String ownerPartyId, String provider, String explicitKey) {
         if (explicitKey) return true
         if (!ownerPartyId) return false
@@ -517,7 +517,7 @@ price, customer case or link, and never invent ones that are not here):
     }
 
     /**
-     * Stop generating on the GrowERP system key once this tenant used up its free monthly
+     * Stop generating on the NASQO system key once this tenant used up its free monthly
      * allowance (SystemDefault.llmMonthlyTokenLimit, 0/empty = unlimited). Same rule the ADK
      * agent gate applies in growerp.100.AdkGovernanceServices.govern#AgentAction.
      * Not enforced for calls without a real tenant (system tasks, ownerPartyId '_NA_').
@@ -841,7 +841,7 @@ Return ONLY the adapted content text, no explanations, no markdown code fences.
             case 'SUBSTACK_NOTE':
                 return "- Short note, MAX 500 characters in total\n- One idea only, conversational, no headline and no sign-off\n- ${hasUrl ? 'End with the link' : 'No link needed'}"
             case 'EMAIL':
-                return "- ${contentType == 'MESSAGE' ? '1:1 email under ~120 words' : 'Broadcast newsletter, 200-400 words'}\n- Clear greeting and a one-line sign-off (Hans, GrowERP)\n- Single clear call-to-action\n- ${hasUrl ? 'Include the link once' : 'No link needed'}"
+                return "- ${contentType == 'MESSAGE' ? '1:1 email under ~120 words' : 'Broadcast newsletter, 200-400 words'}\n- Clear greeting and a one-line sign-off (Hans, NASQO)\n- Single clear call-to-action\n- ${hasUrl ? 'Include the link once' : 'No link needed'}"
             default:
                 return "- Professional and concise\n- Clear single call-to-action"
         }

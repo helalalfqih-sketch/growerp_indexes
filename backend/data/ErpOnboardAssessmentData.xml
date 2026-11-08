@@ -8,7 +8,7 @@ tenant user. The result is
 GROWERP-owned (GROWERP uses it to understand each new customer); the respondent
 company identifies the tenant.
 
-The answer options are deliberately semantic: the agent maps them to GrowERP
+The answer options are deliberately semantic: the agent maps them to NASQO
 menu areas at runtime, so there is no machine-encoded mapping here. optionScore
 is unused for tailoring; a single catch-all ScoringThreshold covers the range so
 submit#Assessment always resolves a leadStatus.
@@ -17,7 +17,7 @@ submit#Assessment always resolves a leadStatus.
 
     <!-- Assessment -->
     <growerp.assessment.Assessment assessmentId="ERP_ONBOARD" pseudoId="erp-onboard" ownerPartyId="GROWERP"
-        assessmentName="Set up GrowERP for your business"
+        assessmentName="Set up NASQO for your business"
         description="A few quick questions about how your business is organised so we can tailor your menu to what you actually use."
         status="Active" />
 
@@ -51,7 +51,7 @@ submit#Assessment always resolves a leadStatus.
     <!-- Q3: Accounting -->
     <growerp.assessment.AssessmentQuestion assessmentQuestionId="ERPO_Q3" pseudoId="erpo-q3"
         assessmentId="ERP_ONBOARD" questionSequence="3" questionType="MultipleChoice"
-        questionText="Will you keep your accounting and ledger in GrowERP?"
+        questionText="Will you keep your accounting and ledger in NASQO?"
         isRequired="Y" defaultOption="ERPO_Q3_O1" />
     <growerp.assessment.AssessmentQuestionOption assessmentQuestionOptionId="ERPO_Q3_O1"
         pseudoId="erpo-q3-o1" assessmentQuestionId="ERPO_Q3" assessmentId="ERP_ONBOARD"

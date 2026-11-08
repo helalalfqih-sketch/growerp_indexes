@@ -45,11 +45,11 @@ Assessment email template for sending results with PDF attachment
             <p>If you have any questions about your results, please don't hesitate to contact us.</p>
             
             <p>Best regards,<br>
-            The GrowERP Team</p>
+            The NASQO Team</p>
         </div>
         <div class="footer">
             <p>This is an automated message. Please do not reply to this email.</p>
-            <p>&copy; ${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')} GrowERP. All rights reserved.</p>
+            <p>&copy; ${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')} NASQO. All rights reserved.</p>
         </div>
     </div>
 </body>

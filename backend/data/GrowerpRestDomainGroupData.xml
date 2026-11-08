@@ -18,13 +18,13 @@ The REST security domains.
 These ArtifactGroups deliberately carry NO ArtifactAuthz: they are the path to
 domain lookup that growerp.100.SecurityServices100.check#RestAccess reads. The
 single guard that does carry an ArtifactAuthz is GROWERP_REST_GUARDED in
-GrowerpSecurityData.xml, which calls that service for every REST leaf.
+NASQOSecurityData.xml, which calls that service for every REST leaf.
 
 artifactName is a Java regex (nameIsPattern="Y") matched against the full
 artifact name, e.g. /growerp/100/FinDoc. inheritAuthz is irrelevant on these
 members and left at "N": they carry no ArtifactAuthz, so the framework never
 authorizes anything through them. The value that matters is on the guard in
-GrowerpSecurityData.xml, which is "Y" so an authorized endpoint carries through
+NASQOSecurityData.xml, which is "Y" so an authorized endpoint carries through
 to the service it invokes.
 
 A domain may need SEVERAL members: artifactName is text-medium (255) and part of
@@ -174,7 +174,7 @@ The 28 anonymous-* resources bypass authz entirely and need no domain.
         artifactName="/growerp/100/(OwnerTokenLimit|SystemSettings|EmailTemplate|SystemDefault|ImportExport|OwnerData)(/.*)?"/>
 
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_SUPPORT"
-        description="GrowERP support staff only"/>
+        description="NASQO support staff only"/>
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_SUPPORT"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="N"
         artifactName="/growerp/100/(RestUsageStatistics|SupportDashboard|InfraMetrics|Application|RestRequest)(/.*)?"/>

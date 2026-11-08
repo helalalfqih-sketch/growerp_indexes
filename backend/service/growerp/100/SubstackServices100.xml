@@ -5,7 +5,7 @@
     <!-- ========================================================= -->
     <!--  Substack automation services                             -->
     <!--  - Notes publishing (short-form, account-level)           -->
-    <!--  - Subscriber sync (new GrowERP trial signups)            -->
+    <!--  - Subscriber sync (new NASQO trial signups)            -->
     <!--  - Engagement collection (comments/restacks)              -->
     <!--  Auth: substack.sid session cookie stored in              -->
     <!--  PlatformConfiguration (platform SUBSTACK):               -->
@@ -335,7 +335,7 @@
     </service>
 
     <service verb="sync" noun="NewSignupsToSubstack" authenticate="false" allow-remote="false">
-        <description>Backend job: add everyone who tried GrowERP as a Substack free
+        <description>Backend job: add everyone who tried NASQO as a Substack free
             subscriber. Every real signup creates a trial Subscription in the GROWERP
             tenant (externalSubscriptionId = the new tenant's ownerPartyId) with a
             customer party carrying the admin email — so this job only scans

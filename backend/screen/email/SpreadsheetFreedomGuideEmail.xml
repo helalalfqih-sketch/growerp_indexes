@@ -47,17 +47,17 @@ the playbook PDF is attached via EmailTemplate SPREADSHEET_FREEDOM_GUIDE
             exactly how urgent your situation is.</p>
 
             <p style="text-align:center;">
-                <a class="btn" href="https://growerp.com">Explore GrowERP</a>
+                <a class="btn" href="https://erp.indexesstore.com">Explore NASQO</a>
             </p>
 
             <p>Questions about your migration? Just reply to this email — a real person reads it.</p>
 
             <p>Best regards,<br>
-            The GrowERP Team</p>
+            The NASQO Team</p>
         </div>
         <div class="footer">
             <p>You received this email because you requested the free guide on our website.</p>
-            <p>&copy; ${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')} GrowERP. All rights reserved.</p>
+            <p>&copy; ${ec.l10n.format(ec.user.nowTimestamp, 'yyyy')} NASQO. All rights reserved.</p>
         </div>
     </div>
 </body>

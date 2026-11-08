@@ -27,7 +27,7 @@ limitations under the License.
             <parameter name="baseUrl" />
         </out-parameters>
         <actions>
-            <set field="baseUrl" value="https://growerp.com" />
+            <set field="baseUrl" value="https://erp.indexesstore.com" />
             <entity-find entity-name="mantle.product.store.ProductStore" list="stores"
                 limit="1">
                 <econdition field-name="organizationPartyId" from="ownerPartyId" />

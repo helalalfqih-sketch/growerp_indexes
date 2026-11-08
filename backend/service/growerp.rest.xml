@@ -14,8 +14,8 @@ limitations under the License.
 -->
 <resource xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/rest-api-2.1.xsd"
-    name="growerp" displayName="GrowERP REST API" version="1.0.0"
-    description="Services for GrowERP system">
+    name="growerp" displayName="NASQO REST API" version="1.0.0"
+    description="Services for NASQO system">
 
     <!-- flutter versioned REST interface -->
     <resource name="100">
@@ -118,7 +118,7 @@ limitations under the License.
             </resource>
         </resource>
         <resource name="SystemDefault"
-            description="Get/update GrowERP wide defaults; update is system support only">
+            description="Get/update NASQO wide defaults; update is system support only">
             <method type="get">
                 <service name="growerp.100.GeneralServices100.get#SystemDefault" />
             </method>

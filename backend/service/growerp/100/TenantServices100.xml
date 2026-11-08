@@ -271,13 +271,13 @@ limitations under the License.
                 <script><![CDATA[
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpLandingPageData.xml").load()
                     ec.entity.makeDataLoader().location("component://growerp/data/ErpOnboardAssessmentData.xml").load()
-                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpWebsiteSeedData.xml").load()
-                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpPricingPageData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/NASQOWebsiteSeedData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/NASQOPricingPageData.xml").load()
                     // request / contribute an agent forms on the /content/ai-agents page
-                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpAgentCatalogFormsData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/NASQOAgentCatalogFormsData.xml").load()
                     // self-marketing sprint content: MarketingCampaign references
                     // landingPageId=ERP_LANDING_PAGE just loaded above
-                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpMarketingContentData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/NASQOMarketingContentData.xml").load()
                     // spreadsheet-freedom guide download form + playbook email template
                     // for the /spreadsheetFreedom landing page
                     ec.entity.makeDataLoader().location("component://growerp/data/SpreadsheetFreedomLandingPageData.xml").load()
@@ -285,19 +285,19 @@ limitations under the License.
                     ec.entity.makeDataLoader().location("component://growerp/data/RevenueFirstAssessmentData.xml").load()
                     // first-login welcome sequence (day0/3/7) + Substack subscribe on
                     // completion, enrolled from GeneralServices100.login#User
-                    ec.entity.makeDataLoader().location("component://growerp/data/GrowerpFirstLoginSequenceData.xml").load()
+                    ec.entity.makeDataLoader().location("component://growerp/data/NASQOFirstLoginSequenceData.xml").load()
                 ]]></script>
                 <service-call name="update#growerp.Application" in-map="[applicationId: 'AppAdmin', assessmentId: 'ERP_ONBOARD']"/>
 
                 <!-- Repoint the GROWERP company store (created by setup#MainOrganization) at the
-                     official marketing wiki/content just loaded, and let it serve the growerp.com
-                     / growerp.org domains. The store keeps its GROWERP-owned categories. -->
+                     official marketing wiki/content just loaded, and let it serve the erp.indexesstore.com
+                     / erp.indexesstore.com domains. The store keeps its GROWERP-owned categories. -->
                 <entity-find entity-name="mantle.product.store.ProductStore" list="growerpStores">
                     <econdition field-name="organizationPartyId" from="companyPartyId"/>
                 </entity-find>
                 <if condition="growerpStores">
                     <set field="growerpStoreId" from="growerpStores[0].productStoreId"/>
-                    <!-- GROWERP_WS normally comes from GrowerpWebsiteSeedData.xml loaded above;
+                    <!-- GROWERP_WS normally comes from NASQOWebsiteSeedData.xml loaded above;
                          create a minimal space when absent (e.g. that load failed) so the
                          ProductStore foreign key below can never abort tenant setup -->
                     <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="growerpWikiSpace">
@@ -305,11 +305,11 @@ limitations under the License.
                     </entity-find-one>
                     <if condition="growerpWikiSpace == null">
                         <service-call name="create#moqui.resource.wiki.WikiSpace"
-                            in-map="[wikiSpaceId: 'GROWERP_WS', description: 'GrowERP Official Website Content',
+                            in-map="[wikiSpaceId: 'GROWERP_WS', description: 'NASQO Official Website Content',
                                 allowAnyHtml: 'Y', rootPageLocation: 'dbresource://GROWERP_ROOT']"/>
                     </if>
                     <service-call name="update#mantle.product.store.ProductStore"
-                        in-map="[productStoreId: growerpStoreId, storeName: 'GrowERP', wikiSpaceId: 'GROWERP_WS']"/>
+                        in-map="[productStoreId: growerpStoreId, storeName: 'NASQO', wikiSpaceId: 'GROWERP_WS']"/>
 
                     <!-- serve the marketing site with the modern (Tailwind/Lumina) template set -->
                     <entity-find entity-name="mantle.product.store.ProductStoreSetting" list="templateIdSettings">
@@ -338,21 +338,21 @@ limitations under the License.
                     <!-- Let the public store resolve on the official marketing hosts. These are
                          explicit hostnames (not broad regex) so they match ONLY the GROWERP
                          marketing site and never shadow a tenant store served on a
-                         *.growerp.com / *.growerp.org subdomain. The original cloned
+                         *.erp.indexesstore.com / *.erp.indexesstore.com subdomain. The original cloned
                          "<storeId>.localhost" row is left untouched. PsstHostname is matched as a
                          regex by PopRestStore (StoreServices). -->
                     <service-call name="create#mantle.product.store.ProductStoreSetting"
                         in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
-                                 fromDate: java.sql.Timestamp.valueOf('2024-01-01 00:00:00'), settingValue: 'growerp.com']"/>
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-01 00:00:00'), settingValue: 'erp.indexesstore.com']"/>
                     <service-call name="create#mantle.product.store.ProductStoreSetting"
                         in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
-                                 fromDate: java.sql.Timestamp.valueOf('2024-01-02 00:00:00'), settingValue: 'www.growerp.com']"/>
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-02 00:00:00'), settingValue: 'erp.indexesstore.com']"/>
                     <service-call name="create#mantle.product.store.ProductStoreSetting"
                         in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
-                                 fromDate: java.sql.Timestamp.valueOf('2024-01-03 00:00:00'), settingValue: 'growerp.org']"/>
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-03 00:00:00'), settingValue: 'erp.indexesstore.com']"/>
                     <service-call name="create#mantle.product.store.ProductStoreSetting"
                         in-map="[productStoreId: growerpStoreId, settingTypeEnumId: 'PsstHostname',
-                                 fromDate: java.sql.Timestamp.valueOf('2024-01-04 00:00:00'), settingValue: 'www.growerp.org']"/>
+                                 fromDate: java.sql.Timestamp.valueOf('2024-01-04 00:00:00'), settingValue: 'erp.indexesstore.com']"/>
                 </if>
             </if>
 
@@ -383,8 +383,8 @@ limitations under the License.
             <parameter name="subscription" type="Map"/>
         </out-parameters>
         <actions>
-            <!-- subscriptions never expire on the growerp.org staging and growerp.net
-                 review backends; production (growerp.com and custom domains) keeps
+            <!-- subscriptions never expire on the erp.indexesstore.com staging and erp.indexesstore.com
+                 review backends; production (erp.indexesstore.com and custom domains) keeps
                  the normal rules. -->
             <if condition="hostName?.endsWith('.org') || hostName?.endsWith('.net')">
                 <set field="hasActiveSubscription" value="true" type="Boolean"/>
@@ -526,7 +526,7 @@ limitations under the License.
             </iterate>
             <set field="pageRef" from="ec.resource.getLocationReference('dbresource://GROWERP_ROOT/content/pricing.html.ftl')" />
             <if condition="pageRef.exists &amp;&amp; pageRef.getText()?.contains('amount=49.99')">
-                <script>ec.entity.makeDataLoader().location("component://growerp/data/GrowerpPricingPageData.xml").load()</script>
+                <script>ec.entity.makeDataLoader().location("component://growerp/data/NASQOPricingPageData.xml").load()</script>
                 <set field="pageUpdated" from="true" type="Boolean" />
             </if>
             <log message="migrate#PricingFromPlans: ${plansUpdated} plan(s) updated, page updated: ${pageUpdated}" />
@@ -681,7 +681,7 @@ limitations under the License.
                             paymentTypeEnumId: 'PmtCreditCard',
                             fromPartyId: subscriberPartyId,
                             toPartyId: companyPartyId,
-                            memo: 'GrowERP plan renewal: ' + (planProduct.productName ?: plan),
+                            memo: 'NASQO plan renewal: ' + (planProduct.productName ?: plan),
                             ]"
                 out-map="paymentInfo" />
             <set field="paymentId" from="paymentInfo.paymentId" />
@@ -701,7 +701,7 @@ limitations under the License.
                 in-map="[subscriptionId: subscription.subscriptionId,
                     productId: plan,
                     thruDate: newThruDate,
-                    description: 'GrowERP plan: ' + (planProduct.productName ?: plan)]" />
+                    description: 'NASQO plan: ' + (planProduct.productName ?: plan)]" />
             <set field="subscriptionId" from="subscription.subscriptionId" />
             <log
                 message="Renewed subscription ${subscriptionId} for tenant ${ownerPartyId} until ${newThruDate}, payment ${paymentId} ${paymentAmount} ${paymentCurrencyUomId}" />

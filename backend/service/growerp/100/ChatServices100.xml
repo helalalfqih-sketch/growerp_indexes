@@ -1215,7 +1215,7 @@ limitations under the License.
             </entity-find>
             <set field="toEmail" from="emailPcms ? emailPcms[0].contactMech.infoString : null" />
             <if condition="!toEmail || toEmail.contains('example.com')"><return /></if>
-            <!-- the GrowERP app this user works in, e.g. AppAdmin -> Admin -->
+            <!-- the NASQO app this user works in, e.g. AppAdmin -> Admin -->
             <entity-find entity-name="growerp.PartyApplication" list="partyApps" limit="1">
                 <econdition field-name="partyId" from="toUa.partyId" />
                 <date-filter />
@@ -1231,7 +1231,7 @@ limitations under the License.
             </entity-find-one>
             <set field="fromAddress"
                 from="mailServer?.mailUsername?.contains('@') ? mailServer.mailUsername
-                        : 'support@growerp.com'" />
+                        : 'support@erp.indexesstore.com'" />
             <script><![CDATA[
                 boolean isVisitor = toUserId == room.visitorUserId
                 // private rooms carry no name: fall back to who wrote last
@@ -1244,7 +1244,7 @@ limitations under the License.
                     : 'A chat message came in while you were not connected.'
                 String closing = isVisitor
                     ? 'You can continue the conversation in the chat window on ' + baseUrl + '.'
-                    : 'Log in to the GrowERP app ' + appName + ' to reply'
+                    : 'Log in to the NASQO app ' + appName + ' to reply'
                 StringBuilder sb = new StringBuilder()
                 sb.append('<p>').append(intro).append('</p>')
                 sb.append('<p>The conversation so far:</p>')
@@ -1265,7 +1265,7 @@ limitations under the License.
                 ignore-error="true" out-map="sendOut"
                 in-map="[ownerPartyId: mailOwnerPartyId, toAddresses: toEmail,
                         subject: subject, bodyHtml: bodyHtml,
-                        fromAddress: fromAddress, fromName: 'GrowERP chat']" />
+                        fromAddress: fromAddress, fromName: 'NASQO chat']" />
             <if condition="sendOut?.emailMessageId">
                 <then>
                     <set field="emailSent" from="true" />

@@ -1975,8 +1975,8 @@ limitations under the License.
                     <set field="customerStatusId" value="CUSTOMER_CONVERTED" />
                 </else-if>
             </if>
-            <!-- as in register#User: a testN@example.com account added on the growerp.org
-                 staging backend gets the known qqqqqq9! password; production (growerp.com)
+            <!-- as in register#User: a testN@example.com account added on the erp.indexesstore.com
+                 staging backend gets the known qqqqqq9! password; production (erp.indexesstore.com)
                  and every other email get a random one. -->
             <if condition="!password">
                 <if condition="user.email ==~ /(?i)^test[a-z0-9]*@example\.com$/
@@ -2223,7 +2223,7 @@ limitations under the License.
                                 hasRead: 'Y']" />
                 <service-call name="create#growerp.general.ChatMessage"
                     in-map="[chatRoomId: chatRoomId,
-                            content: 'Welcome to GrowERP, if you need support, enter here in the chat your request, we will reply within 24 Hrs',
+                            content: 'Welcome to NASQO, if you need support, enter here in the chat your request, we will reply within 24 Hrs',
                             fromUserId: 'SYSTEM_SUPPORT']" />
             </if>
 
@@ -3322,9 +3322,9 @@ limitations under the License.
             </if>
 
             <!-- App Store / Play Store review builds are always release-mode, so a
-                 testN@example.com reviewer account registered on the growerp.org staging
+                 testN@example.com reviewer account registered on the erp.indexesstore.com staging
                  backend still gets the known qqqqqq9! password reviewers log back in with;
-                 production (growerp.com) and every other email keep the random, emailed one. -->
+                 production (erp.indexesstore.com) and every other email keep the random, emailed one. -->
             <if condition="!newPassword">
                 <if condition="email ==~ /(?i)^test[a-z0-9]*@example\.com$/
                         &amp;&amp; ec.web?.getHostName(false)?.endsWith('.org') == true">
@@ -3993,7 +3993,7 @@ limitations under the License.
             <set field="facilityId" from="productStore.inventoryFacilityId" />
 
             <!-- the agents app is no ERP: instead of the ERP demo data it gets its own demo
-                 agent team (GrowerpAgentsDemoTeamData.xml) plus a few wiki pages and knowledge
+                 agent team (NASQOAgentsDemoTeamData.xml) plus a few wiki pages and knowledge
                  documents for it to work on. ignore-error: a missing moqui-adk component must not fail the demo load. -->
             <if condition="applicationId == 'AppAgents'">
                 <service-call name="AdkDemoServices.clone#AgentTeam"
@@ -4357,7 +4357,7 @@ limitations under the License.
                         [ quantity: 4, price: 29.11, orderName: 'first generated order', productName: '32GB'],
                         [ quantity: 3, price: 12.1, orderName: 'second generated order', productName: 'Coffee'],
                         [ quantity: 1, price: 0.00, orderName: 'third generated order service',
-                            productName: 'GrowERP demo movie', itemType: 'ItemServiceProduct'],
+                            productName: 'NASQO demo movie', itemType: 'ItemServiceProduct'],
                         ]" />
                     <!-- set time at mid day noon adjusted by client timeZoneOffset -->
                     <set field="timeZoneOffsetInMinutes" type="Double"
@@ -4776,7 +4776,7 @@ limitations under the License.
                                 pnpType: demoContent.pnpType,
                                 title: demoContent.title, body: demoContent.body,
                                 callToAction: demoContent.callToAction,
-                                targetUrl: 'https://www.growerp.com',
+                                targetUrl: 'https://erp.indexesstore.com',
                                 status: demoContent.status,
                                 approvedDate: demoContent.status == 'APPROVED' ? nowDate : null,
                                 createdDate: nowDate, lastModifiedDate: nowDate]" />
@@ -4806,7 +4806,7 @@ limitations under the License.
 
     <service verb="repair" noun="PartyOwner" authenticate="true">
         <description>One shot repair of mantle.party.Party rows whose ownerPartyId is null or
-            '_NA_'. Party.ownerPartyId is the tenant boundary in GrowERP but mantle defaults it
+            '_NA_'. Party.ownerPartyId is the tenant boundary in NASQO but mantle defaults it
             to '_NA_', so any creation path that missed it produced a Party that looks valid and
             is invisible to every owner scoped query. Resolution order:
               - PtyPerson   : the owner of the company it is an Employee of

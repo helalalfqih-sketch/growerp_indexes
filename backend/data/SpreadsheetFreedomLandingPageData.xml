@@ -12,7 +12,7 @@
       description="Spreadsheet Freedom Playbook download delivery"
       emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
       bodyScreenLocation="component://growerp/screen/email/SpreadsheetFreedomGuideEmail.xml"
-      fromAddress="support@growerp.com" fromName="GrowERP"
+      fromAddress="support@erp.indexesstore.com" fromName="NASQO"
       subject="Your Spreadsheet Freedom Playbook" sendPartial="Y">
       <attachments fileName="spreadsheet-freedom-playbook.pdf"
           attachmentLocation="component://growerp/screen/email/SpreadsheetFreedomPlaybookPdf.xml"

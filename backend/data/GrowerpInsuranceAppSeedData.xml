@@ -15,7 +15,7 @@ limitations under the License.
 <entity-facade-xml type="seed">
     <!-- Application record -->
     <growerp.Application applicationId="AppInsurance"
-        description="GrowERP Insurance: agencies and brokers, policies, claims and commissions" />
+        description="NASQO Insurance: agencies and brokers, policies, claims and commissions" />
 
     <!-- ====================== policy types (generic, any line) ====================== -->
     <moqui.basic.EnumerationType enumTypeId="InsPolicyType" description="Insurance Policy Type" />

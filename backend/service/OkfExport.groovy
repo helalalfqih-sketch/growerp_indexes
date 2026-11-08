@@ -158,16 +158,16 @@ for (Map e in tableIndexEntries.sort { it.fileBase }) {
 writePage('tables/index', ti.toString())
 
 // ---- datasets/growerp.md + datasets/index.md ----
-String datasetDesc = 'The GrowERP multi-company ERP data model: runtime Moqui entity definitions (mantle + growerp).'
+String datasetDesc = 'The NASQO multi-company ERP data model: runtime Moqui entity definitions (mantle + growerp).'
 StringBuilder ds = new StringBuilder()
 ds.append('---\n')
 ds.append('type: Dataset\n')
-ds.append('title: GrowERP Data Model\n')
+ds.append('title: NASQO Data Model\n')
 ds.append('description: ').append(yq(datasetDesc)).append('\n')
 ds.append('tags: [growerp, mantle]\n')
 ds.append('timestamp: ').append(nowIso).append('\n')
 ds.append('---\n\n')
-ds.append('# GrowERP Data Model\n\n')
+ds.append('# NASQO Data Model\n\n')
 ds.append(datasetDesc).append('\n\n')
 ds.append('## Tables\n\n')
 for (Map e in tableIndexEntries.sort { it.fileBase }) {
@@ -177,7 +177,7 @@ writePage('datasets/growerp', ds.toString())
 
 StringBuilder di = new StringBuilder()
 di.append('# Datasets\n\n')
-di.append('* [GrowERP Data Model](growerp.md) - ').append(datasetDesc).append('\n')
+di.append('* [NASQO Data Model](growerp.md) - ').append(datasetDesc).append('\n')
 writePage('datasets/index', di.toString())
 
 // ---- bundle root index.md (only index allowed frontmatter: okf_version) + root wiki page ----
@@ -186,9 +186,9 @@ ri.append('---\n')
 ri.append('okf_version: "0.1"\n')
 ri.append('---\n\n')
 ri.append('# Datasets\n\n')
-ri.append('* [GrowERP Data Model](datasets/growerp.md) - ').append(datasetDesc).append('\n\n')
+ri.append('* [NASQO Data Model](datasets/growerp.md) - ').append(datasetDesc).append('\n\n')
 ri.append('# Tables\n\n')
-ri.append('* [Tables Index](tables/index.md) - All ').append(count).append(' entity concepts of the GrowERP data model.\n')
+ri.append('* [Tables Index](tables/index.md) - All ').append(count).append(' entity concepts of the NASQO data model.\n')
 String rootIndexText = ri.toString()
 writePage('index', rootIndexText)
 writePage(null, rootIndexText) // wiki space root page file (<bundleDir>.md)

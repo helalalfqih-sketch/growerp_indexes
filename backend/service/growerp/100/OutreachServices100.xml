@@ -1740,7 +1740,7 @@
     <!-- ========================================================= -->
     <!--  LinkedIn connect                                         -->
     <!-- ========================================================= -->
-    <!-- Every tenant posts on LinkedIn through the one GrowERP LinkedIn app (env
+    <!-- Every tenant posts on LinkedIn through the one NASQO LinkedIn app (env
          LINKEDIN_OAUTH_CLIENT_ID/LINKEDIN_OAUTH_CLIENT_SECRET): start#LinkedInSignIn
          returns the LinkedIn consent URL, LinkedIn redirects to /linkedinOAuth/callback
          (screen/linkedinOAuth.xml) which calls complete#LinkedInSignIn. That stores the
@@ -1762,7 +1762,7 @@
             <set field="clientId" from="System.getenv('LINKEDIN_OAUTH_CLIENT_ID') ?: System.getProperty('linkedin_oauth_client_id')"/>
             <set field="clientSecret" from="System.getenv('LINKEDIN_OAUTH_CLIENT_SECRET') ?: System.getProperty('linkedin_oauth_client_secret')"/>
             <if condition="!clientId || !clientSecret">
-                <return error="true" message="LinkedIn connect not available: the GrowERP LinkedIn app is not configured on this server"/></if>
+                <return error="true" message="LinkedIn connect not available: the NASQO LinkedIn app is not configured on this server"/></if>
             <!-- behind a proxy the request scheme/host may not be the public one -->
             <set field="redirectUri" from="System.getenv('LINKEDIN_OAUTH_REDIRECT_URI') ?:
                 System.getProperty('linkedin_oauth_redirect_uri') ?:

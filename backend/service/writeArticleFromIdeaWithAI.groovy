@@ -46,7 +46,7 @@ if (idea.sourceUrl) {
             ec.message.addError("The article URL ${url} cannot be fetched (not a public web address)")
             return
         }
-        def doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (compatible; GrowERP article reader)")
+        def doc = Jsoup.connect(url).userAgent("Mozilla/5.0 (compatible; NASQO article reader)")
             .timeout(20000).maxBodySize(3 * 1024 * 1024).get()
         doc.select("script, style, nav, header, footer, aside, form, noscript").remove()
         def main = doc.selectFirst("article") ?: doc.selectFirst("main") ?: doc.body()

@@ -376,7 +376,7 @@ this file is loaded for every owner who request demo data.
     headline="Are you ready to unlock your business's full potential?"
     subheading="Answer a few questions to find out why you might be facing challenges and what steps you need to take to guarantee success."
     status="Active"
-    privacyPolicyUrl="https://www.growerp.com/privacy"
+    privacyPolicyUrl="https://erp.indexesstore.com/privacy"
     createdDate="2025-01-01 00:00:00"
     createdByUserLogin="admin" />
 
@@ -465,7 +465,7 @@ this file is loaded for every owner who request demo data.
   <growerp.landing.CredibilityInfo credibilityInfoId="CREDIBILITY_GENERAL_001"
     pseudoId="credibility-general"
     landingPageId="PAGE_BUSI_READINESS_001"
-    creatorBio="GrowERP is a team specialized in scaling businesses and optimizing systems. We have dedicated ourselves to helping organizations transform their operations and achieve sustainable growth."
+    creatorBio="NASQO is a team specialized in scaling businesses and optimizing systems. We have dedicated ourselves to helping organizations transform their operations and achieve sustainable growth."
     backgroundText="Our background involves two decades of scaling multiple companies and building lead generation systems. We have consulted on over 50 major projects across various industries, working with companies from startups to enterprise-level organizations. Our experience spans multiple sectors including technology, manufacturing, retail, hospitality, and professional services."
     createdDate="2025-01-01 00:00:00" />
 

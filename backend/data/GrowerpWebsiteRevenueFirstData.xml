@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <entity-facade-xml type="seed-initial">
 
-    <!-- Parent records (also in GrowerpWebsiteSeedData.xml) so the page loads on a fresh DB -->
+    <!-- Parent records (also in NASQOWebsiteSeedData.xml) so the page loads on a fresh DB -->
     <moqui.resource.DbResource filename="GROWERP_ROOT" isFile="N" resourceId="GROWERP_ROOT" parentResourceId="" />
     <moqui.resource.DbResource filename="content" isFile="N" resourceId="growerp_content_dir" parentResourceId="GROWERP_ROOT" />
 
     <!-- Wiki Space -->
-    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="NASQO Official Website Content"
         allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
 
     <!-- ================================================================
