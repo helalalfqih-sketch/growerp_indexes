@@ -59,28 +59,28 @@ void main() {
       // Act + Assert
       expect(
         await getDioError(error),
-        'You have been signed out, please log in again.',
+        'signedOutLoginAgain',
       );
     });
 
     test('getDioError_errorCodeOnly_reportsTheCode', () async {
       expect(
         await getDioError(response({'errorCode': 500})),
-        'Error code: 500',
+        'errorCodeMessage:500',
       );
     });
 
     test('getDioError_htmlBody_isAGenericServerError', () async {
       expect(
         await getDioError(response('<html>Bad gateway</html>', status: 502)),
-        'Server error occurred',
+        'serverErrorOccurred',
       );
     });
 
     test('getDioError_emptyErrors_fallsBackToConnectionError', () async {
       expect(
         await getDioError(response({'errors': ''})),
-        'Server Connection error',
+        'serverConnectionError',
       );
     });
 
@@ -92,7 +92,7 @@ void main() {
         response({'errors': 'Login key not valid'}, status: 401),
       );
       // Assert
-      expect(message, 'Login key expired, please login again');
+      expect(message, 'loginKeyExpired');
       final prefs = await SharedPreferences.getInstance();
       expect(prefs.getString('apiKey'), isNull);
     });
@@ -100,12 +100,12 @@ void main() {
 
   group('getDioError network errors', () {
     final cases = {
-      DioExceptionType.connectionError: 'Connection error',
-      DioExceptionType.receiveTimeout: 'Request timeout',
-      DioExceptionType.connectionTimeout: 'Connection timeout',
-      DioExceptionType.sendTimeout: 'Send timeout',
-      DioExceptionType.cancel: 'Request cancelled',
-      DioExceptionType.unknown: 'Network error',
+      DioExceptionType.connectionError: 'networkConnectionError',
+      DioExceptionType.receiveTimeout: 'requestTimeout',
+      DioExceptionType.connectionTimeout: 'connectionTimeout',
+      DioExceptionType.sendTimeout: 'sendTimeout',
+      DioExceptionType.cancel: 'requestCancelled',
+      DioExceptionType.unknown: 'networkError',
     };
     for (final MapEntry(key: type, value: text) in cases.entries) {
       test('getDioError_${type.name}_says$text', () async {
@@ -118,7 +118,7 @@ void main() {
     test('getDioError_formatException_saysInvalidFormat', () async {
       expect(
         await getDioError(const FormatException('bad')),
-        'Invalid data format',
+        'invalidDataFormat',
       );
     });
 
