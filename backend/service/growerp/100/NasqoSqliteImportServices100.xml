@@ -13,8 +13,11 @@
                 <return error="true" message="Only an administrator can preview a SQLite import"/>
             </if>
             <script><![CDATA[
-                File temp = File.createTempFile('nasqo-sqlite-import-', '.back', new File(ec.factory.runtimePath, 'ownerData'))
-                temp.parentFile.mkdirs()
+                File dir = new File(ec.factory.runtimePath, 'ownerData')
+                if (!dir.isDirectory() && !dir.mkdirs() && !dir.isDirectory()) {
+                    throw new IllegalStateException('SQLite import temporary directory unavailable')
+                }
+                File temp = File.createTempFile('nasqo-sqlite-import-', '.back', dir)
                 try {
                     file.inputStream.withCloseable { InputStream input ->
                         temp.outputStream.withCloseable { OutputStream output -> input.transferTo(output) }
