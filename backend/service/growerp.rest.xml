@@ -1579,6 +1579,14 @@ limitations under the License.
                 </method>
             </resource>
         </resource>
+        <!-- Read-only legacy SQLite backup preview. Never imports or posts accounting. -->
+        <resource name="SqliteImport" require-authentication="true">
+            <resource name="Preview">
+                <method type="post">
+                    <service name="growerp.100.NasqoSqliteImportServices100.preview#SqliteImport"/>
+                </method>
+            </resource>
+        </resource>
         <!-- import/export -->
         <resource name="ImportExport">
             <!-- import -->

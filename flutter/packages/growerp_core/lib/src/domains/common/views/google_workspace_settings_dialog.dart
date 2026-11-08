@@ -112,8 +112,35 @@ class _GoogleWorkspaceSettingsDialogState
     _bookingUrlCtrl.text = s.googleBookingUrl ?? '';
   }
 
+  /// A Google identity alone does not authorize Workspace settings.
+  /// Protected REST endpoints must receive the current NASQO API key.
+  Future<bool> _ensureAuthenticatedSession() async {
+    final auth = context.read<AuthBloc>().state;
+    final apiKey = auth.authenticate?.apiKey;
+    if (auth.status != AuthStatus.authenticated ||
+        apiKey == null ||
+        apiKey.isEmpty) {
+      if (mounted) {
+        HelperFunctions.showMessage(
+          context,
+          'انتهت جلسة نسقو. سجّل الدخول مجددًا قبل تعديل Google Workspace.',
+          Colors.red,
+        );
+      }
+      return false;
+    }
+    // Repair an older session whose in-memory identity was restored but
+    // whose SharedPreferences API key was not persisted before REST requests.
+    await PersistFunctions.persistKeyValue('apiKey', apiKey);
+    final token = auth.authenticate?.moquiSessionToken;
+    if (token != null && token.isNotEmpty) {
+      await PersistFunctions.persistKeyValue('moquiSessionToken', token);
+    }
+    return true;
+  }
+
   Future<void> _load() async {
-    if (!mounted) return;
+    if (!mounted || !await _ensureAuthenticatedSession()) return;
     setState(() => _isLoading = true);
     try {
       final s = await _restClient!.getSystemSettings();
@@ -123,7 +150,7 @@ class _GoogleWorkspaceSettingsDialogState
       if (mounted) {
         HelperFunctions.showMessage(
           context,
-          'Failed to load settings: $e',
+          'تعذّر تحميل إعدادات Google Workspace. تأكد من صلاحيات حسابك. $e',
           Colors.red,
         );
       }
@@ -149,6 +176,7 @@ class _GoogleWorkspaceSettingsDialogState
   bool get _ownClient => (_settings?.googleClientId ?? '').isNotEmpty;
 
   Future<void> _signIn(List<String> services) async {
+    if (!await _ensureAuthenticatedSession()) return;
     try {
       final result = await _restClient!.startGoogleSignIn(services: services);
       final map = result is String ? jsonDecode(result) : result;
@@ -248,7 +276,7 @@ class _GoogleWorkspaceSettingsDialogState
   }
 
   Future<void> _save() async {
-    if (!_formKey.currentState!.validate()) return;
+    if (!_formKey.currentState!.validate() || !await _ensureAuthenticatedSession()) return;
     setState(() => _isSaving = true);
     try {
       final s = _settings;
@@ -291,7 +319,7 @@ class _GoogleWorkspaceSettingsDialogState
       if (mounted) {
         HelperFunctions.showMessage(
           context,
-          'Failed to save settings: $e',
+          'تعذّر حفظ إعدادات Google Workspace. تحقق من صلاحيات إدارة الشركة وأعد تسجيل الدخول عند انتهاء الجلسة. $e',
           Colors.red,
         );
       }

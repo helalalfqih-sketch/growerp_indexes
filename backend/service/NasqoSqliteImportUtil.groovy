@@ -15,9 +15,19 @@ class NasqoSqliteImportUtil {
             throw new IllegalArgumentException('SQLite backup file exceeds the 256 MB limit')
         }
 
+        byte[] header = new byte[16]
+        database.withInputStream { stream ->
+            if (stream.read(header) != 16 || new String(header, 'US-ASCII') != "SQLite format 3\u0000") {
+                throw new IllegalArgumentException('Not a SQLite database')
+            }
+        }
         Class.forName('org.sqlite.JDBC')
-        Sql sql = Sql.newInstance("jdbc:sqlite:${database.absolutePath}")
+        // A preview must NEVER write to an uploaded file. SQLite's query_only
+        // setting adds another guard after opening the immutable source.
+        String uri = database.toURI().toString()
+        Sql sql = Sql.newInstance("jdbc:sqlite:${uri}?mode=ro")
         try {
+            sql.execute('PRAGMA query_only=ON')
             String integrity = sql.firstRow('PRAGMA integrity_check()')?.values()?.first()?.toString()
             if (integrity != 'ok') throw new IllegalArgumentException('SQLite integrity check failed')
 

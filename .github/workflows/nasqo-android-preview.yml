@@ -1,0 +1,68 @@
+name: NASQO Android Preview APK
+
+on:
+  push:
+    branches:
+      - fix/nasqo-android-sqlite-workspace-20261108
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  android-preview:
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - name: Checkout NASQO
+        uses: actions/checkout@v4
+      - name: Set up Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Bootstrap and generate Flutter sources
+        uses: ./.github/actions/bootstrap
+      - name: Check NASQO Android configuration
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          p=Path('flutter/packages/admin/assets/cfg/app_settings.json')
+          d=json.loads(p.read_text())
+          assert d['databaseUrl']=='https://erp.indexesstore.com'
+          assert d['googleLoginEnabled'] is True
+          assert d['googleRegistrationEnabled'] is True
+          assert Path('flutter/packages/admin/assets/icon/icon.png').is_file()
+          print('NASQO_ANDROID_SETTINGS_PASS')
+          PY
+      - name: Generate NASQO Android launcher assets
+        working-directory: flutter/packages/admin
+        run: dart run flutter_launcher_icons
+      - name: Build installable Android preview
+        working-directory: flutter/packages/admin
+        run: |
+          flutter build apk --debug --no-pub --dart-define=BACKEND_URL=https://erp.indexesstore.com
+      - name: Package verified APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          install -d dist
+          install -m 644 flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk dist/NASQO_ERP_Android_Preview_1.22.5.apk
+          (cd dist && sha256sum NASQO_ERP_Android_Preview_1.22.5.apk > SHA256SUMS)
+          test -s dist/NASQO_ERP_Android_Preview_1.22.5.apk
+          echo 'APK_PREVIEW_CREATED'
+          ls -lh dist/*
+      - name: Upload Android APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: NASQO_ERP_Android_Preview_1.22.5
+          path: dist/
+          retention-days: 30
+          if-no-files-found: error
