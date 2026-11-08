@@ -8,6 +8,7 @@ on:
 
 permissions:
   contents: read
+  actions: read
 
 jobs:
   build-web:
@@ -53,3 +54,29 @@ jobs:
           path: dist/
           if-no-files-found: error
           retention-days: 30
+
+
+  verify-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - name: Download existing NASQO Android preview
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p apk
+          gh run download 42499897637 --repo "${{ github.repository }}" --name NASQO_ERP_Android_Preview_1.22.5 --dir apk
+      - name: Verify Android signature and application identity
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd apk
+          sha256sum -c SHA256SUMS
+          unzip -tq NASQO_ERP_Android_Preview_1.22.5.apk
+          signer="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)"
+          aapt="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -1)"
+          test -x "$signer" && test -x "$aapt"
+          "$signer" verify --verbose --print-certs NASQO_ERP_Android_Preview_1.22.5.apk
+          "$aapt" dump badging NASQO_ERP_Android_Preview_1.22.5.apk | grep -E '^(package:|application-label:|sdkVersion:|targetSdkVersion:|native-code:)' | head -10
+          echo 'NASQO_ANDROID_APK_SIGNATURE_AND_METADATA_VERIFIED'
