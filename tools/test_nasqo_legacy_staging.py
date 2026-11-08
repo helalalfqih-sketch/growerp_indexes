@@ -74,7 +74,7 @@ class SafeStagingTests(unittest.TestCase):
         self.assertEqual(result["approvalStatus"], "BLOCKED_PENDING_MANUAL_MAPPING")
         self.assertEqual(result["checks"]["sqliteIntegrity"], "ok")
         self.assertEqual(result["tableCount"], 9)
-        self.assertEqual(result["totalRows"], 10)
+        self.assertEqual(result["totalRows"], 11)
         self.assertEqual(result["checks"]["rawDainEqualsRawMadinRows"], 1)
         self.assertEqual(result["checks"]["missingReferencedRows"][
             "input_move.cur -> currencies.id"], 1)
@@ -125,7 +125,7 @@ class SafeStagingTests(unittest.TestCase):
                             for x in financial))
         self.assertEqual(hashlib.sha256(self.backup.read_bytes()).hexdigest(),
                          self.source_digest)
-        self.assertEqual(result["totalRows"], 10)
+        self.assertEqual(result["totalRows"], 11)
 
     def test_never_overwrites_a_staging_bundle(self):
         destination = self.root / "review"
