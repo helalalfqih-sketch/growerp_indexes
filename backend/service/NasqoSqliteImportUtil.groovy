@@ -56,3 +56,6 @@ class NasqoSqliteImportUtil {
         }
     }
 }
+
+// Return the helper class to callers of Moqui's ec.resource.script().
+return NasqoSqliteImportUtil
