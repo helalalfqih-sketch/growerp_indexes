@@ -1,9 +1,6 @@
 name: NASQO Android Preview APK
 
 on:
-  push:
-    branches:
-      - fix/nasqo-android-sqlite-workspace-20261108
   workflow_dispatch:
 
 permissions:

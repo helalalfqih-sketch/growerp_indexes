@@ -1,0 +1,55 @@
+name: NASQO Web Authentication Fix
+
+on:
+  push:
+    branches:
+      - fix/nasqo-android-sqlite-workspace-20261108
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build-web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 70
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - name: Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          cache: true
+      - name: Generate workspace sources
+        uses: ./.github/actions/bootstrap
+      - name: Run authentication unit tests
+        working-directory: flutter/packages/growerp_core
+        run: |
+          flutter test --no-pub test/get_dio_error_test.dart test/blocs/auth_bloc_test.dart
+      - name: Build NASQO web
+        working-directory: flutter/packages/admin
+        run: |
+          flutter build web --release --no-pub --pwa-strategy=none --no-wasm-dry-run --dart-define=BACKEND_URL=https://erp.indexesstore.com
+      - name: Export compiled web entrypoint
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist
+          cp flutter/packages/admin/build/web/main.dart.js dist/main.dart.js
+          gzip -n -9 dist/main.dart.js
+          (cd dist && sha256sum main.dart.js.gz > SHA256SUMS)
+          test -s dist/main.dart.js.gz
+          echo NASQO_WEB_JS_READY
+      - name: Upload compiled JS
+        uses: actions/upload-artifact@v4
+        with:
+          name: NASQO_Web_Authentication_403_Fix
+          path: dist/
+          if-no-files-found: error
+          retention-days: 30
