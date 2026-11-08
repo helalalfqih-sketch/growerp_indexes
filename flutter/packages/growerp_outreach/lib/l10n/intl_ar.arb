@@ -134,7 +134,7 @@
   "linkedInConnect": "الاتصال بـ LinkedIn",
   "linkedInReconnect": "إعادة الاتصال بـ LinkedIn",
   "linkedInWaiting": "بانتظار تسجيل الدخول إلى LinkedIn في متصفحك...",
-  "linkedInNotConnected": "غير متصل. اضغط «الاتصال بـ LinkedIn» وسجّل الدخول للسماح لـ GrowERP بالنشر نيابة عنك.",
+  "linkedInNotConnected": "غير متصل. اضغط «الاتصال بـ LinkedIn» وسجّل الدخول للسماح لـ NASQO بالنشر نيابة عنك.",
   "linkedInExpired": "انتهى الاتصال في {date}. اضغط «إعادة الاتصال بـ LinkedIn».",
   "linkedInConnected": "متصل ({urn})",
   "linkedInConnectedUntil": "متصل ({urn})، صالح حتى {date}"

@@ -16,7 +16,7 @@
   "progressSavedMessage": "تم حفظ التقدم - يمكنك الإغلاق والمتابعة لاحقًا.",
   "demoFeaturesNotAvail": "ميزات العرض التجريبي غير متاحة في بيئة الإنتاج.",
   "devEnvDemosHidden": "بيئة تطوير - العروض التجريبية مخفية في إصدارات الإنتاج.",
-  "growerpDemosTitle": "عروض GrowERP التجريبية",
+  "growerpDemosTitle": "عروض NASQO التجريبية",
   "noDemosRegistered": "لا توجد عروض تجريبية مسجلة.",
   "resetDemoListTitle": "إعادة ضبط العرض التجريبي؟",
   "resetDemoListContent": "ستتم إعادة التقدم إلى الخطوة 0.\nستبقى البيانات التي أُنشئت في النظام."

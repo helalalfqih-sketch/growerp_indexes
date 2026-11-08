@@ -1,6 +1,6 @@
 {
   "@@locale": "ar",
-  "adk_addsTheFiveGrowerp": "يضيف وكلاء التسويق الخمسة في GrowERP (تخصيص العملاء المحتملين،",
+  "adk_addsTheFiveGrowerp": "يضيف وكلاء التسويق الخمسة في NASQO (تخصيص العملاء المحتملين،",
   "adk_addsTheAgentControl": "يضيف عرض مركز التحكم بالوكلاء: مساعد عمليات يقوم",
   "adk_deleteFailedE": "فشل الحذف: {e}",
   "adk_noAgentsYetNtap": "لا يوجد وكلاء بعد.\nاضغط + لإنشاء وكيلك الأول.",

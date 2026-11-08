@@ -9,7 +9,7 @@
       }
     }
   },
-  "aboutGrowERP": "About GrowERP",
+  "aboutGrowERP": "About NASQO",
   "@aboutGrowERP": {
     "description": "About GrowERP menu item"
   },
@@ -65,7 +65,7 @@
   "@contributing": {
     "description": "Contributing menu item"
   },
-  "copyright": "© {year} GrowERP.com",
+  "copyright": "© {year} NASQO ERP",
   "@copyright": {
     "description": "Copyright text with year",
     "placeholders": {
@@ -569,7 +569,7 @@
   "@welcome": {
     "description": "Welcome message"
   },
-  "welcomeToGrowERPBusinessSystem": "Welcome to the GrowERP business system!",
+  "welcomeToGrowERPBusinessSystem": "Welcome to the NASQO business system!",
   "@welcomeToGrowERPBusinessSystem": {
     "description": "Welcome message on home page"
   },
@@ -874,7 +874,7 @@
       }
     }
   },
-  "welcomeTitle": "Welcome to GrowERP!",
+  "welcomeTitle": "Welcome to NASQO ERP!",
   "@welcomeTitle": {
     "description": "Welcome page title for evaluation period"
   },
@@ -896,7 +896,7 @@
       }
     }
   },
-  "evaluationPeriodDetails": "No credit card required during the evaluation period. After the evaluation, you can choose a plan to continue using GrowERP.",
+  "evaluationPeriodDetails": "No credit card required during the evaluation period. After the evaluation, you can choose a plan to continue using NASQO ERP.",
   "@evaluationPeriodDetails": {
     "description": "Detailed evaluation period explanation"
   },
@@ -1235,7 +1235,7 @@
   "@loadingMenuConfiguration": {
     "description": "Loading Menu Configuration... text"
   },
-  "welcomeToGrowerp": "Welcome to GrowERP!",
+  "welcomeToGrowerp": "Welcome to NASQO ERP!",
   "@welcomeToGrowerp": {
     "description": "Welcome to GrowERP! text"
   },
@@ -1259,7 +1259,7 @@
   "@incomingImapPop3": {
     "description": "Incoming (IMAP / POP3) text"
   },
-  "toContinueUsingGrowerpWithoutInterruptio": "To continue using GrowERP without interruption, ",
+  "toContinueUsingGrowerpWithoutInterruptio": "To continue using NASQO ERP without interruption, ",
   "@toContinueUsingGrowerpWithoutInterruptio": {
     "description": "To continue using GrowERP without interruption,  text"
   },
@@ -1267,7 +1267,7 @@
   "@failedToLoadMenuConfiguration": {
     "description": "Failed to load menu configuration text"
   },
-  "growerp": "GrowERP ",
+  "growerp": "NASQO ",
   "@growerp": {
     "description": "GrowERP  text"
   },
@@ -1319,7 +1319,7 @@
   "@selectAPlan": {
     "description": "Select a Plan text"
   },
-  "growerp1": "GrowERP",
+  "growerp1": "NASQO ERP",
   "@growerp1": {
     "description": "GrowERP text"
   },
@@ -1920,5 +1920,24 @@
   "ownerDataSave": "Save the file",
   "@ownerDataSave": {
     "description": "System setup backup tab: save a finished download (again)"
+  },
+  "networkConnectionError": "Connection error",
+  "requestTimeout": "Request timeout",
+  "connectionTimeout": "Connection timeout",
+  "sendTimeout": "Send timeout",
+  "requestCancelled": "Request cancelled",
+  "networkError": "Network error",
+  "serverErrorOccurred": "Server error occurred",
+  "invalidDataFormat": "Invalid data format",
+  "serverConnectionError": "Server connection error",
+  "signedOutLoginAgain": "You have been signed out, please log in again.",
+  "loginKeyExpired": "Login key expired, please login again",
+  "errorCodeMessage": "Error code: {code}",
+  "@errorCodeMessage": {
+    "placeholders": {
+      "code": {
+        "type": "String"
+      }
+    }
   }
 }
