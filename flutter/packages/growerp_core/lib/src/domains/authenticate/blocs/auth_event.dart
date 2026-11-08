@@ -74,6 +74,16 @@ class AuthLogin extends AuthEvent {
   });
 }
 
+/// Emitted only after the backend has validated the Google identity and
+/// exchanged the single-use device secret for an existing NASQO login.
+class AuthGoogleDeviceLoginSucceeded extends AuthEvent {
+  const AuthGoogleDeviceLoginSucceeded(this.authenticate);
+  final Authenticate authenticate;
+
+  @override
+  List<Object> get props => [authenticate];
+}
+
 class AuthResetPassword extends AuthEvent {
   final String username;
   const AuthResetPassword({required this.username});

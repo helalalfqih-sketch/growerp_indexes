@@ -67,6 +67,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       _onAuthLogin,
       transformer: authDroppable(const Duration(milliseconds: 100)),
     );
+    on<AuthGoogleDeviceLoginSucceeded>(_onAuthGoogleDeviceLoginSucceeded);
     on<AuthResetPassword>(_onAuthResetPassword);
     on<AuthChangePassword>(_onAuthChangePassword);
     on<AuthSetupCompleted>(_onAuthSetupCompleted);
@@ -220,6 +221,17 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     final result = Uri.base.queryParameters['googleLogin'];
     if (result == null) return false;
     _googleRedirectHandled = true;
+    if (result == 'registered') {
+      emit(
+        state.copyWith(
+          status: AuthStatus.unAuthenticated,
+          authenticate: Authenticate(applicationId: applicationId),
+          message:
+              'تم إنشاء حسابك باستخدام Google. أكمل إعداد الشركة والاشتراك عند تسجيل الدخول.',
+        ),
+      );
+      return true;
+    }
     if (result != 'success') {
       emit(
         state.copyWith(
@@ -570,6 +582,54 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.failure,
           message: await getDioError(e),
+        ),
+      );
+    }
+  }
+
+  /// Native Google login: the backend alone verifies Google identity and
+  /// issues the actual session; Flutter never trusts a Google account email.
+  Future<void> _onAuthGoogleDeviceLoginSucceeded(
+    AuthGoogleDeviceLoginSucceeded event,
+    Emitter<AuthState> emit,
+  ) async {
+    final authenticated = event.authenticate;
+    if (authenticated.apiKey == null ||
+        authenticated.user?.userId == null ||
+        authenticated.apiKey!.isEmpty) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: 'لم يكتمل تسجيل الدخول الآمن باستخدام Google.',
+        ),
+      );
+      return;
+    }
+    try {
+      emit(state.copyWith(status: AuthStatus.loading));
+      await clearRestCache();
+      await PersistFunctions.persistAuthenticate(authenticated);
+      await PersistFunctions.persistKeyValue('apiKey', authenticated.apiKey!);
+      await PersistFunctions.persistKeyValue(
+        'moquiSessionToken',
+        authenticated.moquiSessionToken ?? '',
+      );
+      await chat.connect(authenticated.apiKey!, authenticated.user!.userId!);
+      await notification.connect(
+        authenticated.apiKey!,
+        authenticated.user!.userId!,
+      );
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          authenticate: authenticated,
+        ),
+      );
+    } catch (e) {
+      emit(
+        state.copyWith(
+          status: AuthStatus.failure,
+          message: 'تعذّر إكمال جلسة نسقو بعد مصادقة Google.',
         ),
       );
     }

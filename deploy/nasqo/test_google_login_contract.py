@@ -17,6 +17,7 @@ screen = ET.parse(backend_screen).getroot()
 transitions = [t.attrib.get("name") for t in screen.findall("transition")]
 assert set(("callback", "loginStart", "loginCallback")).issubset(transitions)
 assert transitions.count("callback") == 1  # Workspace flow preserved
+assert set(("deviceCallback", "deviceApprove")).issubset(transitions)
 util = backend_util.read_text()
 for token in (
     "openid email", "code_challenge_method=S256", "nonce",
@@ -27,6 +28,20 @@ for token in (
 ):
     assert token in util, f"Missing security or tenancy check: {token}"
 assert "refresh_token" not in util.lower(), "Business login must not persist Google refresh tokens"
+for token in ("startDevice", "completeDeviceCallback", "approveDevice",
+              "pollDevice", "MAX_PAIRING_ATTEMPTS", "deviceCallbackUri",
+              "MessageDigest.isEqual"):
+    assert token in util, f"Missing native device pairing security: {token}"
+device_services = BASE / "backend/service/growerp/100/NasqoGoogleDeviceLoginServices100.xml"
+assert device_services.exists()
+ET.parse(device_services)
+rest = (BASE / "backend/service/growerp.rest.xml").read_text()
+assert "GoogleDeviceLoginStart" in rest and "GoogleDeviceLoginPoll" in rest
+native_client = (BASE / "flutter/packages/growerp_models/lib/src/rest_client/auth_api.dart").read_text()
+assert "startGoogleDeviceLogin" in native_client and "pollGoogleDeviceLogin" in native_client
+native_dialog = (BASE / "flutter/packages/growerp_core/lib/src/domains/authenticate/views/google_device_login_dialog.dart").read_text()
+assert "openExternalUrl" in native_dialog and "_pairingCode" in native_dialog
+assert "AuthGoogleDeviceLoginSucceeded" in bloc.read_text()
 ui = frontend.read_text()
 assert "googleLoginEnabled" in ui
 assert "googleOAuth/loginStart" in ui

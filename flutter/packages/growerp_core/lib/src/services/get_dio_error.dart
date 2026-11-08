@@ -39,7 +39,7 @@ Future<String> getDioError(dynamic e) async {
             // signed out, say so instead of leaking that text verbatim.
             if (errorMessage.contains('[No User]') &&
                 errorMessage.contains('is not authorized for')) {
-              return 'You have been signed out, please log in again.';
+              return 'signedOutLoginAgain';
             }
 
             // Try to extract the inner error message from nested JSON errors
@@ -65,47 +65,47 @@ Future<String> getDioError(dynamic e) async {
             // Return only the clean error message without technical prefixes
             returnMessage = errorMessage;
           } else if (decoded['errorCode'] != null) {
-            returnMessage = 'Error code: ${decoded['errorCode']}';
+            returnMessage = 'errorCodeMessage:${decoded['errorCode']}';
           }
         } else {
           // Fallback to technical error for non-JSON responses
-          returnMessage = 'Server error occurred';
+          returnMessage = 'serverErrorOccurred';
         }
       } catch (_) {
-        returnMessage = 'Server error occurred';
+        returnMessage = 'serverErrorOccurred';
       }
     } else {
       // Handle cases where there's no response (connection issues, etc.)
       late String expression;
       switch (e.type) {
         case DioExceptionType.connectionError:
-          expression = "Connection error";
+          expression = "networkConnectionError";
         case DioExceptionType.receiveTimeout:
-          expression = "Request timeout";
+          expression = "requestTimeout";
         case DioExceptionType.connectionTimeout:
-          expression = "Connection timeout";
+          expression = "connectionTimeout";
         case DioExceptionType.sendTimeout:
-          expression = "Send timeout";
+          expression = "sendTimeout";
         case DioExceptionType.cancel:
-          expression = "Request cancelled";
+          expression = "requestCancelled";
         default:
-          expression = "Network error";
+          expression = "networkError";
       }
       returnMessage = expression;
     }
   } else if (e is FormatException) {
-    returnMessage = 'Invalid data format';
+    returnMessage = 'invalidDataFormat';
   } else {
     returnMessage = e.toString();
   }
 
-  if (returnMessage.trim().isEmpty) returnMessage = "Server Connection error";
+  if (returnMessage.trim().isEmpty) returnMessage = "serverConnectionError";
 
   // remove key from db when not valid
   if (returnMessage.trim() == 'Login key not valid') {
     final SharedPreferences prefs = await SharedPreferences.getInstance();
     await prefs.remove('apiKey');
-    returnMessage = 'Login key expired, please login again';
+    returnMessage = 'loginKeyExpired';
   }
   return returnMessage.trim();
 }

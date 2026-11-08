@@ -470,5 +470,25 @@
   "serverConnectionError": "خطأ في الاتصال بالخادم",
   "signedOutLoginAgain": "تم تسجيل خروجك، يرجى تسجيل الدخول مرة أخرى.",
   "loginKeyExpired": "انتهت صلاحية مفتاح تسجيل الدخول، يرجى تسجيل الدخول مرة أخرى",
-  "errorCodeMessage": "رمز الخطأ: {code}"
+  "errorCodeMessage": "رمز الخطأ: {code}",
+  "sqliteImportTitle": "معاينة نسخة SQLite الاحتياطية",
+  "sqliteImportInfo": "راجع نسخة POS القديمة قبل الاستيراد. لن يتم إنشاء سجلات أو قيود محاسبية.",
+  "sqliteImportSelect": "اختيار نسخة SQLite",
+  "sqliteImportReadOnly": "معاينة للقراءة فقط",
+  "sqliteImportProducts": "المنتجات",
+  "sqliteImportCustomers": "العملاء",
+  "sqliteImportStores": "المخازن",
+  "sqliteImportMoves": "الحركات المالية",
+  "sqliteImportDetails": "تفاصيل الفواتير",
+  "sqliteImportStockMoves": "حركات المخزون",
+  "sqliteImportTransfers": "تحويلات المخازن",
+  "sqliteImportBillTypes": "أنواع فواتير تحتاج إلى مطابقة",
+  "sqliteImportWarnings": "تحذيرات الاستيراد",
+  "sqliteImportNoFile": "لم يتم اختيار نسخة احتياطية",
+  "sqliteImportPreviewFailed": "فشلت معاينة نسخة SQLite: {message}",
+  "@sqliteImportPreviewFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
+  }
 }

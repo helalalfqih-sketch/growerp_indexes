@@ -1939,5 +1939,25 @@
         "type": "String"
       }
     }
+  },
+  "sqliteImportTitle": "SQLite backup preview",
+  "sqliteImportInfo": "Review a legacy POS backup before importing. No records or accounting entries are created.",
+  "sqliteImportSelect": "Choose SQLite backup",
+  "sqliteImportReadOnly": "Read-only preview",
+  "sqliteImportProducts": "Products",
+  "sqliteImportCustomers": "Customers",
+  "sqliteImportStores": "Stores",
+  "sqliteImportMoves": "Financial moves",
+  "sqliteImportDetails": "Bill details",
+  "sqliteImportStockMoves": "Stock moves",
+  "sqliteImportTransfers": "Store transfers",
+  "sqliteImportBillTypes": "Bill types requiring mapping",
+  "sqliteImportWarnings": "Import warnings",
+  "sqliteImportNoFile": "No backup selected",
+  "sqliteImportPreviewFailed": "SQLite backup preview failed: {message}",
+  "@sqliteImportPreviewFailed": {
+    "placeholders": {
+      "message": {"type": "String"}
+    }
   }
 }

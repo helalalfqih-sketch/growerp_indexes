@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import '../../../common/translate_bloc_messages.dart';
 import '../../../templates/templates.dart';
 import '../../domains.dart';
 
@@ -228,8 +229,12 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                       key: const Key('startupFailureBanner'),
                       backgroundColor: colorScheme.errorContainer,
                       content: Text(
-                        state.message ??
-                            'The server cannot be reached at the moment.',
+                        state.message == null
+                            ? 'تعذر الوصول إلى الخادم حاليًا.'
+                            : translateAuthBlocMessage(
+                                state.message,
+                                _localizations!,
+                              ),
                         style: TextStyle(color: colorScheme.onErrorContainer),
                       ),
                       leading: Icon(

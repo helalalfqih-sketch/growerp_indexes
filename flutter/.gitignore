@@ -85,3 +85,5 @@ packages/*/example/test/
 
 # flutter test --coverage (melos test_unit)
 coverage/
+# Widget Preview related
+.widget_preview/

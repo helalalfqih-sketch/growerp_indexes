@@ -126,9 +126,7 @@ mixin SystemApi {
 
   /// Google consent URL ({authUrl}) for the services: drive, gmail, calendar.
   @POST("rest/s1/growerp/100/SystemSettings/googleSignIn")
-  Future<dynamic> startGoogleSignIn({
-    @Field() required List<String> services,
-  });
+  Future<dynamic> startGoogleSignIn({@Field() required List<String> services});
 
   /// Disconnect one Google service: drive, gmail or calendar.
   @POST("rest/s1/growerp/100/SystemSettings/googleDisconnect")
@@ -208,6 +206,13 @@ mixin SystemApi {
     @Part(name: 'fileName') required String fileName,
     @Part(name: 'offset') required String offset,
     @Part(name: 'last') required String last,
+    @Part(name: 'file') required MultipartFile file,
+  });
+
+  /// Validate a legacy SQLite POS backup without creating NASQO records.
+  @POST("rest/s1/growerp/100/SqliteImport/Preview")
+  @MultiPart()
+  Future<SqliteImportPreview> previewSqliteImport({
     @Part(name: 'file') required MultipartFile file,
   });
 

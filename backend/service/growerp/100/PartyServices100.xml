@@ -3283,6 +3283,7 @@ limitations under the License.
             tenant -->
             <parameter name="timeZoneOffset" />
             <parameter name="locale" />
+            <parameter name="skipMarketing" type="Boolean" default="false" />
         </in-parameters>
         <out-parameters>
             <parameter name="authenticate" type="Map">
@@ -3413,6 +3414,8 @@ limitations under the License.
                         in-map="[userPartyId: tenantResult.adminPartyId, ownerPartyId: tenantResult.ownerPartyId]"
                         out-map="userInfo" />
 
+                    <!-- Google-verified signup does not imply marketing consent. -->
+                    <if condition="skipMarketing != true">
                     <!-- Add to mailing list -->
                     <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"
                         in-map="[email: email, firstName: firstName, lastName: lastName]" />
@@ -3420,6 +3423,7 @@ limitations under the License.
                         async="true" ignore-error="true"
                         in-map="[emailAddress: email, ownerPartyId: 'GROWERP',
                             tenantPartyId: tenantResult.ownerPartyId]" />
+                    </if>
 
                     <!-- Return with 'registered' status -->
                     <set field="authenticate"

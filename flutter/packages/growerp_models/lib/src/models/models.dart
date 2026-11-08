@@ -135,6 +135,7 @@ export 'adk_action_model.dart';
 export 'adk_approval_model.dart';
 export 'adk_knowledge_model.dart';
 export 'owner_data_transfer_model.dart';
+export 'sqlite_import_preview_model.dart';
 export 'adk_agent_catalog_model.dart';
 export 'adk_function_suggestion_model.dart';
 export 'adk_nominated_agents_model.dart';

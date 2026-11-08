@@ -35,7 +35,7 @@ class TestEc {
     TestCacheFacade cache = new TestCacheFacade()
 }
 
-Class util = new GroovyClassLoader(this.class.classLoader).parseClass(
+Class util = new GroovyShell(this.class.classLoader).evaluate(
     new File('backend/service/NasqoGoogleLoginUtil.groovy')
 )
 assert util.enabled()

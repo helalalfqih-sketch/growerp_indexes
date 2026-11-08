@@ -9,7 +9,7 @@ import groovy.lang.GroovyClassLoader
 
 File code = new File('backend/service/NasqoGoogleLoginUtil.groovy')
 assert code.isFile(): 'Run this test at the repository root'
-Class util = new GroovyClassLoader(this.class.classLoader).parseClass(code)
+Class util = new GroovyShell(this.class.classLoader).evaluate(code)
 String client = '12345-nasqo.apps.googleusercontent.com'
 String nonce = 'test-nonce-will-never-be-used-in-production'
 long now = System.currentTimeMillis().intdiv(1000L)
@@ -20,7 +20,7 @@ Map valid = [
     email: 'Sample.User@Gmail.com', email_verified: 'true'
 ]
 assert util.validateIdentityClaims(valid, client, nonce) ==
-    [email: 'sample.user@gmail.com', sub: 'google-subject-123']
+    [email: 'sample.user@gmail.com', sub: 'google-subject-123', givenName: '', familyName: '']
 
 int negativeCases = 0
 def mustDeny = { Map change, String label ->
@@ -46,7 +46,7 @@ mustDeny([email: 'contact@thirdparty.example'], 'unhosted third party email')
 mustDeny([email: 'person@company.example', hd: 'wrong-company.example'], 'mismatched hosted domain')
 assert util.validateIdentityClaims(
     valid + [email: 'person@company.example', hd: 'company.example'], client, nonce
-) == [email: 'person@company.example', sub: 'google-subject-123']
+) == [email: 'person@company.example', sub: 'google-subject-123', givenName: '', familyName: '']
 assert util.validateIdentityClaims(
     valid + [iss: 'accounts.google.com'], client, nonce
 ).email == 'sample.user@gmail.com'

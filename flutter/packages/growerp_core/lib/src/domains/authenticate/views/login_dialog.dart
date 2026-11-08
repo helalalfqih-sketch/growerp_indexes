@@ -25,6 +25,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../domains/domains.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import 'google_device_login_dialog.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -364,8 +365,7 @@ class LoginDialogState extends State<LoginDialog> {
                   ),
                 ],
               ),
-              if (kIsWeb &&
-                  _application != 'AppSupport' &&
+              if (_application != 'AppSupport' &&
                   GlobalConfiguration().get('googleLoginEnabled') == true) ...[
                 const SizedBox(height: 12),
                 OutlinedButton.icon(
@@ -377,6 +377,21 @@ class LoginDialogState extends State<LoginDialog> {
                         : 'Continue with Google',
                   ),
                   onPressed: () async {
+                    if (!kIsWeb) {
+                      final auth = await showDialog<Authenticate>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (dialogContext) => GoogleDeviceLoginDialog(
+                          restClient: context.read<RestClient>(),
+                          applicationId: _application,
+                        ),
+                      );
+                      if (!mounted) return;
+                      if (auth != null) {
+                        _authBloc.add(AuthGoogleDeviceLoginSucceeded(auth));
+                      }
+                      return;
+                    }
                     // Google identity is handled by the server, never by a
                     // password or secret in this Flutter application.
                     final uri = Uri.base.replace(
