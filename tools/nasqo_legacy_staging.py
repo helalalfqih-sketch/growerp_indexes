@@ -15,7 +15,7 @@ import json
 import os
 import re
 import sqlite3
-from collections import Counter
+from contextlib import closing
 from pathlib import Path
 from typing import Any
 
@@ -323,17 +323,17 @@ def dump_jsonl(path: Path, records) -> int:
 def create_private_bundle(source: Path, destination: Path,
                           stage_records: bool = False) -> dict:
     source = source.expanduser().resolve()
-    destination = destination.expanduser().absolute()
-    if destination.exists() or destination.is_symlink():
+    requested = destination.expanduser().absolute()
+    if requested.exists() or requested.is_symlink():
         raise MigrationBlocked("Refusing to overwrite an existing staging directory")
+    destination = requested.resolve(strict=False)
     repo_root = Path(__file__).resolve().parents[1]
     if destination == repo_root or repo_root in destination.parents:
         raise MigrationBlocked("Private migration output must stay OUTSIDE Git")
-    with open_source(source) as db:
+    with closing(open_source(source)) as db:
         manifest, mapping = analyze(db, source)
         # Keep a link to the original backup rather than changing or deleting it.
         destination.mkdir(mode=0o700, parents=True, exist_ok=False)
-        dump_json(destination / "manifest.json", manifest)
         dump_json(destination / "mapping_template.json", mapping)
         if stage_records:
             raw = destination / "source_tables"
@@ -405,7 +405,7 @@ def create_private_bundle(source: Path, destination: Path,
                 for move in rows(db, "input_move")
             ))
             # Every raw table is retained locally. No target schema writes occur.
-            dump_json(destination / "manifest_with_snapshots.json", manifest)
+        dump_json(destination / "manifest.json", manifest)
     return manifest
 
 
