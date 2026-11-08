@@ -52,6 +52,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - name: Install PostgreSQL test driver
-        run: python3 -m pip install --quiet 'psycopg[binary]==3.2.3'
+        run: python3 -m pip install --quiet 'psycopg[binary]==3.2.12'
       - name: Rehearse synthetic-only staging in temporary PostgreSQL rows and rollback
         run: python3 tools/test_nasqo_ephemeral_pg_rehearsal.py
