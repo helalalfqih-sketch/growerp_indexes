@@ -1,7 +1,7 @@
 # NASQO ERP Android preview
 
 - This preview is a **debug-signed beta APK**, not a Google Play release.
-- Display name: **نسقو ERP**, version 1.22.5 (build 142).
+- Display name: **نسقو ERP**, version 1.22.6 (build 143).
 - Connects exclusively to the production NASQO ERP backend at
   `https://erp.indexesstore.com` (do not use it with test tenant data).
 - Existing Google-account sign-in uses a browser and a manual pairing code.

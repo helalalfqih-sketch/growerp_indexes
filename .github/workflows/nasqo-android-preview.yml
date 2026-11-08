@@ -1,6 +1,9 @@
 name: NASQO Android Preview APK
 
 on:
+  push:
+    branches:
+      - fix/nasqo-android-sqlite-workspace-20261108
   workflow_dispatch:
 
 permissions:
@@ -51,15 +54,15 @@ jobs:
         run: |
           set -euo pipefail
           install -d dist
-          install -m 644 flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk dist/NASQO_ERP_Android_Preview_1.22.5.apk
-          (cd dist && sha256sum NASQO_ERP_Android_Preview_1.22.5.apk > SHA256SUMS)
-          test -s dist/NASQO_ERP_Android_Preview_1.22.5.apk
+          install -m 644 flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk dist/NASQO_ERP_Android_Preview_1.22.6.apk
+          (cd dist && sha256sum NASQO_ERP_Android_Preview_1.22.6.apk > SHA256SUMS)
+          test -s dist/NASQO_ERP_Android_Preview_1.22.6.apk
           echo 'APK_PREVIEW_CREATED'
           ls -lh dist/*
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: NASQO_ERP_Android_Preview_1.22.5
+          name: NASQO_ERP_Android_Preview_1.22.6
           path: dist/
           retention-days: 30
           if-no-files-found: error
