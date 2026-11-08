@@ -97,3 +97,59 @@ integration or a completed migration. The final import must first run in an
 isolated Moqui/PostgreSQL staging environment with synthetic data, and only
 then run against authorized source data after the above approvals. Never
 merge this PR as proof of production migration readiness.
+
+
+## Company identity check before any staging migration (read-only)
+
+The target company name and numeric ID must be matched against an authenticated
+NASQO Moqui PartyServices100.get#Company response **in the intended environment**.
+Use the internal JSON field partyId; pseudoId is not interchangeable. A
+Shopify store or public URL does not prove the NASQO company identity.
+Independent staging/production databases may have different party IDs.
+
+Record the candidate in your private mapping_template.json as
+targetCompanyPartyIdCandidate, but retain targetCompanyPartyId=null,
+targetCompanyVerified=false, approved=false. Add authorized spelling aliases
+under targetCompanyAliases when necessary. Do not commit the mapping file.
+
+Without authenticated staging access, the following **does not make a network
+request** and reports a blocked identity status:
+
+    python3 tools/nasqo_staging_company_identity.py \
+      --mapping /private/review/mapping_template.json \
+      --manifest /private/review/manifest.json \
+      --source /private/original.back
+
+A previously saved Company API response JSON can be checked as an offline
+fixture with --response-file, but this never proves live company identity.
+
+Only when an authorized staging backend exists, configure a **read-only**
+Moqui login key securely in the NASQO_STAGING_API_KEY environment variable
+(never place the key in chat, CLI arguments, Git or logs) and run:
+
+    python3 tools/nasqo_staging_company_identity.py \
+      --mapping /private/review/mapping_template.json \
+      --manifest /private/review/manifest.json \
+      --source /private/original.back \
+      --staging-base-url https://staging.example.test
+
+This verifier performs a single authenticated GET using the
+Company?companyPartyId=<candidate>&limit=2 service path. It disables HTTP
+redirects, validates HTTPS and a staging/test host label, and prints only a
+sanitized match decision. It **never** writes a company, changes the mapping
+approval, creates drafts, or posts ledger entries.
+
+### Staging acceptance gates (still pending)
+
+- Provision a separate, durable Moqui/PostgreSQL staging environment; never
+  point a migration script at the production database.
+- Authenticate as an authorized tester and independently verify company
+  partyId, pseudoId, name and owning tenant in that specific environment.
+- Rehearse an end-to-end synthetic-only import and rollback before real data.
+- Require approved bill-type meanings, party roles, taxes, units, currencies,
+  account mapping and source-to-target idempotency before real draft migration.
+- Reconcile original rows and preserve unapproved/missing references for review.
+- Never mark a financial document posted as a side-effect of bulk import.
+
+If a staging backend is unavailable, the identity gate must remain blocked
+with PENDING_AUTHENTICATED_STAGING_LOOKUP; a user-supplied ID is not proof.
