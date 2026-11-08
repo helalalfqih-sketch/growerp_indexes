@@ -1,0 +1,24 @@
+name: NASQO legacy SQLite staging (no production writes)
+
+on:
+  pull_request:
+    paths:
+      - 'tools/nasqo_legacy_staging.py'
+      - 'tools/test_nasqo_legacy_staging.py'
+      - 'docs/NASQO_LEGACY_MIGRATION_STAGING.md'
+      - '.github/workflows/nasqo-legacy-staging.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-sqlite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run staging regression tests using synthetic SQLite only
+        run: python3 tools/test_nasqo_legacy_staging.py
+      - name: Preserve the existing offline legacy-report contract
+        run: python3 tools/test_import_nasqo_sqlite_backup.py
