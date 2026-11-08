@@ -1,0 +1,26 @@
+name: NASQO SQLite preview contract
+
+on:
+  pull_request:
+    paths:
+      - 'backend/service/NasqoSqliteImportUtil.groovy'
+      - 'backend/service/growerp/100/NasqoSqliteImportServices100.xml'
+      - 'tools/import_nasqo_sqlite_backup.py'
+      - 'tools/test_import_nasqo_sqlite_backup.py'
+      - 'tools/test_nasqo_sqlite_preview_service.py'
+      - '.github/workflows/nasqo-sqlite-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  sqlite-preview-contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - name: Test offline legacy SQLite review format
+        run: python3 tools/test_import_nasqo_sqlite_backup.py
+      - name: Test Moqui preview service source contract
+        run: python3 tools/test_nasqo_sqlite_preview_service.py
