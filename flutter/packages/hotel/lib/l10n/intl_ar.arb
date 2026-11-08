@@ -1,3 +1,9 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "errorWithArg": "خطأ: {error}",
+  "roomsToClean": "الغرف: {totalRooms}   المطلوب تنظيفها: {dirtyCount}",
+  "tableHdrOccupied": "مشغولة",
+  "tableHdrRoom": "الغرفة",
+  "tableHdrStatus": "الحالة",
+  "tableHdrType": "النوع"
 }

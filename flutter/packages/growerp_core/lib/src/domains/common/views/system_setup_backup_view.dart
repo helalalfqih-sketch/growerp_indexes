@@ -68,9 +68,11 @@ class _SystemSetupBackupViewState extends State<SystemSetupBackupView> {
   RestClient? _restClient;
   OwnerDataTransfer? _download;
   OwnerDataTransfer? _upload;
+  SqliteImportPreview? _sqlitePreview;
   Timer? _timer;
   bool _isLoading = true;
   bool _sending = false;
+  bool _sqliteSending = false;
 
   @override
   void initState() {
@@ -91,6 +93,11 @@ class _SystemSetupBackupViewState extends State<SystemSetupBackupView> {
       widget.upload ??
       context.read<AuthBloc>().state.authenticate?.user?.userGroup ==
           UserGroup.system;
+
+  bool get _showSqlitePreview {
+    final group = context.read<AuthBloc>().state.authenticate?.user?.userGroup;
+    return group == UserGroup.admin || group == UserGroup.system;
+  }
 
   Future<void> _load() async {
     try {
@@ -217,6 +224,30 @@ class _SystemSetupBackupViewState extends State<SystemSetupBackupView> {
     }
   }
 
+  Future<void> _previewSqlite() async {
+    final picked = await FilePicker.pickFile(
+      type: FileType.custom,
+      allowedExtensions: ['back', 'db', 'sqlite'],
+    );
+    if (picked == null) return;
+    setState(() => _sqliteSending = true);
+    try {
+      final buffer = BytesBuilder(copy: false);
+      await for (final data in picked.readAsByteStream()) {
+        buffer.add(data);
+      }
+      final bytes = buffer.takeBytes();
+      final preview = await _restClient!.previewSqliteImport(
+        file: MultipartFile.fromBytes(bytes, filename: picked.name),
+      );
+      if (mounted) setState(() => _sqlitePreview = preview);
+    } catch (e) {
+      _error(e);
+    } finally {
+      if (mounted) setState(() => _sqliteSending = false);
+    }
+  }
+
   Future<void> _error(Object e) async {
     final message = await getDioError(e);
     if (!mounted) return;
@@ -310,6 +341,38 @@ class _SystemSetupBackupViewState extends State<SystemSetupBackupView> {
               ],
             ),
           ),
+        if (_showSqlitePreview) ...[
+          if (widget.download || _showUpload) const SizedBox(height: 24),
+          GroupingDecorator(
+            decoratorKey: const Key('sqliteImportPreviewSection'),
+            labelText: localizations.sqliteImportTitle,
+            icon: Icons.storage_outlined,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(localizations.sqliteImportInfo),
+                const SizedBox(height: 12),
+                Text(
+                  localizations.sqliteImportReadOnly,
+                  style: TextStyle(
+                    color: Theme.of(context).colorScheme.primary,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (_sqlitePreview != null) _sqliteReport(_sqlitePreview!),
+                Center(
+                  child: OutlinedButton.icon(
+                    key: const Key('sqliteImportPreview'),
+                    icon: const Icon(Icons.preview_outlined),
+                    label: Text(localizations.sqliteImportSelect),
+                    onPressed: _sqliteSending ? null : _previewSqlite,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
       ],
     );
     if (!widget.standalone) return content;
@@ -364,6 +427,42 @@ class _SystemSetupBackupViewState extends State<SystemSetupBackupView> {
           ),
         ],
       ),
+    );
+  }
+
+  Widget _sqliteReport(SqliteImportPreview preview) {
+    final localizations = CoreLocalizations.of(context)!;
+    Widget count(String label, String key) =>
+        Chip(label: Text('$label: ${preview.counts[key] ?? 0}'));
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Wrap(
+          spacing: 8,
+          runSpacing: 4,
+          children: [
+            count(localizations.sqliteImportProducts, 'products'),
+            count(localizations.sqliteImportCustomers, 'customers'),
+            count(localizations.sqliteImportStores, 'stores'),
+            count(localizations.sqliteImportMoves, 'financialMoves'),
+            count(localizations.sqliteImportDetails, 'billDetails'),
+            count(localizations.sqliteImportStockMoves, 'stockMoves'),
+            count(localizations.sqliteImportTransfers, 'storeTransfers'),
+          ],
+        ),
+        const SizedBox(height: 12),
+        Text(localizations.sqliteImportBillTypes),
+        for (final item in preview.billTypes)
+          Text(
+            '${item['billType']} / ${item['state']}: ${item['count']}',
+            style: Theme.of(context).textTheme.bodySmall,
+          ),
+        const SizedBox(height: 8),
+        Text(localizations.sqliteImportWarnings),
+        for (final warning in preview.warnings)
+          Text('• $warning', style: Theme.of(context).textTheme.bodySmall),
+        const SizedBox(height: 12),
+      ],
     );
   }
 }

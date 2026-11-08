@@ -62,7 +62,7 @@ try {
     def videoPrompt = extractVideoPromptFromScript(ec, scriptContent, videoStyle, ownerPartyId)
     ec.logger.info("Generated video prompt: ${videoPrompt?.take(200)}...")
     
-    // Step 2: Call Veo 2 API to generate video, on the GrowERP GCP account: metered like the
+    // Step 2: Call Veo 2 API to generate video, on the NASQO GCP account: metered like the
     // Gemini image calls (4 key frames, ~1290 tokens each)
     def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
     GeminiAiUtil.checkMonthlyAllowance(ec, ownerPartyId, 'course video frames')

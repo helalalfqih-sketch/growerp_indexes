@@ -1,3 +1,12 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "day": "يوم",
+  "week": "أسبوع",
+  "month": "شهر",
+  "save": "حفظ",
+  "cancel": "إلغاء",
+  "tableHdrFrom": "من",
+  "tableHdrRate": "السعر",
+  "tableHdrThru": "إلى",
+  "searchHintReservations": "البحث برقم الحجز أو اسم العميل أو التاريخ..."
 }

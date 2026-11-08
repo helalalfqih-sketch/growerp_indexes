@@ -33,7 +33,7 @@ import org.moqui.context.ExecutionContext
 
 ExecutionContext ec = context.ec ?: context
 
-final String USER_AGENT = 'Mozilla/5.0 (compatible; GrowERP-WebsiteGenerator/1.0; +https://www.growerp.com)'
+final String USER_AGENT = 'Mozilla/5.0 (compatible; NASQO-WebsiteGenerator/1.0; +https://erp.indexesstore.com)'
 final int TIMEOUT_MS = 15000
 final int MAX_BODY = 3 * 1024 * 1024
 final List ASSET_SUFFIXES = ['.jpg', '.jpeg', '.png', '.gif', '.svg', '.webp', '.pdf', '.zip',

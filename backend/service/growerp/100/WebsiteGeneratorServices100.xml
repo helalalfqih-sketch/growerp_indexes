@@ -13,7 +13,7 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 <!--
-Website generator: convert an existing company website into a new GrowERP owner (system
+Website generator: convert an existing company website into a new NASQO owner (system
 support only), or into the store of the tenant that asks for it (targetStore).
 
     create#WebsiteConversion   validate + queue, returns immediately
@@ -100,7 +100,7 @@ or for a tenant by replace#StoreWebsite.
     <service verb="get" noun="WebsiteHostName">
         <description>The host name this website gets on THIS installation:
         the first label of its own domain, on the domain this backend is reached at.
-        www.xxxx.com becomes xxxx.growerp.org.
+        www.xxxx.com becomes xxxx.erp.indexesstore.com.
 
         Follows the same rule as setup#MainOrganization: a host with two or more dots loses
         its first label, so admin/staging prefixes do not end up in the name. Returns empty
@@ -126,7 +126,7 @@ or for a tenant by replace#StoreWebsite.
                 // the default http/https ports are never part of a host name
                 if (port == ':80' || port == ':443') port = ''
                 if (host == '10.0.2.2' || host == '127.0.0.1') host = 'localhost'
-                // two or more dots: drop the first label, admin.growerp.org -> growerp.org
+                // two or more dots: drop the first label, erp.indexesstore.com -> erp.indexesstore.com
                 if (host.indexOf('.', host.indexOf('.') + 1) != -1) {
                     host = host.substring(host.indexOf('.') + 1)
                 }
@@ -750,7 +750,7 @@ or for a tenant by replace#StoreWebsite.
             ]]></script>
             <if condition="!siteId">
                 <return error="true"
-                    message="This is not a GrowERP website export: no &lt;ID&gt;_ROOT resource found in the file" />
+                    message="This is not a NASQO website export: no &lt;ID&gt;_ROOT resource found in the file" />
             </if>
 
             <service-call name="growerp.100.ImportExportServices100.import#WebsiteOwner"
@@ -802,7 +802,7 @@ or for a tenant by replace#StoreWebsite.
 
     <service verb="export" noun="WebsiteOwner" transaction-timeout="600">
         <description>Rebuild the owner-import XML of a website that is live here, so it can be
-            installed on another GrowERP with import#WebsiteOwner. Reads the current content, so
+            installed on another NASQO with import#WebsiteOwner. Reads the current content, so
             later edits made in the admin app's Website dialog are included. Works for any
             website, whether the generator, the /convert-website skill or a person made it.</description>
         <in-parameters>

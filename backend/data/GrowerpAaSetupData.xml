@@ -59,9 +59,9 @@ limitations under the License.
         paused="N"
         transactionTimeout="300" />
 
-    <!-- Service Job: Add new GrowERP trial signups as Substack free subscribers - hourly -->
+    <!-- Service Job: Add new NASQO trial signups as Substack free subscribers - hourly -->
     <moqui.service.job.ServiceJob jobName="substack_subscriber_sync"
-        description="Add everyone who tried GrowERP (trial tenants) as a Substack free subscriber, idempotently"
+        description="Add everyone who tried NASQO (trial tenants) as a Substack free subscriber, idempotently"
         serviceName="growerp.100.SubstackServices100.sync#NewSignupsToSubstack"
         cronExpression="0 25 * * * ?" paused="N" transactionTimeout="300" />
 
@@ -79,7 +79,7 @@ limitations under the License.
 
     <!-- Service Job: Read changes made in the per-user calendars back - every 5 minutes -->
     <moqui.service.job.ServiceJob jobName="user_calendar_read_back"
-        description="Read changes made in the per-user GrowERP calendars (Google) back into the activities"
+        description="Read changes made in the per-user NASQO calendars (Google) back into the activities"
         serviceName="growerp.100.CalendarSyncServices100.sync#UserCalendars"
         cronExpression="0 2/5 * * * ?" paused="N" transactionTimeout="600" />
 
@@ -102,7 +102,7 @@ limitations under the License.
         ownerPartyId="_NA_" />
     <mantle.product.category.ProductCategory productCategoryId="GROWERP_SERVICES"
         ownerPartyId="GROWERP" productCategoryTypeEnumId="PctCatalog"
-        categoryName="GrowERP Services" description="" />
+        categoryName="NASQO Services" description="" />
 
     <!-- Subscription Plans: description = tagline|feature|feature..., shown on the website
          pricing page and in the app plan selection -->

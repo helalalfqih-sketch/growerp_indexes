@@ -304,9 +304,9 @@ limitations under the License.
         </assets>
     </mantle.product.Product>
 
-    <!-- GrowERP introduction movie -->
+    <!-- NASQO introduction movie -->
     <mantle.product.Product productId="GROWERP_DEMO" productTypeEnumId="PtService"
-        chargeShipping="N" returnable="N" productName="GrowERP demo movie" description=""
+        chargeShipping="N" returnable="N" productName="NASQO demo movie" description=""
         ownerPartyId="_NA_" requireInventory="N">
         <prices productPriceId="DEMO_GROWERP_MOVIE_L" pricePurposeEnumId="PppPurchase"
             priceTypeEnumId="PptList" fromDate="1265184000000"
@@ -337,9 +337,9 @@ limitations under the License.
         <fileData><![CDATA[PHA+NTAlIGNvdHRvbiAvIDUwJSBQb2x5ZXN0ZXI8L3A+DQo8cD5JbXBvcnRlZDwvcD4NCjxwPlppcHBlciBjbG9zdXJlPC9wPg0KPHA+TWFjaGluZSB3YXNoPC9wPg0KPHA+WmlwLXVwIGhvb2RlZCBzd2VhdHNoaXJ0IGluIDcuOC1vdW5jZSBmbGVlY2UgbWFkZSB3aXRoIHVwIHRvIDUlIHBvbHllc3RlciBjcmVhdGVkIGZyb20gcmVjeWNsZWQgcGxhc3RpYy48L3A+DQo8cD5QaWxsLXJlc2lzdGFudCBmYWJyaWMgd2l0aCBoaWdoLXN0aXRjaCBkZW5zaXR5IGZvciBkdXJhYmlsaXR5LiA8L3A+DQo8cD5SaWJiZWQgd2Fpc3RiYW5kIGFuZCBjdWZmcywgc3BsaXQga2FuZ2Fyb28gcG9ja2V0LjwvcD4=]]></fileData>
     </moqui.resource.DbResourceFile>
 
-    <!-- GrowERP Training movie -->
+    <!-- NASQO Training movie -->
     <mantle.product.Product productId="GROWERP_TRAINING" productTypeEnumId="PtService"
-        chargeShipping="N" returnable="N" productName="GrowERP training movie" description=""
+        chargeShipping="N" returnable="N" productName="NASQO training movie" description=""
         ownerPartyId="_NA_" requireInventory="N">
         <prices productPriceId="TRAINING_GROWERP_MOVIE_L" pricePurposeEnumId="PppPurchase"
             priceTypeEnumId="PptList" fromDate="1265184000000"
@@ -595,8 +595,8 @@ limitations under the License.
 
     <!-- product store image example -->
     <growerp.store.ProductStoreContent productStoreContentId="PRODSTORE_LOGO"
-        description="GrowERP logo" productStoreId="POPC_DEFAULT"
-        contentLocation="dbresource://GrowERP/images/growerp_logo.jpg"
+        description="NASQO logo" productStoreId="POPC_DEFAULT"
+        contentLocation="dbresource://NASQO/images/growerp_logo.jpg"
         contentTypeEnumId="PrstImageLarge" />
 
     <!-- About Us -->
@@ -610,16 +610,16 @@ limitations under the License.
             <fileData><![CDATA[
 ![](/getImage/growerp)
 # About
-GrowERP Shop is the official supplier of GrowERP merchandise. Established in early 2016, GrowERP Shop has an
+NASQO Shop is the official supplier of NASQO merchandise. Established in early 2016, NASQO Shop has an
 extensive supplier network that allows us to source only the best clothing, drinkware and technology for all your POP needs. Is uses on the backend the Moqui system which act as our brain!  
 
-All of our items come with a 100% guarantee of authenticity and each GrowERP item you purchase comes
-with a certificate to prove that you are indeed buying authentic GrowERPware.  
+All of our items come with a 100% guarantee of authenticity and each NASQO item you purchase comes
+with a certificate to prove that you are indeed buying authentic NASQOware.  
 
-The GrowERP team working out of Thailand warehouses love what they do, and
+The NASQO team working out of Thailand warehouses love what they do, and
 particularly enjoy wearing high-vis jackets and a nifty helmet.  
 
-"Working at GrowERP Shop is okay"  
+"Working at NASQO Shop is okay"  
 
 Sylvester / warehouse technician
             ]]></fileData>

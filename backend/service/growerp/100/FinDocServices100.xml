@@ -3786,7 +3786,7 @@ limitations under the License.
     <service verb="get" noun="InvoiceFromImage">
         <description>Read a supplier invoice from an image with the AI model of the company and
             return it as a new purchase invoice to review: nothing is saved here. Uses the
-            model and API key of System Setup, or the GrowERP system key within its allowance.</description>
+            model and API key of System Setup, or the NASQO system key within its allowance.</description>
         <in-parameters>
             <parameter name="imageData" required="true"><description>the image, base64</description></parameter>
             <parameter name="mimeType" default-value="image/jpeg" />

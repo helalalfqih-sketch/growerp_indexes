@@ -1,0 +1,50 @@
+# Builds NASQO Moqui from the owner's own repository at one audited commit.
+# Never clones the upstream growerp/growerp app in place of NASQO.
+FROM eclipse-temurin:21-jdk AS build
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    git curl unzip zip ca-certificates python3 && rm -rf /var/lib/apt/lists/*
+ARG NASQO_REF=master
+ARG NASQO_COMMIT
+RUN test -n "$NASQO_COMMIT"
+RUN git config --global url."https://github.com/".insteadOf "git@github.com:" && \
+    git clone --depth 1 --branch "$NASQO_REF" \
+      https://github.com/helalalfqih-sketch/growerp_indexes.git /src/nasqo && \
+    cd /src/nasqo && test "$(git rev-parse HEAD)" = "$NASQO_COMMIT" && \
+    git submodule update --init --recursive && \
+    bash setup-backend.sh
+# Mantle's upstream TimePeriod service parses locale-formatted Arabic digits with
+# LocalDate.parse (ISO ASCII), which prevents Arabic users completing setup.
+RUN python3 /src/nasqo/deploy/nasqo/patch_time_period_locale.py /src/nasqo
+
+WORKDIR /src/nasqo/moqui
+RUN mkdir -p runtime/lib && \
+    curl -fsSL https://jdbc.postgresql.org/download/postgresql-42.7.3.jar \
+      -o runtime/lib/postgresql-42.7.3.jar
+# JGit/Groovy cannot build with .git links in the runtime.
+RUN rm -rf .git runtime/.git && \
+    find runtime/component -maxdepth 2 -name .git -exec rm -rf {} + 2>/dev/null || true
+RUN printf 'allprojects { tasks.withType(GroovyCompile).configureEach { groovyOptions.forkOptions.memoryMaximumSize = "2g" } }\n' \
+      > /tmp/groovy-heap.gradle && \
+    ./gradlew -I /tmp/groovy-heap.gradle -Dorg.gradle.jvmargs=-Xmx3g addRunTime
+RUN for link in runtime/component/growerp runtime/component/PopRestStore \
+        runtime/component/mantle-stripe runtime/component/moqui-adk \
+        runtime/component/moqui-mcp; do \
+      if [ -L "$link" ]; then \
+        target=$(readlink -f "$link") && rm "$link" && cp -a "$target" "$link"; \
+      fi; \
+    done
+RUN mkdir -p /opt/moqui && cd /opt/moqui && \
+    unzip -q /src/nasqo/moqui/moqui-plus-runtime.war
+
+FROM eclipse-temurin:21-jre-alpine
+RUN apk add --no-cache bash curl fontconfig ttf-dejavu
+COPY --from=build /opt/moqui /opt/moqui
+RUN rm -rf /opt/moqui/runtime
+COPY --from=build /src/nasqo/moqui/runtime /opt/moqui/runtime
+WORKDIR /opt/moqui
+RUN cp runtime/component/growerp/deploy/initstart.sh /opt/moqui/initstart.sh && \
+    chmod 755 /opt/moqui/initstart.sh
+EXPOSE 80
+HEALTHCHECK --interval=30s --timeout=3s --start-period=120s \
+  CMD curl -fsS http://127.0.0.1/status >/dev/null || exit 1
+CMD ["/bin/bash", "/opt/moqui/initstart.sh"]

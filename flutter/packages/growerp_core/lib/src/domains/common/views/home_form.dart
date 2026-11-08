@@ -20,6 +20,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
 
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import '../../../common/translate_bloc_messages.dart';
 import '../../../templates/templates.dart';
 import '../../domains.dart';
 
@@ -136,6 +137,8 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
     bool isPhone = isAPhone(context);
     final colorScheme = Theme.of(context).colorScheme;
     final isDark = Theme.of(context).brightness == Brightness.dark;
+    // Only the NASQO Admin shell is rebranded; other GrowERP apps are unchanged.
+    final isNasqo = widget.title == 'NASQO ERP';
 
     Widget appInfo = Center(
       child: Align(
@@ -148,7 +151,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
           ),
           child: GlobalConfiguration().get("appName") != ''
               ? Text(
-                  "GrowERP "
+                  "${isNasqo ? 'NASQO ERP' : 'GrowERP'} "
                   "${GlobalConfiguration().get("appName")} "
                   "V${GlobalConfiguration().get("version")} "
                   "#${GlobalConfiguration().get("build")}",
@@ -159,7 +162,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                   ),
                 )
               : Text(
-                  'GrowERP',
+                  isNasqo ? 'NASQO ERP' : 'GrowERP',
                   style: TextStyle(color: colorScheme.outline, fontSize: 11),
                 ),
         ),
@@ -226,8 +229,12 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                       key: const Key('startupFailureBanner'),
                       backgroundColor: colorScheme.errorContainer,
                       content: Text(
-                        state.message ??
-                            'The server cannot be reached at the moment.',
+                        state.message == null
+                            ? 'تعذر الوصول إلى الخادم حاليًا.'
+                            : translateAuthBlocMessage(
+                                state.message,
+                                _localizations!,
+                              ),
                         style: TextStyle(color: colorScheme.onErrorContainer),
                       ),
                       leading: Icon(
@@ -253,7 +260,15 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                         key: const Key('HomeFormUnAuth'),
                         title: Center(
                           child: Text(
-                            _localizations!.welcomeToGrowERPBusinessSystem,
+                            isNasqo
+                                ? (Localizations.localeOf(
+                                            context,
+                                          ).languageCode ==
+                                          'ar'
+                                      ? 'مرحبًا بك في نسقو ERP'
+                                      : 'Welcome to NASQO ERP')
+                                : _localizations!
+                                      .welcomeToGrowERPBusinessSystem,
                             style: TextStyle(
                               fontSize: isPhone ? 14 : 16,
                               fontWeight: FontWeight.w600,
@@ -389,8 +404,7 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                                       !(kReleaseMode &&
                                           GlobalConfiguration().get("test") ==
                                               true &&
-                                          (Platform.isIOS ||
-                                              Platform.isMacOS)))
+                                          (Platform.isIOS || Platform.isMacOS)))
                                     _buildPremiumButton(
                                       context: context,
                                       key: const Key('newUserButton'),
@@ -529,6 +543,18 @@ class HomeFormState extends State<HomeForm> with TickerProviderStateMixin {
                   height: 100,
                   width: 100,
                   fit: BoxFit.cover,
+                ),
+              )
+            : widget.title == 'NASQO ERP'
+            ? const SizedBox(
+                height: 80,
+                width: 80,
+                child: Center(
+                  child: Text(
+                    'نسقو',
+                    textAlign: TextAlign.center,
+                    style: TextStyle(fontWeight: FontWeight.w800, fontSize: 24),
+                  ),
                 ),
               )
             : Image(

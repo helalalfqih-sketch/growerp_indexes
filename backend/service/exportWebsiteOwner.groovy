@@ -71,7 +71,7 @@ try {
     long stamp = System.currentTimeMillis()
     StringBuilder xml = new StringBuilder()
     xml.append('<?xml version="1.0" encoding="UTF-8"?>\n')
-    xml.append("<!-- ${xmlAttr(companyName)} website, exported from this GrowERP installation\n")
+    xml.append("<!-- ${xmlAttr(companyName)} website, exported from this NASQO installation\n")
     xml.append("     (store ${productStoreId}) on ${new Date()}.\n")
     xml.append("     Install elsewhere with:\n")
     xml.append("        growerp.100.ImportExportServices100.import#WebsiteOwner\n")

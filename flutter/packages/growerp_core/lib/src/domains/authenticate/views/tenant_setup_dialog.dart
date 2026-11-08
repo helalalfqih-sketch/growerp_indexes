@@ -91,7 +91,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
 
     return popUp(
       context: context,
-      title: 'Company Setup',
+      title: localizations?.settingUpYourCompany ?? 'إعداد الشركة',
       height: _showAccounting ? 550 : 400,
       width: 400,
       child: BlocListener<AuthBloc, AuthState>(
@@ -102,7 +102,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
             setState(() => _isSubmitting = false);
             HelperFunctions.showMessage(
               context,
-              state.message ?? 'Setup failed',
+              state.message ?? localizations?.error ?? 'فشل إعداد الشركة',
               Theme.of(context).colorScheme.error,
             );
           }
@@ -131,7 +131,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                         autofocus: true,
                         initialValue:
                             widget.authenticate.ownerPartyId == 'GROWERP'
-                            ? 'GrowERP'
+                            ? 'NASQO'
                             : kDebugMode
                             ? 'Company ${widget.authenticate.user?.email?.split('@').first ?? ''}'
                             : null,
@@ -155,7 +155,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                         else
                           AutocompleteLabel<Currency>(
                             key: const Key('currency'),
-                            label: localizations?.currency ?? 'Currency',
+                            label: localizations?.currency ?? 'العملة',
                             initialValue: _currencySelected,
                             optionsBuilder: (TextEditingValue textEditingValue) {
                               if (textEditingValue.text.isEmpty) {
@@ -179,7 +179,8 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                             },
                             validator: (value) {
                               if (value == null) {
-                                return 'Currency is required';
+                                return localizations?.currencyError ??
+                                    'العملة مطلوبة';
                               }
                               return null;
                             },
@@ -191,7 +192,7 @@ class TenantSetupDialogState extends State<TenantSetupDialog> {
                           value: _fiscalYearStartMonth,
                           label:
                               localizations?.accountingYearStarts ??
-                              'Accounting year starts',
+                              'بداية السنة المالية',
                           onChanged: (value) => setState(
                             () => _fiscalYearStartMonth = value ?? 1,
                           ),

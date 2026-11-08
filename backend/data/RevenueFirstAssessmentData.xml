@@ -45,8 +45,8 @@
   <!-- Credibility Section -->
   <growerp.landing.CredibilityInfo credibilityInfoId="RF_CRED_INFO" pseudoId="rf-cred-info"
     landingPageId="REVENUE_FIRST_LANDING_PAGE"
-    creatorBio="This assessment is built by the creators of GrowERP, a modern, open-source, multi-platform ERP built from modular building blocks."
-    backgroundText="Because GrowERP is modular, you can start with the website, marketing and CRM blocks and add accounting, inventory and HR later without a migration. This assessment uses that experience to tell you where to start." />
+    creatorBio="This assessment is built by the creators of NASQO, a modern, open-source, multi-platform ERP built from modular building blocks."
+    backgroundText="Because NASQO is modular, you can start with the website, marketing and CRM blocks and add accounting, inventory and HR later without a migration. This assessment uses that experience to tell you where to start." />
 
   <growerp.landing.CredibilityStatistic
     credibilityStatisticId="RF_STAT_1" pseudoId="rf-stat-1"

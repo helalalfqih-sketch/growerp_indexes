@@ -18,6 +18,7 @@ tasks.withType(GroovyCompile) { options.compilerArgs << "-proc:none" }
 
 dependencies {
     implementation project(':framework')
+    implementation 'org.xerial:sqlite-jdbc:3.47.2.0'
     testImplementation project(':framework').configurations.testImplementation.allDependencies
 }
 

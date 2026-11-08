@@ -13,8 +13,8 @@ See the License for the specific language governing permissions and
 limitations under the License.
 -->
 
-<!-- READ-ONLY re-enable of the REST APIs that GrowerpRestApiDisableData.xml disables, for the
-     ADMIN group only (SystemSupport-class system superusers; GrowERP company admins are in the
+<!-- READ-ONLY re-enable of the REST APIs that NASQORestApiDisableData.xml disables, for the
+     ADMIN group only (SystemSupport-class system superusers; NASQO company admins are in the
      GROWERP_* groups, not the framework ADMIN group).
 
      Purpose: support read-only data inspection / debugging through the moqui MCP server's
@@ -24,7 +24,7 @@ limitations under the License.
      How it works: AUTHZT_ALWAYS has the highest precedence in Moqui authorization
      (ArtifactExecutionFacadeImpl: an ALWAYS match returns permitted immediately, overriding any
      DENY). We grant ALWAYS for the VIEW action only — so GET/find/list is re-enabled, while the
-     AUTHZT_DENY (AUTHZA_ALL) records in GrowerpRestApiDisableData.xml still block create/update/
+     AUTHZT_DENY (AUTHZA_ALL) records in NASQORestApiDisableData.xml still block create/update/
      delete for every user. These records coexist with the DENY records (distinct artifactAuthzId).
 
      Covers: Moqui Tools REST API (/rest/s1/moqui/...), Mantle USL REST API (/rest/s1/mantle/...),
@@ -48,7 +48,7 @@ limitations under the License.
 
     <!-- Entity (e1) and Entity Master (m1/v1) REST API transitions — read-only allow.
          ALWAYS+VIEW on the transitions restores the inheritance chain for child entity reads.
-         The ENTITY_REST_API ArtifactGroup is created by GrowerpRestApiDisableData.xml; declare it
+         The ENTITY_REST_API ArtifactGroup is created by NASQORestApiDisableData.xml; declare it
          here too so this file loads cleanly regardless of file order (store = create-or-update). -->
     <moqui.security.ArtifactGroup artifactGroupId="ENTITY_REST_API"
         description="Entity and Entity Master REST API (e1/m1/v1 transitions in webroot rest.xml)"/>

@@ -61,7 +61,7 @@ class GoogleCalendarProvider {
         util(ec).shareCalendar(ec, ownerPartyId, calendarId, email)
     }
 
-    /** Event id for a new event of a GrowERP record: Google only allows [a-v0-9]. */
+    /** Event id for a new event of a NASQO record: Google only allows [a-v0-9]. */
     static String newEventId(String sourceType, String sourceId) {
         return 'gerp' + "${sourceType}:${sourceId}".getBytes('UTF-8').encodeHex().toString()
     }

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+    <service verb="preview" noun="SqliteImport" authenticate="true">
+        <description>Validate a legacy NASQO SQLite backup and return a read-only import preview.</description>
+        <in-parameters>
+            <parameter name="file" type="org.apache.commons.fileupload2.core.FileItem" required="true"/>
+        </in-parameters>
+        <out-parameters><parameter name="preview" type="Map"/></out-parameters>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner" out-map="context"/>
+            <if condition="!ec.user.isInGroup('GROWERP_M_ADMIN') &amp;&amp; !ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true" message="Only an administrator can preview a SQLite import"/>
+            </if>
+            <script><![CDATA[
+                File temp = File.createTempFile('nasqo-sqlite-import-', '.back', new File(ec.factory.runtimePath, 'ownerData'))
+                temp.parentFile.mkdirs()
+                try {
+                    file.inputStream.withCloseable { InputStream input ->
+                        temp.outputStream.withCloseable { OutputStream output -> input.transferTo(output) }
+                    }
+                    def util = ec.resource.script('component://growerp/service/NasqoSqliteImportUtil.groovy', null)
+                    preview = util.preview(temp)
+                } finally {
+                    temp.delete()
+                }
+            ]]></script>
+        </actions>
+    </service>
+</services>

@@ -1,3 +1,23 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "resetDemoTitle": "إعادة ضبط العرض التجريبي؟",
+  "resetDemoContent": "سيؤدي هذا إلى إعادة تقدمك إلى الخطوة 0.\nستبقى بيانات العرض التجريبي التي أُنشئت في النظام.",
+  "cancelButton": "إلغاء",
+  "resetButton": "إعادة ضبط",
+  "resetDemoProgressTooltip": "إعادة ضبط تقدم العرض التجريبي",
+  "allStepsComplete": "اكتملت الخطوات {count} كلها",
+  "stepProgress": "الخطوة {current} من {total}",
+  "demoCompleteMessage": "اكتمل العرض التجريبي - انتهت جميع المراحل!",
+  "showingPhase": "المعروض: {phaseName}",
+  "resetToRunAgainButton": "إعادة الضبط للتشغيل مرة أخرى",
+  "runningStep": "جارٍ تشغيل الخطوة {step}...",
+  "retryStep": "إعادة محاولة الخطوة {step}",
+  "runStep": "تشغيل الخطوة {current} من {total}",
+  "progressSavedMessage": "تم حفظ التقدم - يمكنك الإغلاق والمتابعة لاحقًا.",
+  "demoFeaturesNotAvail": "ميزات العرض التجريبي غير متاحة في بيئة الإنتاج.",
+  "devEnvDemosHidden": "بيئة تطوير - العروض التجريبية مخفية في إصدارات الإنتاج.",
+  "growerpDemosTitle": "عروض NASQO التجريبية",
+  "noDemosRegistered": "لا توجد عروض تجريبية مسجلة.",
+  "resetDemoListTitle": "إعادة ضبط العرض التجريبي؟",
+  "resetDemoListContent": "ستتم إعادة التقدم إلى الخطوة 0.\nستبقى البيانات التي أُنشئت في النظام."
 }

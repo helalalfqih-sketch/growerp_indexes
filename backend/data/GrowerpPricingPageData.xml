@@ -14,7 +14,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="01" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Pricing -->
-<#-- description: GrowERP pricing: a free two week trial, then a monthly subscription per company, with the source code always freely available. -->
+<#-- description: NASQO pricing: a free two week trial, then a monthly subscription per company, with the source code always freely available. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[-20%] left-[-10%] w-[50%] h-[50%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -95,7 +95,7 @@
                     <span class="text-sm text-on-surface">SLA Guarantees</span>
                 </li>
             </ul>
-            <a href="mailto:support@growerp.com" class="w-full py-3 rounded-lg bg-white/10 text-on-surface font-label text-sm font-medium hover:bg-white/20 transition-colors mt-auto border border-white/10 text-center">
+            <a href="mailto:support@erp.indexesstore.com" class="w-full py-3 rounded-lg bg-white/10 text-on-surface font-label text-sm font-medium hover:bg-white/20 transition-colors mt-auto border border-white/10 text-center">
                 Contact Sales
             </a>
         </div>

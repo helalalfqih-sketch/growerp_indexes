@@ -18,11 +18,11 @@ import groovy.json.JsonOutput
 import java.util.concurrent.ConcurrentHashMap
 
 /**
- * Google Workspace (Calendar v3 + Drive v3) API utility for GrowERP.
+ * Google Workspace (Calendar v3 + Drive v3) API utility for NASQO.
  *
  * Auth: per-tenant OAuth 2.0 refresh token stored in growerp.general.SystemSettings
  * (googleRefreshToken), obtained with the Sign in flow (authUrl/exchangeCode) against the
- * GrowERP platform OAuth client (env GOOGLE_OAUTH_CLIENT_ID/GOOGLE_OAUTH_CLIENT_SECRET).
+ * NASQO platform OAuth client (env GOOGLE_OAUTH_CLIENT_ID/GOOGLE_OAUTH_CLIENT_SECRET).
  * A tenant may still use its own client (googleClientId/googleClientSecret), which then
  * takes precedence. Scopes per service: see SERVICE_SCOPES.
  *
@@ -45,7 +45,7 @@ class GoogleWorkspaceUtil {
         calendar: 'https://www.googleapis.com/auth/calendar.readonly',
     ]
     /** Scopes asked together with the service scope: calendar also writes the per-user
-     *  GrowERP calendars (created by the app) and shares them (CalendarSyncServices100). */
+     *  NASQO calendars (created by the app) and shares them (CalendarSyncServices100). */
     static final Map<String, List<String>> EXTRA_SCOPES = [
         calendar: ['https://www.googleapis.com/auth/calendar.app.created',
                    'https://www.googleapis.com/auth/calendar.acls'],

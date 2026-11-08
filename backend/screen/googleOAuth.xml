@@ -42,7 +42,7 @@ along with this software (see the LICENSE.md file). If not, see
                     if (ec.user.userId) ec.user.logoutUser()
                 }
                 String title = ok ? 'Google connected' : 'Google sign in failed'
-                String body = ok ? "Connected${result?.email ? ' as ' + result.email : ''}. You can close this window and return to GrowERP." :
+                String body = ok ? "Connected${result?.email ? ' as ' + result.email : ''}. You can close this window and return to NASQO." :
                     "Google sign in did not complete${error ? ' (' + error + ')' : ''}. Close this window and try again."
                 if (!ok && message) ec.logger.warn("Google sign in failed: ${message}")
                 String html = """<!doctype html><html><head><meta charset="utf-8">
@@ -55,5 +55,172 @@ div{background:#fff;padding:32px;border-radius:16px;max-width:420px;text-align:c
             ]]></script>
         </actions>
         <default-response type="none" />
+    </transition>
+
+
+    <!-- NASQO Business login: independent from tenant Google Workspace scopes. -->
+    <transition name="loginStart" read-only="true" begin-transaction="false">
+        <parameter name="applicationId" />
+        <parameter name="intent" />
+        <actions>
+            <script><![CDATA[
+                ec.web.response.setHeader('Cache-Control', 'no-store')
+                ec.web.response.setHeader('Referrer-Policy', 'no-referrer')
+                try {
+                    def login = ec.resource.script(
+                        'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)
+                    String authUrl = login.start(ec, (applicationId ?: 'AppAdmin').toString(), (intent ?: 'login').toString())
+                    ec.web.response.sendRedirect(authUrl)
+                } catch (Throwable t) {
+                    ec.logger.warn("NASQO Google login start refused: ${t.class.simpleName}")
+                    ec.web.response.sendRedirect('/?googleLogin=failed')
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+
+    <transition name="loginCallback" read-only="true" begin-transaction="false">
+        <parameter name="code" />
+        <parameter name="state" />
+        <parameter name="error" />
+        <actions>
+            <script><![CDATA[
+                ec.web.response.setHeader('Cache-Control', 'no-store')
+                ec.web.response.setHeader('Referrer-Policy', 'no-referrer')
+                String result = 'failed'
+                if (code && state && !error) {
+                    try {
+                        def login = ec.resource.script(
+                            'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)
+                        String outcome = login.complete(ec, (String)state, (String)code)
+                        if (!ec.message.hasError() && outcome in ['success', 'registered']) {
+                            result = outcome
+                        }
+                    } catch (Throwable t) {
+                        // Never write the Google code or id_token to logs, errors or URLs.
+                        ec.logger.warn("NASQO Google login callback refused: ${t.class.simpleName}")
+                    }
+                }
+                if (ec.message.hasError()) ec.message.clearErrors()
+                if (result == 'registered') {
+                    ec.web.response.setHeader('X-Frame-Options', 'DENY')
+                    ec.web.response.setHeader('Content-Security-Policy',
+                        "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'")
+                    String html = '''<!doctype html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>تم إنشاء حساب نسقو</title>
+<style>body{font-family:sans-serif;background:#f5f8f8;color:#174a43;margin:0;
+min-height:100vh;display:grid;place-items:center}main{background:white;padding:32px;
+border-radius:16px;text-align:center;max-width:480px;box-shadow:0 3px 16px #0001}
+a{display:inline-block;margin-top:20px;background:#167c6e;color:white;
+padding:12px 24px;text-decoration:none;border-radius:8px}</style></head>
+<body><main><h2>تم إنشاء حسابك في نسقو</h2>
+<p>تم التحقق من حساب Google وإنشاء حساب نسقو. أكمل إعداد شركتك
+واختيار الاشتراك من خلال تسجيل الدخول إلى النظام.</p>
+<a href="/">الانتقال إلى نسقو ERP</a></main></body></html>'''
+                    ec.web.sendTextResponse(html, 'text/html', null)
+                } else {
+                    ec.web.response.sendRedirect('/?googleLogin=' + result)
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+
+    <!-- Native clients: Google verifies identity in the system browser;
+         user types pairing code from NASQO before app can claim login. -->
+    <transition name="deviceCallback" read-only="true" begin-transaction="false">
+        <parameter name="code"/>
+        <parameter name="state"/>
+        <parameter name="error"/>
+        <actions>
+            <script><![CDATA[
+                ec.web.response.setHeader('Cache-Control','no-store')
+                ec.web.response.setHeader('Referrer-Policy','no-referrer')
+                ec.web.response.setHeader('X-Frame-Options','DENY')
+                ec.web.response.setHeader('Content-Security-Policy',
+                    "default-src 'none'; style-src 'unsafe-inline'; form-action 'self'; base-uri 'none'")
+                boolean accepted = false
+                if (state && code && !error) {
+                    try {
+                        def login = ec.resource.script(
+                            'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)
+                        login.completeDeviceCallback(ec, (String)state, (String)code)
+                        accepted = !ec.message.hasError()
+                    } catch (Throwable t) {
+                        ec.logger.warn('NASQO device callback rejected: ' + t.class.simpleName)
+                    }
+                }
+                if (ec.message.hasError()) ec.message.clearErrors()
+                String title = accepted ? 'تأكيد ربط Google' : 'تعذّر تسجيل الدخول'
+                String intro = accepted
+                    ? 'أدخل رمز المطابقة الظاهر في تطبيق نسقو على هاتفك أو حاسوبك.'
+                    : 'تعذّرت المصادقة. ارجع إلى نسقو وابدأ مرة أخرى.'
+                String safeState = accepted
+                    ? org.moqui.util.StringUtilities.encodeForXmlAttribute((String)state)
+                    : ''
+                String csrf = accepted
+                    ? org.moqui.util.StringUtilities.encodeForXmlAttribute(ec.web.sessionToken ?: '')
+                    : ''
+                String form = accepted ? """
+                  <form method="post" action="/googleOAuth/deviceApprove" autocomplete="off">
+                    <input type="hidden" name="state" value="${safeState}">
+                    <input type="hidden" name="moquiSessionToken" value="${csrf}">
+                    <label for="pairing">رمز المطابقة (8 أحرف)</label>
+                    <input id="pairing" name="pairing" minlength="8" maxlength="8"
+                           pattern="[A-Za-z2-9]{8}" autocapitalize="characters"
+                           spellcheck="false" autocomplete="off" required autofocus>
+                    <button type="submit">تأكيد تسجيل الدخول</button>
+                  </form>""" : ''
+                String html = """<!doctype html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title>
+<style>body{font-family:sans-serif;background:#f5f8f8;margin:0;min-height:100vh;display:grid;place-items:center;color:#123a35}
+main{background:#fff;padding:28px;border-radius:16px;width:min(90vw,400px);box-shadow:0 2px 12px #0001;text-align:center}
+input,button{box-sizing:border-box;display:block;width:100%;padding:12px;margin:12px 0;font-size:18px;border-radius:8px;border:1px solid #aaa}
+button{background:#12796e;color:white;border:0;cursor:pointer}
+label{display:block;margin-top:18px}</style></head>
+<body><main><h2>${title}</h2><p>${intro}</p>${form}</main></body></html>"""
+                ec.web.sendTextResponse(html, 'text/html', null)
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
+    </transition>
+
+    <transition name="deviceApprove" begin-transaction="true">
+        <parameter name="state"/>
+        <parameter name="pairing"/>
+        <actions>
+            <script><![CDATA[
+                ec.web.response.setHeader('Cache-Control','no-store')
+                ec.web.response.setHeader('Referrer-Policy','no-referrer')
+                ec.web.response.setHeader('X-Frame-Options','DENY')
+                ec.web.response.setHeader('Content-Security-Policy',
+                    "default-src 'none'; style-src 'unsafe-inline'; base-uri 'none'")
+                boolean accepted = false
+                try {
+                    def login = ec.resource.script(
+                        'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)
+                    login.approveDevice(ec, (String)state, (String)pairing)
+                    accepted = !ec.message.hasError()
+                } catch (Throwable t) {
+                    ec.logger.warn('NASQO device pairing rejected: ' + t.class.simpleName)
+                }
+                if (ec.message.hasError()) ec.message.clearErrors()
+                String title = accepted ? 'تم تأكيد الدخول' : 'تعذّر التأكيد'
+                String body = accepted
+                    ? 'يمكنك العودة إلى تطبيق نسقو؛ سيُكمل تسجيل الدخول تلقائيًا.'
+                    : 'رمز المطابقة غير صحيح أو انتهت المهلة. ارجع إلى تطبيق نسقو وابدأ من جديد.'
+                String html = """<!doctype html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>${title}</title>
+<style>body{font-family:sans-serif;background:#f5f8f8;margin:0;min-height:100vh;display:grid;place-items:center;color:#123a35}
+main{background:white;padding:32px;border-radius:16px;max-width:440px;text-align:center;box-shadow:0 2px 12px #0001}</style>
+</head><body><main><h2>${title}</h2><p>${body}</p></main></body></html>"""
+                ec.web.sendTextResponse(html, 'text/html', null)
+            ]]></script>
+        </actions>
+        <default-response type="none"/>
     </transition>
 </screen>

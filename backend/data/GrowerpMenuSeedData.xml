@@ -49,7 +49,7 @@ limitations under the License.
         name="Courses Example Menu" description="Default menu for courses example app"/>
 
     <growerp.menu.MenuConfiguration menuConfigurationId="AGENTS_DEFAULT" appId="agents"
-        name="Agents Menu" description="Default menu for the GrowERP Agents app"/>
+        name="Agents Menu" description="Default menu for the NASQO Agents app"/>
 
     <!-- ====================== ADMIN_DEFAULT Menu Items ====================== -->
     <!-- Top-level menu items -->

@@ -100,7 +100,7 @@ along with this software (see the LICENSE.md file). If not, see
                     } else {
                         upload.delete()
                         fields.putAll([status: 'FAILED', fileLocation: null, completedDate: ec.user.nowTimestamp,
-                                errorMessage: "${fileName} is not a GrowERP company data file".toString()])
+                                errorMessage: "${fileName} is not a NASQO company data file".toString()])
                     }
                 }
                 // committed before the worker starts, it runs on another thread

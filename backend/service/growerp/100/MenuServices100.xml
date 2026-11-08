@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Menu Configuration Services for GrowERP Dynamic Menu System
+Menu Configuration Services for NASQO Dynamic Menu System
 Service definitions for menu configuration and menu item management
 - Uses unified MenuItem entity with recursive parent/child relationships
 - Supports dual-ID lookup: menuConfigurationId (system-wide) or appId+userLoginId (tenant-unique)

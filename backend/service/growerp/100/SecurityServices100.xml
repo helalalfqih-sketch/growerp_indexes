@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Security services for GrowERP.
+Security services for NASQO.
 
 The user group (GROWERP_M_SYSTEM / _ADMIN / _EMPLOYEE / _OTHER) is the only security
 axis; the business relationship lives on the party Role and never grants access.

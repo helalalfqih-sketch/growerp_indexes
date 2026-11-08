@@ -181,44 +181,44 @@ limitations under the License.
         emailTypeEnumId="EMT_NOTIFICATION"
         bodyScreenLocation="component://growerp/screen/email/PaymentFailed.xml"
         webappName="webroot"
-        fromAddress="support@growerp.com" fromName="GrowERP system"
+        fromAddress="support@erp.indexesstore.com" fromName="NASQO system"
         ccAddresses="" bccAddresses=""
-        subject="Action needed: your GrowERP subscription payment failed"
+        subject="Action needed: your NASQO subscription payment failed"
         sendPartial="Y" />
     <moqui.basic.email.EmailTemplate emailTemplateId="NOTIFICATION"
         description="Default Notification" emailServerId="SYSTEM"
         emailTypeEnumId="EMT_NOTIFICATION"
         bodyScreenLocation="classpath://screen/NotificationEmail.xml"
         webappName="webroot"
-        fromAddress="support@growerp.com" fromName="GrowERP system"
+        fromAddress="support@erp.indexesstore.com" fromName="NASQO system"
         ccAddresses="" bccAddresses="" subject="${title}" sendPartial="Y" />
     <!-- EmailTemplate for password reset email -->
     <moqui.basic.email.EmailTemplate emailTemplateId="PASSWORD_RESET"
         description="Default Password Reset"
         emailServerId="SYSTEM" emailTypeEnumId="EMT_PWD_RESET"
         bodyScreenLocation="component://growerp/screen/email/PasswordReset.xml"
-        fromAddress="support@growerp.com" ccAddresses=""
+        fromAddress="support@erp.indexesstore.com" ccAddresses=""
         bccAddresses="" subject="Password Reset" sendPartial="Y" />
     <!-- welcome email -->
     <moqui.basic.email.EmailTemplate emailTemplateId="WELCOME"
         description="Welcome email with Password"
         emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
         bodyScreenLocation="component://growerp/screen/email/Welcome.xml"
-        fromAddress="support@growerp.com" fromName="GrowERP system"
-        ccAddresses="" bccAddresses="info@growerp.com"
-        subject="Welcome to GrowERP ${application}" sendPartial="Y" />
+        fromAddress="support@erp.indexesstore.com" fromName="NASQO system"
+        ccAddresses="" bccAddresses="info@erp.indexesstore.com"
+        subject="Welcome to NASQO ${application}" sendPartial="Y" />
     <moqui.basic.email.EmailTemplate emailTemplateId="WELCOME_TEST"
         description="Welcome email with Password"
         emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
         bodyScreenLocation="component://growerp/screen/email/WelcomeTest.xml"
-        fromAddress="support@growerp.com" fromName="GrowERP system"
-        ccAddresses="" bccAddresses="info@growerp.com"
-        subject="Welcome to GrowERP ${application} (test system)" sendPartial="Y" />
+        fromAddress="support@erp.indexesstore.com" fromName="NASQO system"
+        ccAddresses="" bccAddresses="info@erp.indexesstore.com"
+        subject="Welcome to NASQO ${application} (test system)" sendPartial="Y" />
     <!-- export -->
-    <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportCategories"
-        description="GrowERP export Categories"
+    <moqui.basic.email.EmailTemplate emailTemplateId="NASQOExportCategories"
+        description="NASQO export Categories"
         emailServerId="SYSTEM" webappName="webroot"
-        fromAddress="support@growerp.com" fromName="Support GrowERP" sendPartial="Y"
+        fromAddress="support@erp.indexesstore.com" fromName="Support NASQO" sendPartial="Y"
         subject="Export Categories data"
         bodyScreenLocation="component://growerp/screen/email/CategoriesExportBody.xml">
         <attachments fileName="categories.csv"
@@ -226,10 +226,10 @@ limitations under the License.
             screenRenderMode="text" />
     </moqui.basic.email.EmailTemplate>
 
-    <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportProducts"
-        description="GrowERP export Products"
+    <moqui.basic.email.EmailTemplate emailTemplateId="NASQOExportProducts"
+        description="NASQO export Products"
         emailServerId="SYSTEM" webappName="webroot"
-        fromAddress="support@growerp.com" fromName="Support GrowERP" sendPartial="Y"
+        fromAddress="support@erp.indexesstore.com" fromName="Support NASQO" sendPartial="Y"
         subject="Export Products data"
         bodyScreenLocation="component://growerp/screen/email/ProductsExportBody.xml">
         <attachments fileName="products.csv"
@@ -237,10 +237,10 @@ limitations under the License.
             screenRenderMode="text" />
     </moqui.basic.email.EmailTemplate>
 
-    <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportGlAccounts"
-        description="GrowERP export GlAccounts"
+    <moqui.basic.email.EmailTemplate emailTemplateId="NASQOExportGlAccounts"
+        description="NASQO export GlAccounts"
         emailServerId="SYSTEM" webappName="webroot"
-        fromAddress="support@growerp.com" fromName="Support GrowERP" sendPartial="Y"
+        fromAddress="support@erp.indexesstore.com" fromName="Support NASQO" sendPartial="Y"
         subject="Export Ledger GlAccounts data"
         bodyScreenLocation="component://growerp/screen/email/GlAccountsExportBody.xml">
         <attachments fileName="glAccounts.csv"
@@ -248,11 +248,11 @@ limitations under the License.
             screenRenderMode="text" />
     </moqui.basic.email.EmailTemplate>
 
-    <moqui.basic.email.EmailTemplate emailTemplateId="GrowerpExportCompanyUsers"
-        description="GrowERP export Companies/Users"
+    <moqui.basic.email.EmailTemplate emailTemplateId="NASQOExportCompanyUsers"
+        description="NASQO export Companies/Users"
         emailServerId="SYSTEM" webappName="webroot"
-        fromAddress="support@growerp.com" fromName="Support GrowERP" sendPartial="Y"
-        subject="Export GrowERP Companies/users data"
+        fromAddress="support@erp.indexesstore.com" fromName="Support NASQO" sendPartial="Y"
+        subject="Export NASQO Companies/users data"
         bodyScreenLocation="component://growerp/screen/email/CompanyUsersExportBody.xml">
         <attachments fileName="companyUsers.csv"
             attachmentLocation="component://growerp/screen/email/CompanyUsersExportAtt.xml"
@@ -264,7 +264,7 @@ limitations under the License.
         description="Assessment Results with PDF"
         emailServerId="SYSTEM" emailTypeEnumId="EMT_SYSTEM"
         bodyScreenLocation="component://growerp/screen/email/AssessmentResultsEmail.xml"
-        fromAddress="support@growerp.com" fromName="GrowERP Assessments"
+        fromAddress="support@erp.indexesstore.com" fromName="NASQO Assessments"
         ccAddresses="" bccAddresses=""
         subject="Your ${assessmentName} Results" sendPartial="Y">
         <attachments fileName="assessment-results-${assessmentResultId}.pdf"
@@ -278,7 +278,7 @@ limitations under the License.
         emailServerId="SYSTEM" emailTypeEnumId="EMT_NOTIFICATION"
         bodyScreenLocation="component://growerp/screen/email/ChatNotification.xml"
         webappName="webroot"
-        fromAddress="support@growerp.com" fromName="GrowERP system"
+        fromAddress="support@erp.indexesstore.com" fromName="NASQO system"
         ccAddresses="" bccAddresses=""
         subject="New chat message from ${senderName}" sendPartial="Y" />
 
@@ -424,7 +424,7 @@ limitations under the License.
 
 
     <mantle.other.tax.TaxGatewayConfig taxGatewayConfigId="LOCAL"
-        calculateServiceName="growerp.100.TaxServices100.calculate#SalesTaxGrowerp" />
+        calculateServiceName="growerp.100.TaxServices100.calculate#SalesTaxNASQO" />
 
     <mantle.product.store.ProductStore productStoreId="POPC_DEFAULT" storeName="Default Store"
         organizationPartyId="_NA_" inventoryFacilityId="DEFAULT_WH"
@@ -539,7 +539,7 @@ limitations under the License.
         description="Template Server Content" enumId="PsstContentLocation"
         enumTypeId="ProductStoreSettingType" />
 
-    <!-- GrowERP wide defaults, maintained in the support app -->
+    <!-- NASQO wide defaults, maintained in the support app -->
     <growerp.general.SystemDefault defaultId="SYSTEM" llmMonthlyTokenLimit="100000"
         aiModelName="gemini-3.8-flash" aiProvider="gemini"/>
 

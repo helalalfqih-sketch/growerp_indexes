@@ -13,7 +13,7 @@
  */
 
 /**
- * Translate one website page into one locale, keeping the file a valid GrowERP website page
+ * Translate one website page into one locale, keeping the file a valid NASQO website page
  * (see docs/Website_Template_Definition.md).
  *
  * One call per page: a whole-site call would run past maxOutputTokens and truncate, the same

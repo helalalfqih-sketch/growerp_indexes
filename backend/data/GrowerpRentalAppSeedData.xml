@@ -15,7 +15,7 @@ limitations under the License.
 <entity-facade-xml type="seed">
     <!-- Application record -->
     <growerp.Application applicationId="AppRental"
-        description="GrowERP Rental vertical app" />
+        description="NASQO Rental vertical app" />
 
     <!-- Menu configuration -->
     <growerp.menu.MenuConfiguration menuConfigurationId="RENTAL_DEFAULT" appId="rental"

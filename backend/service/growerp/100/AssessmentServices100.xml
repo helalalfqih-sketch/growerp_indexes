@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!--
-Assessment Services for GrowERP Landing Page & Assessment System
+Assessment Services for NASQO Landing Page & Assessment System
 Service definitions for assessment management and completion
 - Supports dual-ID lookup: assessmentId (system-wide) or pseudoId (tenant-unique)
 - All services enforce multi-tenant isolation via ownerPartyId
@@ -823,8 +823,8 @@ Service definitions for assessment management and completion
                 </service-call>
             </if>
 
-            <!-- GrowERP-owned assessments feed the mailing list. The birdSend Interface row
-                 is global GrowERP configuration with no owner, so tenant assessments must
+            <!-- NASQO-owned assessments feed the mailing list. The birdSend Interface row
+                 is global NASQO configuration with no owner, so tenant assessments must
                  never reach it. Async and ignore-error so an outbound failure cannot break
                  a public submit; the service no-ops when no api key is configured. -->
             <if

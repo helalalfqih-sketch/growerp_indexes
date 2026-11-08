@@ -16,7 +16,7 @@
          Cloned into a tenant on first use of "Suggest a function" (via
          AdkDemoServices.clone#AgentTeam with an explicit adkAgentConfigIds list), so
          its runOneOff calls are correctly attributed to that tenant's own token quota,
-         not GrowERP's.
+         not NASQO's.
          ════════════════════════════════════════════════════════════════════════ -->
     <moqui.adk.AdkAgentConfig
         ownerPartyId="_NA_"

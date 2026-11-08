@@ -28,7 +28,7 @@
     <!-- Credibility Section -->
     <growerp.landing.CredibilityInfo credibilityInfoId="ERP_CRED" pseudoId="erp-cred"
         landingPageId="ERP_LANDING_PAGE"
-        creatorBio="This assessment was created by GrowERP, a team specialized in scaling businesses and optimizing enterprise systems."
+        creatorBio="This assessment was created by NASQO, a team specialized in scaling businesses and optimizing enterprise systems."
         backgroundText="Our background involves two decades of scaling multiple companies and building lead generation systems. We have consulted on over 50 major system migrations across various industries." />
     <growerp.landing.CredibilityStatistic statisticId="ERP_STAT1" pseudoId="erp-stat1"
         credibilityInfoId="ERP_CRED"

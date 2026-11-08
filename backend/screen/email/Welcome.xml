@@ -15,9 +15,9 @@ limitations under the License.
 <screen xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/xml-screen-2.1.xsd">
     <!-- Body parameters: application, firstName, lastName, newPassword, userLocale.
-         All wording lives in moqui.basic.LocalizedMessage (see GrowerpL10nData.xml);
-         per-application copy is keyed GrowerpEmailWelcomeIntro<App> /
-         GrowerpEmailWelcomeFirstStep<App>, so a new vertical needs seed rows only. -->
+         All wording lives in moqui.basic.LocalizedMessage (see NASQOL10nData.xml);
+         per-application copy is keyed NASQOEmailWelcomeIntro<App> /
+         NASQOEmailWelcomeFirstStep<App>, so a new vertical needs seed rows only. -->
     <parameter name="application"/>
     <parameter name="firstName"/>
     <parameter name="lastName"/>
@@ -49,16 +49,16 @@ limitations under the License.
             ec.context.application = app
             ec.context.userName = [fn, ln].findAll({ it }).join(' ')
 
-            greeting = ec.context.userName ? msg('GrowerpEmailWelcomeGreeting')
-                    : msg('GrowerpEmailWelcomeGreetingNoName')
-            intro = appMsg('GrowerpEmailWelcomeIntro')
-            firstStep = appMsg('GrowerpEmailWelcomeFirstStep')
-            stripeInfo = app in ['Admin', 'Hotel', 'Rental'] ? msg('GrowerpEmailWelcomeStripeInfo') : ''
-            supportInfo = msg('GrowerpEmailWelcomeSupportInfo')
-            passwordInfo = msg('GrowerpEmailWelcomePasswordInfo')
-            tipsInfo = msg('GrowerpEmailWelcomeTipsInfo')
-            regards = msg('GrowerpEmailWelcomeRegards')
-            team = msg('GrowerpEmailWelcomeTeam')
+            greeting = ec.context.userName ? msg('NASQOEmailWelcomeGreeting')
+                    : msg('NASQOEmailWelcomeGreetingNoName')
+            intro = appMsg('NASQOEmailWelcomeIntro')
+            firstStep = appMsg('NASQOEmailWelcomeFirstStep')
+            stripeInfo = app in ['Admin', 'Hotel', 'Rental'] ? msg('NASQOEmailWelcomeStripeInfo') : ''
+            supportInfo = msg('NASQOEmailWelcomeSupportInfo')
+            passwordInfo = msg('NASQOEmailWelcomePasswordInfo')
+            tipsInfo = msg('NASQOEmailWelcomeTipsInfo')
+            regards = msg('NASQOEmailWelcomeRegards')
+            team = msg('NASQOEmailWelcomeTeam')
         ]]></script>
     </actions>
     <widgets>
@@ -78,7 +78,7 @@ limitations under the License.
                 <b>${passwordInfo}</b><br/><br/>
 
                 ${supportInfo}
-                <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${application}">support@growerp.com</a><br/><br/>
+                <a href="mailto:support@erp.indexesstore.com?subject=Question%20about%20NASQO-${application}">support@erp.indexesstore.com</a><br/><br/>
 
                 ${tipsInfo}<br/><br/>
 

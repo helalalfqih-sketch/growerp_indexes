@@ -429,7 +429,7 @@ limitations under the License.
     </service>
 
     <service verb="migrate" noun="TaxGateway">
-        <description>Point the LOCAL tax gateway at GrowERP and give stores without a gateway
+        <description>Point the LOCAL tax gateway at NASQO and give stores without a gateway
             the LOCAL one. No tax is charged until a tenant adds rates.</description>
         <out-parameters>
             <parameter name="storesUpdated" type="Integer" />

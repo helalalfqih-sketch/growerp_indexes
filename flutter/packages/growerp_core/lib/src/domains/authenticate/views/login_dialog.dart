@@ -17,6 +17,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
 import 'package:global_configuration/global_configuration.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:flutter_form_builder/flutter_form_builder.dart';
@@ -24,6 +25,7 @@ import 'package:form_builder_validators/form_builder_validators.dart';
 
 import '../../../domains/domains.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+import 'google_device_login_dialog.dart';
 
 class LoginDialog extends StatefulWidget {
   const LoginDialog({super.key});
@@ -281,7 +283,7 @@ class LoginDialogState extends State<LoginDialog> {
         : 'qqqqqq9!';
 
     return popUp(
-      height: isPhone(context) ? 300 : 280,
+      height: isPhone(context) ? 365 : 350,
       width: isPhone(context) ? 400 : 600,
       context: context,
       title: _localizations!.loginWithExistingUserName,
@@ -363,6 +365,65 @@ class LoginDialogState extends State<LoginDialog> {
                   ),
                 ],
               ),
+              if (_application != 'AppSupport' &&
+                  GlobalConfiguration().get('googleLoginEnabled') == true) ...[
+                const SizedBox(height: 12),
+                OutlinedButton.icon(
+                  key: const Key('googleLogin'),
+                  icon: const Icon(Icons.login),
+                  label: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'المتابعة باستخدام Google'
+                        : 'Continue with Google',
+                  ),
+                  onPressed: () async {
+                    if (!kIsWeb) {
+                      final auth = await showDialog<Authenticate>(
+                        context: context,
+                        barrierDismissible: false,
+                        builder: (dialogContext) => GoogleDeviceLoginDialog(
+                          restClient: context.read<RestClient>(),
+                          applicationId: _application,
+                        ),
+                      );
+                      if (!mounted) return;
+                      if (auth != null) {
+                        _authBloc.add(AuthGoogleDeviceLoginSucceeded(auth));
+                      }
+                      return;
+                    }
+                    // Google identity is handled by the server, never by a
+                    // password or secret in this Flutter application.
+                    final uri = Uri.base.replace(
+                      path: '/googleOAuth/loginStart',
+                      query: null,
+                      queryParameters: {'applicationId': _application},
+                      fragment: null,
+                    );
+                    try {
+                      final opened = await launchUrl(
+                        uri,
+                        webOnlyWindowName: '_self',
+                      );
+                      if (!opened && mounted) {
+                        HelperFunctions.showMessage(
+                          context,
+                          'تعذّر فتح صفحة تسجيل الدخول باستخدام Google',
+                          Theme.of(context).colorScheme.error,
+                        );
+                      }
+                    } catch (_) {
+                      if (mounted) {
+                        HelperFunctions.showMessage(
+                          context,
+                          'تعذّر فتح صفحة تسجيل الدخول باستخدام Google',
+                          Theme.of(context).colorScheme.error,
+                        );
+                      }
+                    }
+                  },
+                ),
+              ],
               const SizedBox(height: 20),
               Center(
                 child: GestureDetector(

@@ -2306,7 +2306,7 @@ limitations under the License.
             </if>
             <!-- create payment -->
             <if condition="product">
-                <set field="memo" value="GrowERP plan: ${product}" />
+                <set field="memo" value="NASQO plan: ${product}" />
             </if>
             <!-- payment comes in as USD, convert to company base currency when different -->
             <set field="paymentAmount" from="amount" />
@@ -2515,7 +2515,7 @@ limitations under the License.
     <!-- ════════════════════════════════════════════════════════════════════════
          Stripe payment import. NOTE: today's mantle-stripe integration is a single
          GLOBAL Stripe account (Stripe.PaymentGatewayStripe has no ownerPartyId —
-         it's resolved from a JVM System property), used for GrowERP's own SaaS
+         it's resolved from a JVM System property), used for NASQO's own SaaS
          subscription/course/store billing — not a per-tenant "each company connects
          their own Stripe" gateway. This service is therefore only meaningful for the
          GROWERP owner today; calling it for another tenant will simply find no

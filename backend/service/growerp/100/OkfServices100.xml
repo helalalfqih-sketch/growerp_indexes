@@ -50,7 +50,7 @@ limitations under the License.
             <entity-find-one entity-name="moqui.resource.wiki.WikiSpace" value-field="wikiSpace" />
             <if condition="wikiSpace == null">
                 <service-call name="create#moqui.resource.wiki.WikiSpace"
-                    in-map="[wikiSpaceId:wikiSpaceId, description:'GrowERP OKF knowledge bundle',
+                    in-map="[wikiSpaceId:wikiSpaceId, description:'NASQO OKF knowledge bundle',
                         rootPageLocation:rootPageLocation]" />
                 <else><set field="rootPageLocation" from="wikiSpace.rootPageLocation" /></else>
             </if>

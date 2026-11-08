@@ -45,6 +45,23 @@ mixin AuthApi {
     @Field() int? testDaysOffset,
   });
 
+  // Native Android/iOS/Windows sign-in is paired via the system browser.
+  // No Google client secret or Google access token reaches the Flutter client.
+  @POST("rest/s1/growerp/100/GoogleDeviceLoginStart")
+  @Extra({'noApiKey': true})
+  @FormUrlEncoded()
+  Future<dynamic> startGoogleDeviceLogin({
+    @Field() required String applicationId,
+  });
+
+  @POST("rest/s1/growerp/100/GoogleDeviceLoginPoll")
+  @Extra({'noApiKey': true})
+  @FormUrlEncoded()
+  Future<dynamic> pollGoogleDeviceLogin({
+    @Field() required String applicationId,
+    @Field() required String deviceCode,
+  });
+
   @POST("rest/s1/growerp/100/Logout")
   Future<String> logout();
 

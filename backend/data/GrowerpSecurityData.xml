@@ -14,8 +14,8 @@ limitations under the License.
 -->
 <entity-facade-xml type="seed-initial">
 
-    <!--  GrowERP REST API security all separated by internalorg company-->
-    <moqui.basic.Enumeration description="GrowERP Mobile User groups" enumId="GROWERPMOBILE"
+    <!--  NASQO REST API security all separated by internalorg company-->
+    <moqui.basic.Enumeration description="NASQO Mobile User groups" enumId="GROWERPMOBILE"
         enumTypeId="UserGroupType" />
     <moqui.security.UserGroup userGroupId="GROWERP_M_SYSTEM" description="System Admin"
         groupTypeEnumId="GROWERPMOBILE" />
@@ -35,7 +35,7 @@ limitations under the License.
     <!-- DEPRECATED: these three were derived from the business role (Customer/Lead/Supplier),
          which is not a security concept. Outside users are GROWERP_M_OTHER; the relationship
          lives on the party Role. Kept only so existing UserGroupMember rows keep their FK -
-         they are granted nothing. See GrowerpSecurityMigrationData.xml. -->
+         they are granted nothing. See NASQOSecurityMigrationData.xml. -->
     <moqui.security.UserGroup userGroupId="GROWERP_M_CUSTOMER" description="Customer (deprecated)"
         groupTypeEnumId="GROWERPMOBILE" />
     <moqui.security.UserGroup userGroupId="GROWERP_M_LEAD" description="Lead (deprecated)"
@@ -89,7 +89,7 @@ limitations under the License.
 
     <!-- The guard. One pattern over every REST leaf, with authzServiceName so the
          decision is made per organization at request time: ArtifactAuthz has no
-         ownerPartyId and GrowERP tenancy is an application convention, so a static
+         ownerPartyId and NASQO tenancy is an application convention, so a static
          row per tenant is not possible.
          The pattern must match the LEAF and nothing above it: /growerp/100/.* does
          not match /growerp or /growerp/100, so the check happens per endpoint. That
@@ -103,9 +103,9 @@ limitations under the License.
          fails with "not authorized for View on Service ...".
 
          AUTHZA_ALL so the row matches every method; check#RestAccess tells view
-         from write. Domains live in GrowerpRestDomainGroupData.xml. -->
+         from write. Domains live in NASQORestDomainGroupData.xml. -->
     <moqui.security.ArtifactGroup artifactGroupId="GROWERP_REST_GUARDED"
-        description="GrowERP REST API, authorized from the organization menu" />
+        description="NASQO REST API, authorized from the organization menu" />
     <moqui.security.ArtifactGroupMember artifactGroupId="GROWERP_REST_GUARDED"
         artifactTypeEnumId="AT_REST_PATH" nameIsPattern="Y" inheritAuthz="Y"
         artifactName="/growerp/100/.*" />

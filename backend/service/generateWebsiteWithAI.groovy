@@ -13,7 +13,7 @@
  */
 
 /**
- * Turn scraped website data into a GrowERP owner-import XML document: the same shape the
+ * Turn scraped website data into a NASQO owner-import XML document: the same shape the
  * /convert-website skill produces (see docs/Website_Template_Definition.md and
  * .claude/skills/convert-website/SKILL.md), ready for import#WebsiteOwner.
  *
@@ -31,7 +31,7 @@ import org.moqui.context.ExecutionContext
 
 ExecutionContext ec = context.ec ?: context
 
-final String USER_AGENT = 'Mozilla/5.0 (compatible; GrowERP-WebsiteGenerator/1.0; +https://www.growerp.com)'
+final String USER_AGENT = 'Mozilla/5.0 (compatible; NASQO-WebsiteGenerator/1.0; +https://erp.indexesstore.com)'
 final long MAX_IMAGE_BYTES = 2 * 1024 * 1024
 
 def GeminiAiUtil = ec.resource.script("component://growerp/service/GeminiAiUtil.groovy", null)
@@ -98,7 +98,7 @@ try {
          text: ((p.text ?: '') as String).take(1500)]
     }
     String structurePrompt = """
-You are converting an existing company website to the GrowERP 'modern' (Lumina) website template.
+You are converting an existing company website to the NASQO 'modern' (Lumina) website template.
 
 COMPANY: ${companyName}
 SOURCE SITE: ${site.homeUrl} — "${site.siteTitle}"
@@ -243,7 +243,7 @@ RULES
 - Keep the facts of the source text. Never invent prices, certifications or claims.
 Return ONLY the Markdown itself: no JSON, no ``` fence, no explanation before or after.
 """ : """
-Write the body of the "${pageTitle}" page of ${companyName}'s website for the GrowERP 'modern'
+Write the body of the "${pageTitle}" page of ${companyName}'s website for the NASQO 'modern'
 Lumina template.
 PURPOSE: ${p.purpose ?: ''}
 SOURCE PAGE: ${p.sourceUrl ?: ''}
@@ -290,7 +290,7 @@ fence, no explanation before or after.
     StringBuilder xml = new StringBuilder()
     xml.append('<?xml version="1.0" encoding="UTF-8"?>\n')
     xml.append("<!-- ${xmlAttr(companyName as String)} website, generated from ${xmlAttr(site.homeUrl as String)}\n")
-    xml.append("     by the GrowERP website generator. Installed with import#WebsiteOwner. -->\n")
+    xml.append("     by the NASQO website generator. Installed with import#WebsiteOwner. -->\n")
     xml.append('<entity-facade-xml type="demo">\n\n')
 
     // directories: the root resolves by filename, so filename must equal its resourceId

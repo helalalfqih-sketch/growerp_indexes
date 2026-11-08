@@ -1,5 +1,6 @@
 #!/bin/bash
-set -x
+# Do not enable shell tracing: startup may interpolate sensitive mail tokens.
+set -e
 
 echo "params 1: $1 2: $2 3: $3"
 echo "docker tag: $TAG"
@@ -40,6 +41,14 @@ if [ "$DISABLE_SECA" == "true" ] ; then
     rm runtime/component/mantle-usl/service/ProductSubscription.secas.xml
 fi
 
+
+# Production runtime never loads data implicitly. The one-time installer is
+# an explicit, separate bootstrap service and only loads required system data.
+# This also prevents accidental conversion, demo or re-seeding at restart.
+if [ "${instance_purpose:-}" = "production" ] && [ "${DB_DATA:-NONE}" != "NONE" ]; then
+    echo "Refusing demo data in production or any automatic data load" >&2
+    exit 1
+fi
 
 #load data if required
 if [ ! -z "$DB_DATA" ] && [ "$DB_DATA" != "NONE" ] ; then

@@ -31,7 +31,33 @@ String translateAuthBlocMessage(
     }
   }
 
+  if (messageKey.startsWith('errorCodeMessage:')) {
+    return localizations.errorCodeMessage(messageKey.substring(17));
+  }
+
   switch (messageKey) {
+    case 'networkConnectionError':
+      return localizations.networkConnectionError;
+    case 'requestTimeout':
+      return localizations.requestTimeout;
+    case 'connectionTimeout':
+      return localizations.connectionTimeout;
+    case 'sendTimeout':
+      return localizations.sendTimeout;
+    case 'requestCancelled':
+      return localizations.requestCancelled;
+    case 'networkError':
+      return localizations.networkError;
+    case 'serverErrorOccurred':
+      return localizations.serverErrorOccurred;
+    case 'invalidDataFormat':
+      return localizations.invalidDataFormat;
+    case 'serverConnectionError':
+      return localizations.serverConnectionError;
+    case 'signedOutLoginAgain':
+      return localizations.signedOutLoginAgain;
+    case 'loginKeyExpired':
+      return localizations.loginKeyExpired;
     case AuthBlocMessageKeys.loginSuccess:
       return localizations.authLoginSuccess;
     case AuthBlocMessageKeys.loginFailure:
@@ -105,4 +131,3 @@ String translateChatMessageBlocMessage(
   // Fallback: return the key itself
   return messageKey;
 }
-

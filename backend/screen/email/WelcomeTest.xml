@@ -43,16 +43,16 @@ limitations under the License.
             ec.context.application = app
             ec.context.userName = [fn, ln].findAll({ it }).join(' ')
 
-            greeting = ec.context.userName ? msg('GrowerpEmailWelcomeGreeting')
-                    : msg('GrowerpEmailWelcomeGreetingNoName')
-            testNote = msg('GrowerpEmailWelcomeTestNote')
-            intro = appMsg('GrowerpEmailWelcomeIntro')
-            firstStep = appMsg('GrowerpEmailWelcomeFirstStep')
-            supportInfo = msg('GrowerpEmailWelcomeSupportInfo')
-            passwordInfo = msg('GrowerpEmailWelcomePasswordInfo')
-            tipsInfo = msg('GrowerpEmailWelcomeTipsInfo')
-            regards = msg('GrowerpEmailWelcomeRegards')
-            team = msg('GrowerpEmailWelcomeTeam')
+            greeting = ec.context.userName ? msg('NASQOEmailWelcomeGreeting')
+                    : msg('NASQOEmailWelcomeGreetingNoName')
+            testNote = msg('NASQOEmailWelcomeTestNote')
+            intro = appMsg('NASQOEmailWelcomeIntro')
+            firstStep = appMsg('NASQOEmailWelcomeFirstStep')
+            supportInfo = msg('NASQOEmailWelcomeSupportInfo')
+            passwordInfo = msg('NASQOEmailWelcomePasswordInfo')
+            tipsInfo = msg('NASQOEmailWelcomeTipsInfo')
+            regards = msg('NASQOEmailWelcomeRegards')
+            team = msg('NASQOEmailWelcomeTeam')
         ]]></script>
     </actions>
     <widgets>
@@ -70,7 +70,7 @@ limitations under the License.
                 <b>${passwordInfo}</b><br/><br/>
 
                 ${supportInfo}
-                <a href="mailto:support@growerp.com?subject=Question%20about%20Growerp-${application}%20on%20the%20test%20system">support@growerp.com</a><br/><br/>
+                <a href="mailto:support@erp.indexesstore.com?subject=Question%20about%20NASQO-${application}%20on%20the%20test%20system">support@erp.indexesstore.com</a><br/><br/>
 
                 ${tipsInfo}<br/><br/>
 

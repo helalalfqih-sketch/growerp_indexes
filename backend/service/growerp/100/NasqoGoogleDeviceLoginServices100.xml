@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Licensed under the Apache License, Version 2.0. -->
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+
+    <!-- Separate from Google Workspace. Only creates short-lived device
+         challenges and uses email/OpenID identity of existing NASQO users. -->
+    <service verb="start" noun="GoogleDeviceLogin" authenticate="anonymous-all">
+        <description>Start browser-based, manually paired Google login for
+            Android, iOS, Windows, and other installed NASQO clients.</description>
+        <in-parameters>
+            <parameter name="applicationId" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="authUrl"/>
+            <parameter name="deviceCode"/>
+            <parameter name="pairingCode"/>
+            <parameter name="expiresInSeconds" type="Integer"/>
+            <parameter name="pollIntervalSeconds" type="Integer"/>
+        </out-parameters>
+        <actions>
+            <set field="googleLogin" from="ec.resource.script(
+                'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)"/>
+            <set field="result" from="googleLogin.startDevice(ec, applicationId)"/>
+            <set field="authUrl" from="result.authUrl"/>
+            <set field="deviceCode" from="result.deviceCode"/>
+            <set field="pairingCode" from="result.pairingCode"/>
+            <set field="expiresInSeconds" from="result.expiresInSeconds" type="Integer"/>
+            <set field="pollIntervalSeconds" from="result.pollIntervalSeconds" type="Integer"/>
+            <script>
+                ec.web.response.setHeader('Cache-Control','no-store')
+                ec.web.response.setHeader('Referrer-Policy','no-referrer')
+            </script>
+        </actions>
+    </service>
+
+    <service verb="poll" noun="GoogleDeviceLogin" authenticate="anonymous-all">
+        <description>Single-use claim of an approved Google identity into
+            an existing NASQO user session. Always call over HTTPS.</description>
+        <in-parameters>
+            <parameter name="applicationId" required="true"/>
+            <parameter name="deviceCode" required="true"/>
+        </in-parameters>
+        <out-parameters>
+            <parameter name="status"/>
+            <parameter name="authenticate" type="Map"/>
+        </out-parameters>
+        <actions>
+            <set field="googleLogin" from="ec.resource.script(
+                'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)"/>
+            <set field="result" from="googleLogin.pollDevice(ec, deviceCode, applicationId)"/>
+            <set field="status" from="result.status"/>
+            <set field="authenticate" from="result.authenticate"/>
+            <script>
+                ec.web.response.setHeader('Cache-Control','no-store')
+                ec.web.response.setHeader('Referrer-Policy','no-referrer')
+            </script>
+        </actions>
+    </service>
+</services>

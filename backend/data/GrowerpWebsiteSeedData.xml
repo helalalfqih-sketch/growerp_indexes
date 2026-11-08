@@ -5,7 +5,7 @@
     <moqui.resource.DbResource filename="content" isFile="N" resourceId="growerp_content_dir" parentResourceId="GROWERP_ROOT" />
 
     <!-- Wiki Space -->
-    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="GrowERP Official Website Content"
+    <moqui.resource.wiki.WikiSpace wikiSpaceId="GROWERP_WS" description="NASQO Official Website Content"
         allowAnyHtml="Y" rootPageLocation="dbresource://GROWERP_ROOT"/>
 
     <!-- ================================================================
@@ -20,7 +20,7 @@
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Home -->
 <#-- description: Your whole business, one simple app: sales, stock, invoices, accounting and marketing for small and medium businesses. Open source and free to start. -->
-<!-- ==================== Marketing landing (GrowERP) ==================== -->
+<!-- ==================== Marketing landing (NASQO) ==================== -->
 <main class="pt-24 pb-16 relative">
     <!-- Ambient background glows -->
     <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
@@ -63,13 +63,13 @@
             <div class="lg:col-span-7 relative z-10">
                 <div class="relative rounded-2xl overflow-hidden border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.5)] bg-surface lg:rotate-1 hover:rotate-0 transition-transform duration-500">
                     <div class="absolute inset-0 bg-gradient-to-tr from-primary/5 to-transparent mix-blend-overlay z-10 pointer-events-none"></div>
-                    <img class="w-full object-cover bg-surface h-auto" src="/assets/dashboard-screenshot.png" alt="GrowERP Admin Dashboard">
+                    <img class="w-full object-cover bg-surface h-auto" src="/assets/dashboard-screenshot.png" alt="NASQO Admin Dashboard">
                 </div>
                 <!-- Mobile main menu -->
                 <div class="absolute -bottom-10 -right-2 md:right-8 w-32 md:w-44 z-20 rotate-3 hover:rotate-0 transition-transform duration-500">
                     <div class="absolute inset-0 bg-primary/20 rounded-[2rem] blur-[30px] -z-10"></div>
                     <img class="w-full h-auto rounded-[1.5rem] border border-white/10 shadow-[0_20px_50px_rgba(0,0,0,0.6)]"
-                        src="/assets/mobile-main-menu.png" alt="GrowERP mobile main menu">
+                        src="/assets/mobile-main-menu.png" alt="NASQO mobile main menu">
                 </div>
             </div>
         </div>
@@ -152,7 +152,7 @@
     <!-- Social proof -->
     <section class="max-w-container mx-auto px-4 md:px-12 py-12 relative">
         <div class="l-glass rounded-2xl p-8 text-center">
-            <span class="font-label text-xs uppercase tracking-wider text-primary">Why you can trust GrowERP</span>
+            <span class="font-label text-xs uppercase tracking-wider text-primary">Why you can trust NASQO</span>
             <p class="text-lg text-on-surface mt-3 max-w-3xl mx-auto leading-relaxed">
                 Years of building and extending enterprise-grade ERP and CRM systems, as top contributors and committers
                 to major open source frameworks and a provider to small and medium-sized businesses.
@@ -164,7 +164,7 @@
     <!-- Platform Downloads -->
     <section class="max-w-container mx-auto px-4 md:px-12 pb-8 relative">
         <div class="l-glass rounded-2xl p-8 text-center">
-            <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get GrowERP on every device you use</h3>
+            <h3 class="font-display text-xl font-semibold text-on-surface mb-2">Get NASQO on every device you use</h3>
             <p class="text-sm text-on-surface-variant mb-6">Start on your laptop, check orders on your phone &mdash; your data is always the same.</p>
             <div class="flex flex-wrap justify-center gap-3">
                 <a href="/admin/" target="_blank" rel="noopener" class="inline-flex items-center gap-2 border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface font-label text-sm px-5 py-2.5 rounded-full transition-colors">
@@ -202,7 +202,7 @@
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="02" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Verticals -->
-<#-- description: Pick the GrowERP app built for your kind of business: admin, hotel, rental, freelance, marketing, agents, academy and insurance. -->
+<#-- description: Pick the NASQO app built for your kind of business: admin, hotel, rental, freelance, marketing, agents, academy and insurance. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -227,11 +227,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Admin</h3>
                 <p class="text-on-surface-variant leading-relaxed">Everything in one app: sales, stock, accounting, marketing and your website. The right start if you want it all.</p>
-                <a href="https://admin.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
-                    admin.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                    erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://admin.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                    <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.admin" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
@@ -257,11 +257,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Hotel</h3>
                 <p class="text-on-surface-variant leading-relaxed">Fill more rooms and never double-book. For hotels, bed &amp; breakfasts and resorts: bookings, rooms and guest bills in one view.</p>
-                <a href="https://hotel.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
-                    hotel.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                    erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://hotel.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                    <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.hotel" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
@@ -287,11 +287,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Rental</h3>
                 <p class="text-on-surface-variant leading-relaxed">Know what is out, what is due back and what is owed. For equipment, vehicle and property rental, with billing that runs itself.</p>
-                <a href="https://rental.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
-                    rental.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
+                    erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://rental.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                    <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.rental" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
@@ -317,11 +317,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Freelance</h3>
                 <p class="text-on-surface-variant leading-relaxed">Track your hours, send the invoice, get paid. Built for freelancers and solo professionals who would rather work than do admin.</p>
-                <a href="https://freelance.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
-                    freelance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                    erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://freelance.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                    <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.freelance" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
@@ -347,11 +347,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Marketing</h3>
                 <p class="text-on-surface-variant leading-relaxed">Get more leads without more hours. Plan campaigns, reach out, follow up with leads and let AI help write your content.</p>
-                <a href="https://marketing.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
-                    marketing.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                    erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://marketing.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                    <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.marketing" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
@@ -377,11 +377,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Agents</h3>
                 <p class="text-on-surface-variant leading-relaxed">Let AI agents take the repetitive work off your plate, while you stay in control of what they do and approve what matters.</p>
-                <a href="https://agents.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
-                    agents.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-tertiary font-label text-sm font-medium">
+                    erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://agents.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
+                    <a href="https://erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.agent" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-tertiary/50 hover:text-tertiary text-on-surface-variant transition-colors">
@@ -407,11 +407,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Academy</h3>
                 <p class="text-on-surface-variant leading-relaxed">Turn what you know into income. Sell courses on your website, give learners an AI tutor, and hand out certificates. For trainers, coaches and schools.</p>
-                <a href="https://academy.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
-                    academy.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://academy.erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-secondary font-label text-sm font-medium">
+                    academy.erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://academy.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
+                    <a href="https://academy.erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.academy" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-secondary/50 hover:text-secondary text-on-surface-variant transition-colors">
@@ -437,11 +437,11 @@
                 </div>
                 <h3 class="font-display text-xl font-semibold text-on-surface">Insurance</h3>
                 <p class="text-on-surface-variant leading-relaxed">Renew every policy before it lapses. For agencies and brokers: all client policies, claims and commissions in one place, plus a portal for your clients.</p>
-                <a href="https://insurance.growerp.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
-                    insurance.growerp.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
+                <a href="https://insurance.erp.indexesstore.com" target="_blank" rel="noopener" class="mt-auto pt-4 flex items-center text-primary font-label text-sm font-medium">
+                    insurance.erp.indexesstore.com <span class="material-symbols-outlined text-[16px] ml-1">arrow_forward</span>
                 </a>
                 <div class="pt-4 flex flex-wrap gap-2 border-t border-outline-variant/20">
-                    <a href="https://insurance.growerp.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
+                    <a href="https://insurance.erp.indexesstore.com" target="_blank" rel="noopener" title="Web Browser" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
                         <span class="material-symbols-outlined text-[18px]">language</span>
                     </a>
                     <a href="https://play.google.com/store/apps/details?id=org.growerp.insurance" target="_blank" rel="noopener" title="Android" class="inline-flex items-center justify-center w-9 h-9 rounded-full border border-white/15 hover:border-primary/50 hover:text-primary text-on-surface-variant transition-colors">
@@ -488,7 +488,7 @@
     <moqui.resource.DbResource filename="getting-started.md.ftl" isFile="Y" resourceId="growerp_getting_started"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: How to start with GrowERP: create a company, load demo data and run the app on web, Android, iOS, Linux or Windows. -->
+            <fileData><![CDATA[<!-- description: How to start with NASQO: create a company, load demo data and run the app on web, Android, iOS, Linux or Windows. -->
 # Getting Started
 
 You can be running in 5 minutes. No credit card required.
@@ -500,7 +500,7 @@ Stuck or have questions? Jump to [Need Help?](#need-help)
 ## Quick Setup (5 Minutes)
 
 ### Step 1: Choose Your App
-Visit [admin.growerp.com](https://admin.growerp.com) or download the app from your platform's store (see links on the home page).
+Visit [erp.indexesstore.com](https://erp.indexesstore.com) or download the app from your platform's store (see links on the home page).
 
 ### Step 2: Register
 Click **"Register"** at the bottom of the login screen. Enter your email address and choose a password.
@@ -523,7 +523,7 @@ You'll land on the main dashboard. From here you can:
 
 ## For Developers
 
-Want to run GrowERP locally or contribute to the project?
+Want to run NASQO locally or contribute to the project?
 
 ### Prerequisites
 - OpenJDK 21
@@ -531,25 +531,25 @@ Want to run GrowERP locally or contribute to the project?
 - Git
 
 ### Local Installation
-See [Manual Installation](https://github.com/growerp/growerp#manual-installation) in the README.
+See [Manual Installation](https://erp.indexesstore.com/growerp#manual-installation) in the README.
 
-See the full [Developer Documentation](https://github.com/growerp/growerp/blob/master/docs/README.md) for detailed guides on building blocks, backend components, and AI integrations.
+See the full [Developer Documentation](https://erp.indexesstore.com/growerp/blob/master/docs/README.md) for detailed guides on building blocks, backend components, and AI integrations.
 
 ---
 
 ## Need Help?
 
 - **Free 30 Minute Support Call:** [Book a time slot](https://calendar.app.google/pz3kcsmty7ArrYWX8)
-- **Email Support:** support@growerp.com
-- **GitHub Issues:** [Report bugs or request features](https://github.com/growerp/growerp/issues)
-- **GitHub Discussions:** [Ask questions and share ideas](https://github.com/growerp/growerp/discussions)
-- **Documentation:** [41+ guides covering all aspects](https://github.com/growerp/growerp/blob/master/docs/README.md)
+- **Email Support:** support@erp.indexesstore.com
+- **GitHub Issues:** [Report bugs or request features](https://erp.indexesstore.com/growerp/issues)
+- **GitHub Discussions:** [Ask questions and share ideas](https://erp.indexesstore.com/growerp/discussions)
+- **Documentation:** [41+ guides covering all aspects](https://erp.indexesstore.com/growerp/blob/master/docs/README.md)
 
 ---
 
 ## Deleting Your Data
 
-You can delete your account and company data from any GrowERP application (GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental, GrowERP Academy, GrowERP Insurance), developed by AntWebsystems Co., Ltd:
+You can delete your account and company data from any NASQO application (NASQO Admin, NASQO Hotel, NASQO Freelance, NASQO Support, NASQO Marketing, NASQO Agents, NASQO Rental, NASQO Academy, NASQO Insurance), developed by AntWebsystems Co., Ltd:
 1. Log in as the administrator
 2. Navigate to your **Personal Screen** (found under "Company" in the employee section)
 3. Click the **Delete** button
@@ -571,7 +571,7 @@ You can delete your account and company data from any GrowERP application (GrowE
         parentResourceId="growerp_content_dir">
         <file mimeType="text/html" versionName="01" rootVersionName="01">
             <fileData><![CDATA[<#-- title: Benefits -->
-<#-- description: Why owners switch to GrowERP: one simple app instead of five tools, no licence fees, live in days and AI help you stay in control of. -->
+<#-- description: Why owners switch to NASQO: one simple app instead of five tools, no licence fees, live in days and AI help you stay in control of. -->
 <!-- Background Ambient Glow -->
 <div class="fixed inset-0 pointer-events-none -z-10 overflow-hidden">
     <div class="absolute top-[15%] left-[-10%] w-[45%] h-[45%] rounded-full bg-primary/5 blur-[120px]"></div>
@@ -586,7 +586,7 @@ You can delete your account and company data from any GrowERP application (GrowE
             <span class="font-label text-xs text-on-surface-variant uppercase tracking-widest">Less admin, more business</span>
         </div>
         <h1 class="font-display text-4xl md:text-5xl font-bold tracking-tight mb-6 max-w-4xl mx-auto leading-tight text-on-surface">
-            Why owners switch to <span class="l-gradient-text">GrowERP</span>
+            Why owners switch to <span class="l-gradient-text">NASQO</span>
         </h1>
         <p class="text-lg text-on-surface-variant max-w-2xl mx-auto">
             Spend less time on admin and more time with your customers.
@@ -858,7 +858,7 @@ You can delete your account and company data from any GrowERP application (GrowE
         </file>
     </moqui.resource.DbResource>
 
-    <!-- pricing page: GrowerpPricingPageData.xml -->
+    <!-- pricing page: NASQOPricingPageData.xml -->
 
     <!-- ================================================================
          AI AGENTS PAGE
@@ -870,12 +870,12 @@ You can delete your account and company data from any GrowERP application (GrowE
     <moqui.resource.DbResource filename="ai-agents.md.ftl" isFile="Y" resourceId="growerp_ai_agents"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: Let GrowERP AI agents do the repetitive work while you approve what matters. Load ready-made agents in one click, request a new one or contribute your own. -->
+            <fileData><![CDATA[<!-- description: Let NASQO AI agents do the repetitive work while you approve what matters. Load ready-made agents in one click, request a new one or contribute your own. -->
 # AI Agents
 
-Let AI agents handle the repetitive work, such as chasing payments, posting content and checking stock, while you approve what matters. They are built on Google's **Agent Development Kit (ADK)** and you manage them from the Agent Control Center in the GrowERP Agents app.
+Let AI agents handle the repetitive work, such as chasing payments, posting content and checking stock, while you approve what matters. They are built on Google's **Agent Development Kit (ADK)** and you manage them from the Agent Control Center in the NASQO Agents app.
 
-The agents below are in the shared **agent catalog**. Any GrowERP company can add them from the Agent Control Center (**Agent catalog**), next to uploading its own agent team file. All agents are open source and can be adjusted after loading.
+The agents below are in the shared **agent catalog**. Any NASQO company can add them from the Agent Control Center (**Agent catalog**), next to uploading its own agent team file. All agents are open source and can be adjusted after loading.
 
 <div data-growerp-agents></div>
 
@@ -891,11 +891,11 @@ Missing an agent for your business? Tell us what it should do and we will consid
 
 ## Contribute an agent
 
-Built a useful agent in your own GrowERP company? Download its team file in the Agent Control Center, or suggest it for the shared catalog from the agent screen, and tell us about it here. After review it becomes available to every GrowERP company.
+Built a useful agent in your own NASQO company? Download its team file in the Agent Control Center, or suggest it for the shared catalog from the agent screen, and tell us about it here. After review it becomes available to every NASQO company.
 
 <div data-growerp-form="AGENT_CONTRIBUTE_FORM"></div>
 
-[Explore the Agents app →](https://agents.growerp.com)
+[Explore the Agents app →](https://erp.indexesstore.com)
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
@@ -915,10 +915,10 @@ Built a useful agent in your own GrowERP company? Download its team file in the 
     <moqui.resource.DbResource filename="about.md.ftl" isFile="Y" resourceId="growerp_about"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: GrowERP is built by AntWebsystems Co., Ltd: years of ERP and CRM experience for small and medium businesses, with installations supported worldwide. -->
+            <fileData><![CDATA[<!-- description: NASQO is built by AntWebsystems Co., Ltd: years of ERP and CRM experience for small and medium businesses, with installations supported worldwide. -->
 # About Us
 
-You get an ERP built by people who have spent years making business software work for companies like yours. GrowERP is brought to you by **AntWebsystems Co., Ltd**, an officially registered software development company in Thailand under European management.
+You get an ERP built by people who have spent years making business software work for companies like yours. NASQO is brought to you by **AntWebsystems Co., Ltd**, an officially registered software development company in Thailand under European management.
 
 ## Why You Can Trust Us
 
@@ -936,7 +936,7 @@ When you need customization or support, you can see progress every day. You get:
 
 ## Open Source Philosophy
 
-GrowERP is released under the **Apache License 2.0**. This means:
+NASQO is released under the **Apache License 2.0**. This means:
 - **No licensing fees** — ever
 - **Full source code access** — customize anything
 - **No vendor lock-in** — you own your data and your deployment
@@ -947,9 +947,9 @@ GrowERP is released under the **Apache License 2.0**. This means:
 Whether you need help working out your requirements, setting up the system, connecting it to your other tools, or having it run for you, you can count on us.
 
 - **Company Website:** [www.antwebsystems.com](https://www.antwebsystems.com)
-- **Email Support:** support@growerp.com / support@antwebsystems.com
-- **GitHub:** [github.com/growerp](https://github.com/growerp)
-- **LinkedIn:** [GrowERP Group](https://www.linkedin.com/groups/4576897/)
+- **Email Support:** support@erp.indexesstore.com / support@antwebsystems.com
+- **GitHub:** [erp.indexesstore.com](https://erp.indexesstore.com)
+- **LinkedIn:** [NASQO Group](https://www.linkedin.com/groups/4576897/)
 - **Twitter/X:** [@grow_erp](https://x.com/grow_erp)
 
 **[Tell us what you need. You will hear back within 24 hours.](mailto:support@antwebsystems.com)**
@@ -970,14 +970,14 @@ Whether you need help working out your requirements, setting up the system, conn
     <moqui.resource.DbResource filename="privacy.md.ftl" isFile="Y" resourceId="growerp_privacy"
         parentResourceId="growerp_content_dir">
         <file mimeType="text/markdown" versionName="01" rootVersionName="01">
-            <fileData><![CDATA[<!-- description: The GrowERP privacy policy and terms of service: what data the apps collect, how it is used, and the terms for using the GrowERP apps and hosted service. -->
+            <fileData><![CDATA[<!-- description: The NASQO privacy policy and terms of service: what data the apps collect, how it is used, and the terms for using the NASQO apps and hosted service. -->
 # Policies
 
 ## Privacy Policy
 
 **Effective Date:** October 2024
 
-This Privacy Policy explains how GrowERP, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any GrowERP application (App) — including GrowERP Admin, GrowERP Hotel, GrowERP Freelance, GrowERP Support, GrowERP Marketing, GrowERP Agents, GrowERP Rental, GrowERP Academy, GrowERP Insurance, GrowERP Restaurant, and GrowERP Shop. By using our App, you agree to the collection and use of information in accordance with this policy.
+This Privacy Policy explains how NASQO, developed by AntWebsystems Co., Ltd, collects, uses, discloses, and safeguards your information when you use any NASQO application (App) — including NASQO Admin, NASQO Hotel, NASQO Freelance, NASQO Support, NASQO Marketing, NASQO Agents, NASQO Rental, NASQO Academy, NASQO Insurance, NASQO Restaurant, and NASQO Shop. By using our App, you agree to the collection and use of information in accordance with this policy.
 
 ### 1. Information We Collect
 #### a. Personal Information
@@ -985,7 +985,7 @@ We may collect personal information that you provide directly to us, such as: Na
 #### b. Usage Data
 We may collect information automatically when you use our App, including: Device type and model, IP address, Operating system version, App usage information.
 #### c. Data You Enter About Others
-Businesses using the App store data about their own customers in it, for example the course progress of learners in GrowERP Academy, or the insurance policies and claims of clients in GrowERP Insurance. This data is processed on behalf of that business and is only visible to the business and, through their own login, to the customer it concerns.
+Businesses using the App store data about their own customers in it, for example the course progress of learners in NASQO Academy, or the insurance policies and claims of clients in NASQO Insurance. This data is processed on behalf of that business and is only visible to the business and, through their own login, to the customer it concerns.
 
 ### 2. How We Use Your Information
 - To provide, maintain, and improve the App
@@ -1013,16 +1013,16 @@ Our App is not intended for children under the age of 13.
 We may update this Privacy Policy from time to time. 
 
 ### 9. Contact Us
-If you have any questions about this Privacy Policy, please contact us at: support@growerp.com
+If you have any questions about this Privacy Policy, please contact us at: support@erp.indexesstore.com
 
 ## Terms of Service
 
 **Effective Date:** November 2026
 
-These Terms of Service ("Terms") govern your use of the GrowERP applications, the website www.growerp.com and the hosted GrowERP service (together the "Service"), provided by AntWebsystems Co., Ltd ("we", "us"). By creating an account or using the Service you agree to these Terms. If you use the Service on behalf of a company, you confirm that you are authorised to accept these Terms for that company.
+These Terms of Service ("Terms") govern your use of the NASQO applications, the website erp.indexesstore.com and the hosted NASQO service (together the "Service"), provided by AntWebsystems Co., Ltd ("we", "us"). By creating an account or using the Service you agree to these Terms. If you use the Service on behalf of a company, you confirm that you are authorised to accept these Terms for that company.
 
 ### 1. Accounts
-You are responsible for the information you provide when registering, for keeping your login details confidential and for all activity under your account. Tell us immediately at support@growerp.com if you suspect unauthorised use.
+You are responsible for the information you provide when registering, for keeping your login details confidential and for all activity under your account. Tell us immediately at support@erp.indexesstore.com if you suspect unauthorised use.
 
 ### 2. Free Trial and Subscriptions
 New accounts start with a free trial period. After the trial, continued use of the hosted Service requires a paid subscription according to the plan you choose. Fees are charged in advance for each billing period and are not refundable, except where required by law. We may change our prices with at least 30 days notice; the new price applies from your next billing period.
@@ -1038,7 +1038,7 @@ You agree not to use the Service to:
 You keep all rights to the data you enter in the Service. You give us permission to host, process and back up that data only as far as needed to provide the Service. How we handle personal information is described in the Privacy Policy above. You can export your data at any time while your account is active.
 
 ### 5. Open Source Software
-The GrowERP software is open source and is licensed under its own open source licence, which you can find at [github.com/growerp](https://github.com/growerp). These Terms cover the hosted Service and do not limit your rights under that licence.
+The NASQO software is open source and is licensed under its own open source licence, which you can find at [erp.indexesstore.com](https://erp.indexesstore.com). These Terms cover the hosted Service and do not limit your rights under that licence.
 
 ### 6. Availability and Changes
 We work to keep the Service available and secure, but we do not guarantee that it will be uninterrupted or error free. We may change, add or remove features of the Service over time.
@@ -1056,7 +1056,7 @@ We may update these Terms from time to time. We will post the new version on thi
 These Terms are governed by the laws of the Kingdom of Thailand.
 
 ### 11. Contact Us
-If you have any questions about these Terms, please contact us at: support@growerp.com
+If you have any questions about these Terms, please contact us at: support@erp.indexesstore.com
 ]]></fileData>
             <histories versionName="01" versionDate="1485028800000" isDiff="N" />
         </file>
@@ -1156,8 +1156,8 @@ If you have any questions about these Terms, please contact us at: support@growe
         sectionTitle="Then: Migrate Clean and Go Live"
         sectionDescription="The last two chapters cover the step most implementations underestimate, and the first day in your new system."
         contentJson="[
-          {&quot;tag&quot;:&quot;Chapter 4&quot;,&quot;title&quot;:&quot;Data Migration and the &apos;Clean Core&apos; Strategy&quot;,&quot;description&quot;:&quot;Migration is the most common failure point, and it is rarely the software&apos;s fault. Five checks keep your new system standard, scalable and cheap to update.&quot;,&quot;points&quot;:[&quot;Audit historical data and weed out obsolete suppliers and closed accounts&quot;,&quot;Cleanse duplicates so your single source of truth is actually true&quot;,&quot;Define scope: which open transactions move, what stays archived&quot;,&quot;Map legacy fields to GrowERP CSV formats and test-load a sample batch&quot;],&quot;footer&quot;:&quot;Avoid the pitfalls&quot;},
-          {&quot;tag&quot;:&quot;Chapter 5&quot;,&quot;title&quot;:&quot;GrowERP Quick-Start: Setup to First Workflow&quot;,&quot;description&quot;:&quot;Three sequences that take you from an empty system to a live, automated transaction in record time.&quot;,&quot;points&quot;:[&quot;Company profile and operational controls: tax IDs, currency, PO numbering&quot;,&quot;Categories and catalog imported in the GrowERP CSV format&quot;,&quot;Ledger automation: one purchase-to-pay transaction, invoice received to paid&quot;,&quot;A 30-day post-launch review to fix the friction points you find&quot;],&quot;footer&quot;:&quot;Get operational&quot;}
+          {&quot;tag&quot;:&quot;Chapter 4&quot;,&quot;title&quot;:&quot;Data Migration and the &apos;Clean Core&apos; Strategy&quot;,&quot;description&quot;:&quot;Migration is the most common failure point, and it is rarely the software&apos;s fault. Five checks keep your new system standard, scalable and cheap to update.&quot;,&quot;points&quot;:[&quot;Audit historical data and weed out obsolete suppliers and closed accounts&quot;,&quot;Cleanse duplicates so your single source of truth is actually true&quot;,&quot;Define scope: which open transactions move, what stays archived&quot;,&quot;Map legacy fields to NASQO CSV formats and test-load a sample batch&quot;],&quot;footer&quot;:&quot;Avoid the pitfalls&quot;},
+          {&quot;tag&quot;:&quot;Chapter 5&quot;,&quot;title&quot;:&quot;NASQO Quick-Start: Setup to First Workflow&quot;,&quot;description&quot;:&quot;Three sequences that take you from an empty system to a live, automated transaction in record time.&quot;,&quot;points&quot;:[&quot;Company profile and operational controls: tax IDs, currency, PO numbering&quot;,&quot;Categories and catalog imported in the NASQO CSV format&quot;,&quot;Ledger automation: one purchase-to-pay transaction, invoice received to paid&quot;,&quot;A 30-day post-launch review to fix the friction points you find&quot;],&quot;footer&quot;:&quot;Get operational&quot;}
         ]" />
 
     <!-- benefits section must stay LAST: the renderer pairs a trailing benefits
@@ -1171,12 +1171,12 @@ If you have any questions about these Terms, please contact us at: support@growe
           {&quot;icon&quot;:&quot;☁️&quot;,&quot;text&quot;:&quot;Cloud against on-premise, scored on cost, IT load and upgrades&quot;},
           {&quot;icon&quot;:&quot;🗺️&quot;,&quot;text&quot;:&quot;The 6-phase implementation roadmap with a pro-tip per phase&quot;},
           {&quot;icon&quot;:&quot;✅&quot;,&quot;text&quot;:&quot;A 5-point Clean Core data migration checklist&quot;},
-          {&quot;icon&quot;:&quot;🚀&quot;,&quot;text&quot;:&quot;A day-one GrowERP quick-start: setup to first automated workflow&quot;}
+          {&quot;icon&quot;:&quot;🚀&quot;,&quot;text&quot;:&quot;A day-one NASQO quick-start: setup to first automated workflow&quot;}
         ]" />
 
     <growerp.landing.CredibilityInfo credibilityInfoId="GG_CRED_INFO" pseudoId="gg-cred"
         landingPageId="GROWERP_GUIDE"
-        creatorBio="GrowERP is built by AntWebsystems Co., Ltd, an officially registered software development company in Thailand under European management."
+        creatorBio="NASQO is built by AntWebsystems Co., Ltd, an officially registered software development company in Thailand under European management."
         backgroundText="Years of building and extending enterprise-grade ERP and CRM systems, as top contributors and committers to major open-source frameworks, went into this guide. It is the low-friction path we use with our own customers." />
 
     <growerp.landing.CredibilityStatistic credibilityStatisticId="GG_STAT_1" pseudoId="gg-stat-1"

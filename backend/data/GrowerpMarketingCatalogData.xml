@@ -2,7 +2,7 @@
 <entity-facade-xml type="seed">
 
     <!-- Shared agent catalog: the marketing team as "_NA_" templates, worded for whichever
-         company loads them (GrowerpMarketingAgentsData.xml holds GrowERP's own live agents).
+         company loads them (NASQOMarketingAgentsData.xml holds NASQO's own live agents).
          Tenants add them from the agent catalog; AdkServices100.enable#MarketingAgentTeam
          clones this team when AppMarketing demo data is loaded. Only the daily digest is
          scheduled on a fresh clone; the others carry their schedule ready to switch on. -->

@@ -16,9 +16,9 @@ limitations under the License.
     xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
 
     <!-- ============ Per-user calendars, two-way (docs/Calendar_Sync.md) ============
-         Every internal user (admin, employee) gets a calendar 'GrowERP - <name>' in the
+         Every internal user (admin, employee) gets a calendar 'NASQO - <name>' in the
          tenant's connected calendar account, shared with the user's email; rentals go to
-         one shared 'GrowERP - Bookings' calendar. Todos and events with a date are pushed
+         one shared 'NASQO - Bookings' calendar. Todos and events with a date are pushed
          as all-day events (EECAs in entity/CalendarSync.eecas.xml, after commit); changes
          made in the calendars are read back by the sync#UserCalendars job.
          Provider neutral: an adapter (service/calendar/<Provider>CalendarProvider.groovy)
@@ -56,7 +56,7 @@ limitations under the License.
     <service verb="get" noun="CalendarItems" authenticate="true">
         <description>What the in-app calendar shows for the logged in user in a period.
             Connected to a calendar provider: the events of the company calendar, plus the
-            user's own GrowERP calendar and Bookings when writable. Otherwise (or when the
+            user's own NASQO calendar and Bookings when writable. Otherwise (or when the
             provider fails): the user's todos and events with a start date, same rule as
             push#Activity. With includeContent also the social posts of the period and the
             undated ones (backlog).</description>
@@ -275,7 +275,7 @@ limitations under the License.
             <if condition="!userCalendar">
                 <set field="externalCalendarId"
                     from="provider.createCalendar(ec, ownerPartyId,
-                        'GrowERP - ' + ((user.firstName ?: '') + ' ' + (user.lastName ?: '')).trim(),
+                        'NASQO - ' + ((user.firstName ?: '') + ' ' + (user.lastName ?: '')).trim(),
                         timeZone)" />
                 <service-call name="create#growerp.crm.UserCalendar"
                     in-map="[ownerPartyId: ownerPartyId, partyId: partyId, providerId: providerId,
@@ -327,7 +327,7 @@ limitations under the License.
             </entity-find-one>
             <if condition="!userCalendar">
                 <set field="externalCalendarId"
-                    from="provider.createCalendar(ec, ownerPartyId, 'GrowERP - Bookings', timeZone)" />
+                    from="provider.createCalendar(ec, ownerPartyId, 'NASQO - Bookings', timeZone)" />
                 <service-call name="create#growerp.crm.UserCalendar"
                     in-map="[ownerPartyId: ownerPartyId, partyId: companyPartyId,
                         providerId: providerId, externalCalendarId: externalCalendarId]" />
@@ -557,7 +557,7 @@ limitations under the License.
     </service>
 
     <service verb="readBack" noun="UserCalendar" authenticate="false" allow-remote="false">
-        <description>Read the changes made in one user calendar back into GrowERP:
+        <description>Read the changes made in one user calendar back into NASQO:
             title/description/dates update the activity, a deleted event cancels it, a new
             event becomes an event activity of the user. Rental events are owned by the
             order: a changed one is pushed again.</description>
@@ -609,7 +609,7 @@ limitations under the License.
                                 !ev.updated.after(link.externalUpdated)">
                             <continue /></if>
                         <if condition="link.sourceType == 'rental'">
-                            <!-- force the next push to write GrowERP's version again -->
+                            <!-- force the next push to write NASQO's version again -->
                             <set field="link.contentHash" from="null" />
                             <entity-update value-field="link" />
                             <script>rentalOrderIds.add(link.sourceId.split(':')[0])</script>
@@ -620,7 +620,7 @@ limitations under the License.
                             <field-map field-name="workEffortId" from="link.sourceId" />
                         </entity-find-one>
                         <if condition="!workEffort"><continue /></if>
-                        <!-- last write wins: GrowERP changed later, its push follows -->
+                        <!-- last write wins: NASQO changed later, its push follows -->
                         <if condition="ev.updated &amp;&amp; workEffort.lastUpdatedStamp &amp;&amp;
                                 workEffort.lastUpdatedStamp.after(ev.updated)">
                             <continue /></if>
@@ -784,7 +784,7 @@ limitations under the License.
                     in-map="[orderId: orderId]" ignore-error="true" transaction="force-new" />
             </iterate>
             <set field="rentalCount" from="orderIds.size()" />
-            <!-- initial read back position: everything there now was pushed by GrowERP -->
+            <!-- initial read back position: everything there now was pushed by NASQO -->
             <entity-find entity-name="growerp.crm.UserCalendar" list="calendars">
                 <econdition field-name="ownerPartyId" />
                 <econdition field-name="providerId" from="prov.providerId" />

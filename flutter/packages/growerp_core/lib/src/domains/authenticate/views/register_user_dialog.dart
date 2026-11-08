@@ -17,6 +17,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter/foundation.dart';
+import 'package:global_configuration/global_configuration.dart';
+import 'package:url_launcher/url_launcher.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
@@ -165,6 +167,33 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
             ),
             const SizedBox(height: 20),
             const SizedBox(height: 10),
+            if (kIsWeb &&
+                widget.admin &&
+                GlobalConfiguration().get('googleRegistrationEnabled') ==
+                    true) ...[
+              OutlinedButton.icon(
+                key: const Key('googleSignupButton'),
+                icon: const Icon(Icons.login),
+                label: Text(
+                  Localizations.localeOf(context).languageCode == 'ar'
+                      ? 'إنشاء حساب جديد باستخدام Google'
+                      : 'Create account with Google',
+                ),
+                onPressed: () async {
+                  final uri = Uri.base.replace(
+                    path: '/googleOAuth/loginStart',
+                    query: null,
+                    queryParameters: {
+                      'applicationId': 'AppAdmin',
+                      'intent': 'register',
+                    },
+                    fragment: null,
+                  );
+                  await launchUrl(uri, webOnlyWindowName: '_self');
+                },
+              ),
+              const SizedBox(height: 12),
+            ],
             OutlinedButton(
               key: const Key('newUserButton'),
               child: Text(_localizations!.register),
@@ -183,8 +212,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                       ),
                       locale: context.read<LocaleBloc>().state.locale,
                       // Honor a password typed on the web startup page, if any.
-                      newPassword:
-                          _authBloc.state.pendingRegistrationPassword,
+                      newPassword: _authBloc.state.pendingRegistrationPassword,
                     ),
                   );
                 }

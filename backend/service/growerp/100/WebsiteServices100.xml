@@ -393,7 +393,7 @@ limitations under the License.
                             <order-by field-name="-fromDate"/>
                         </entity-find>
                         <!-- A store can keep several host names side by side (GROWERP's own
-                             store has growerp.com/.org plus the local dev one); pick the same
+                             store has erp.indexesstore.com/.org plus the local dev one); pick the same
                              row get#Website would show for this request instead of always the
                              newest by date, or editing silently targets the wrong host name. -->
                         <script><![CDATA[
@@ -1690,7 +1690,7 @@ limitations under the License.
                             bodyHtml: magnetBody]" />
                     <!-- lead magnet downloads also go on the mailing list; only this
                          branch subscribes, so ordinary tenant contact forms never
-                         reach the (GrowERP global) birdSend Interface configuration.
+                         reach the (NASQO global) birdSend Interface configuration.
                          The service no-ops when no api key is configured. -->
                     <set field="nameSpacePos" from="visitorName.trim().indexOf(' ')" />
                     <service-call name="growerp.100.BirdSendServices100.registerAdd#UserToGroup"

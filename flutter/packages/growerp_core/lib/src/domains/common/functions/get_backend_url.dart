@@ -108,7 +108,16 @@ Future<ForceUpdateInfo> getBackendUrlOverride(
         GlobalConfiguration().updateValue("test", true);
         return ForceUpdateInfo.none;
       }
-      backendBaseUrl = 'https://backend.growerp.com';
+      // Use the app's own configured origin. NASQO must never contact the
+      // upstream GrowERP backend merely to check for an update.
+      final configuredBaseUrl = GlobalConfiguration().get('databaseUrl');
+      backendBaseUrl = configuredBaseUrl is String
+          ? configuredBaseUrl.trim().replaceFirst(RegExp(r'/$'), '')
+          : '';
+      if (!backendBaseUrl.startsWith('https://')) {
+        debugPrint('Release backend URL is missing or not HTTPS.');
+        return ForceUpdateInfo.none;
+      }
       databaseUrl = 'databaseUrl';
       chatUrl = 'chatUrl';
       secure = 's';

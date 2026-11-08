@@ -42,7 +42,7 @@ along with this software (see the LICENSE.md file). If not, see
                     if (ec.user.userId) ec.user.logoutUser()
                 }
                 String title = ok ? 'LinkedIn connected' : 'LinkedIn connect failed'
-                String body = ok ? "Connected${result?.name ? ' as ' + result.name : ''}. You can close this window and return to GrowERP." :
+                String body = ok ? "Connected${result?.name ? ' as ' + result.name : ''}. You can close this window and return to NASQO." :
                     "LinkedIn connect did not complete${error ? ' (' + error + ')' : ''}. Close this window and try again."
                 if (!ok && message) ec.logger.warn("LinkedIn connect failed: ${message}")
                 String html = """<!doctype html><html><head><meta charset="utf-8">

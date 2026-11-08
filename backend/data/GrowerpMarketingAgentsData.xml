@@ -2,7 +2,7 @@
 <entity-facade-xml type="seed">
 
     <!-- ════════════════════════════════════════════════════════════════════════
-         GrowERP self-marketing sprint — control-center (ADK) agents + send scheduler.
+         NASQO self-marketing sprint — control-center (ADK) agents + send scheduler.
          Owner: GROWERP. Must load after the GROWERP company exists; reloaded by the
          ordinary `java -jar moqui.war load types=seed` (create-or-update, safe to
          re-run on an existing database).
@@ -21,7 +21,7 @@
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_OUTREACH_PERSONALIZER"
         agentName="Outreach Personalizer"
-        teamName="GrowERP Marketing Team"
+        teamName="NASQO Marketing Team"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -33,7 +33,7 @@
         scheduleExpression="0 0 9-17 * * ?"
         schedulePrompt="Fill in PENDING outreach messages that have an EMPTY body, up to 50: fetch with growerp.100.OutreachServices100.list#OutreachMessages (status=PENDING), SKIP every message that already has messageContent, and for the empty ones call growerp.100.OutreachServices100.generate#PlatformMessage grounded on the campaign template + recipient name/title/company, then save with growerp.100.OutreachServices100.update#OutreachMessageContent. Never touch SENT messages and never overwrite a body that already has text. Report how many you filled and how many you skipped."
         description="Fills in empty outreach message bodies for the active campaign.">
-        <instruction><![CDATA[You prepare outbound messages for GrowERP's own marketing campaign.
+        <instruction><![CDATA[You prepare outbound messages for NASQO's own marketing campaign.
 
 ## Which messages
 
@@ -52,7 +52,7 @@
 ## Channel rules
 
 - LINKEDIN: end on a question and include NO URL (we share the link only after they reply); keep it under ~400 characters.
-- EMAIL: include the assessment link https://growerp.com/landing/erp-landing-page and a one-line sign-off (Hans, GrowERP); keep it under ~120 words.
+- EMAIL: include the assessment link https://erp.indexesstore.com/landing/erp-landing-page and a one-line sign-off (Hans, NASQO); keep it under ~120 words.
 - If a recipient field is unknown, rewrite the line to read naturally rather than leaving a blank or a literal placeholder token.
 
 ## Service names
@@ -60,12 +60,12 @@
 Never invent a service name: use only the fully-qualified names above. If a call fails, call `moqui_search_services` with a single noun and use the exact name it returns.]]></instruction>
     </moqui.adk.AdkAgentConfig>
 
-    <!-- 2 ── GrowERP SDR: public website-chat agent, RAG-grounded, books trials, hands off hot leads -->
+    <!-- 2 ── NASQO SDR: public website-chat agent, RAG-grounded, books trials, hands off hot leads -->
     <moqui.adk.AdkAgentConfig
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_SDR"
-        agentName="GrowERP SDR"
-        teamName="GrowERP Marketing Team"
+        agentName="NASQO SDR"
+        teamName="NASQO Marketing Team"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -84,7 +84,7 @@ Never invent a service name: use only the fully-qualified names above. If a call
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_LEAD_TRIAGE"
         agentName="Lead Triage"
-        teamName="GrowERP Marketing Team"
+        teamName="NASQO Marketing Team"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -96,7 +96,7 @@ Never invent a service name: use only the fully-qualified names above. If a call
         scheduleExpression="0 0,30 9-18 * * ?"
         schedulePrompt="List RESPONDED outreach messages (growerp.100.OutreachServices100.list#OutreachMessages) and new opportunities (growerp.100.CrmServices100.get#Opportunity); rank hottest-first by fit and intent; draft a short follow-up for the top few and post a ranked summary to team chat (growerp.100.ChatServices100.create#ChatMessage)."
         description="Scheduled lead triage: ranks replies + new opportunities and drafts follow-ups for Hans.">
-        <instruction><![CDATA[You triage inbound interest for GrowERP's marketing campaign.
+        <instruction><![CDATA[You triage inbound interest for NASQO's marketing campaign.
 
 ## Steps
 
@@ -124,7 +124,7 @@ Never invent a service name: use only the fully-qualified names above. If a call
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_CONTENT_SOCIAL"
         agentName="Content and Social"
-        teamName="GrowERP Marketing Team"
+        teamName="NASQO Marketing Team"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -150,7 +150,7 @@ in this run to all enabled platforms, without scheduledDate: each piece keeps th
 open Marketing > Master Content to approve; once approved every platform variant auto-publishes at its scheduled time
 within each platform's daily limit.'"
         description="Weekly content from a multi-week plan: write this week's planned pieces once, adapt to all enabled platforms, warm the outreach profile."
-        instruction="You run GrowERP's weekly content marketing so the profiles that send outreach look active
+        instruction="You run NASQO's weekly content marketing so the profiles that send outreach look active
 and credible. Aim at SMB owners stuck on spreadsheets. Each week: ensure a persona, make sure a
 ContentPlan covers this week (growerp.100.MarketingServices100.generate#ContentPlan makes an outline of PLANNED
 pieces for several weeks, Pain-News-Prize or a single posting per week), write only this week's planned pieces
@@ -177,7 +177,7 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         ownerPartyId="GROWERP"
         adkAgentConfigId="GROWERP_OPS_DIGEST"
         agentName="Marketing Ops Digest"
-        teamName="GrowERP Marketing Team"
+        teamName="NASQO Marketing Team"
         llmProvider="gemini"
         enabled="Y"
         agentRole="specialist"
@@ -187,9 +187,9 @@ moqui_search_services with a single noun and use the exact name it returns."/>
         scheduleEnabled="Y"
         scheduleChatRoomId="GROWERP_OPS_DIGEST_ROOM"
         scheduleExpression="0 0 9 * * ?"
-        schedulePrompt="Daily GrowERP marketing digest, 5-7 bullets: messages sent today by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response rate (growerp.100.OutreachServices100.get#CampaignProgress, no parameters needed), pipeline by stage with weighted value (growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities (growerp.100.CrmServices100.get#Opportunity), and how many opportunities reached a won stage in that summary. Flag anything stalled."
+        schedulePrompt="Daily NASQO marketing digest, 5-7 bullets: messages sent today by channel (growerp.100.OutreachServices100.list#OutreachMessages), reply/response rate (growerp.100.OutreachServices100.get#CampaignProgress, no parameters needed), pipeline by stage with weighted value (growerp.100.CrmServices100.get#OpportunitySummary), new and advancing opportunities (growerp.100.CrmServices100.get#Opportunity), and how many opportunities reached a won stage in that summary. Flag anything stalled."
         description="Daily marketing digest: sends, replies, pipeline, opportunities won.">
-        <instruction><![CDATA[You write a short daily marketing operations digest for GrowERP's own campaign using read-only data.
+        <instruction><![CDATA[You write a short daily marketing operations digest for NASQO's own campaign using read-only data.
 
 ## Data
 
@@ -230,7 +230,7 @@ Measure progress toward the first customer as the count of opportunities in a wo
     <!-- superseded by CampaignAutomation_GROWERP above; paused so an existing database does
          not run both and send everything twice per hour -->
     <moqui.service.job.ServiceJob
-        jobName="GrowerpCampaignAutomation"
+        jobName="NASQOCampaignAutomation"
         paused="Y"/>
 
 </entity-facade-xml>
