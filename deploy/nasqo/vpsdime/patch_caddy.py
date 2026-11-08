@@ -16,7 +16,7 @@ OLD_DEFAULT = re.compile(
     r"[ \t]*\}"
 )
 NEW_DEFAULT = """    # NASQO real ERP: API + WebSockets to Moqui, app UI to Flutter Web.
-    @nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws*
+    @nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws* /googleOAuth*
     handle @nasqoApi {
         reverse_proxy nasqo-backend:80
     }
@@ -43,7 +43,18 @@ def patch_caddy(source: str) -> str:
 
     # Safe to run a second time; never insert duplicate route definitions.
     if "reverse_proxy nasqo-web:80" in block and "erp-moqui:80" not in block:
-        return source
+        # Keep re-running this patch safe on pre-existing NASQO deployments.
+        # OAuth callbacks must reach Moqui, not the Flutter SPA catch-all.
+        if "/googleOAuth*" in block:
+            return source
+        if block.count("@nasqoApi path ") != 1:
+            raise ValueError("Missing unique NASQO API matcher")
+        block = block.replace(
+            "@nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws*",
+            "@nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws* /googleOAuth*",
+            1,
+        )
+        return "".join(lines[:start]) + block + "".join(lines[end + 1:])
     if block.count("reverse_proxy erp-moqui:80") < 2:
         raise ValueError("Unexpected ERP Caddy structure; no changes made")
     if len(OLD_DEFAULT.findall(block)) != 1:

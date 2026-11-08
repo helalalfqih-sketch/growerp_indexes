@@ -42,7 +42,7 @@ along with this software (see the LICENSE.md file). If not, see
                     if (ec.user.userId) ec.user.logoutUser()
                 }
                 String title = ok ? 'Google connected' : 'Google sign in failed'
-                String body = ok ? "Connected${result?.email ? ' as ' + result.email : ''}. You can close this window and return to GrowERP." :
+                String body = ok ? "Connected${result?.email ? ' as ' + result.email : ''}. You can close this window and return to NASQO." :
                     "Google sign in did not complete${error ? ' (' + error + ')' : ''}. Close this window and try again."
                 if (!ok && message) ec.logger.warn("Google sign in failed: ${message}")
                 String html = """<!doctype html><html><head><meta charset="utf-8">
@@ -52,6 +52,55 @@ div{background:#fff;padding:32px;border-radius:16px;max-width:420px;text-align:c
 </head><body><div><h2>${title}</h2><p>${org.moqui.util.StringUtilities.encodeForXmlAttribute(body)}</p></div>
 <script>setTimeout(function(){window.close()},${ok ? 2000 : 8000})</script></body></html>"""
                 ec.web.sendTextResponse(html, 'text/html', null)
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+
+
+    <!-- NASQO Business login: independent from tenant Google Workspace scopes. -->
+    <transition name="loginStart" read-only="true" begin-transaction="false">
+        <parameter name="applicationId" />
+        <actions>
+            <script><![CDATA[
+                ec.web.response.setHeader('Cache-Control', 'no-store')
+                ec.web.response.setHeader('Referrer-Policy', 'no-referrer')
+                try {
+                    def login = ec.resource.script(
+                        'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)
+                    String authUrl = login.start(ec, (applicationId ?: 'AppAdmin').toString())
+                    ec.web.response.sendRedirect(authUrl)
+                } catch (Throwable t) {
+                    ec.logger.warn("NASQO Google login start refused: ${t.class.simpleName}")
+                    ec.web.response.sendRedirect('/?googleLogin=failed')
+                }
+            ]]></script>
+        </actions>
+        <default-response type="none" />
+    </transition>
+
+    <transition name="loginCallback" begin-transaction="true">
+        <parameter name="code" />
+        <parameter name="state" />
+        <parameter name="error" />
+        <actions>
+            <script><![CDATA[
+                ec.web.response.setHeader('Cache-Control', 'no-store')
+                ec.web.response.setHeader('Referrer-Policy', 'no-referrer')
+                String result = 'failed'
+                if (code && state && !error) {
+                    try {
+                        def login = ec.resource.script(
+                            'component://growerp/service/NasqoGoogleLoginUtil.groovy', null)
+                        login.complete(ec, (String)state, (String)code)
+                        if (!ec.message.hasError()) result = 'success'
+                    } catch (Throwable t) {
+                        // Never write the Google code or id_token to logs, errors or URLs.
+                        ec.logger.warn("NASQO Google login callback refused: ${t.class.simpleName}")
+                    }
+                }
+                if (ec.message.hasError()) ec.message.clearErrors()
+                ec.web.response.sendRedirect('/?googleLogin=' + result)
             ]]></script>
         </actions>
         <default-response type="none" />

@@ -4,6 +4,7 @@
     "version": "",
     "build": "",
     "applicationId": "AppAdmin",
+    "googleLoginEnabled": false,
     "_________________comment__backend": "moqui / ofbiz",
     "backend": "moqui",
     "_________________comment__release to be used with docker locally ": "https://rest.example.com",

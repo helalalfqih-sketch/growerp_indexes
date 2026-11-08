@@ -77,6 +77,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final WsClient notification;
   final String applicationId;
   final Company? company;
+  bool _googleRedirectHandled = false;
 
   void _onAuthUpdateLocal(AuthUpdateLocal event, Emitter<AuthState> emit) {
     emit(state.copyWith(authenticate: event.authenticate));
@@ -87,6 +88,11 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // AuthLoad doubles as pull-to-refresh: drop cached GET responses
     // (dashboard charts use CachePolicy.forceCache) so the reload is real.
     await clearRestCache();
+
+    // The Google browser callback never puts an API key in a URL. It creates
+    // a server-side Moqui session and returns here with only a status flag.
+    // Fetch the signed-in user from the authenticated, same-origin session.
+    if (await _consumeGoogleLoginRedirect(emit)) return;
     Authenticate defaultAuthenticate = Authenticate(
       applicationId: applicationId,
     );
@@ -203,10 +209,70 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.failure,
           authenticate: state.authenticate ?? defaultAuthenticate,
-          message: e.toString(),
+          message: await getDioError(e),
         ),
       );
     }
+  }
+
+  Future<bool> _consumeGoogleLoginRedirect(Emitter<AuthState> emit) async {
+    if (!kIsWeb || _googleRedirectHandled) return false;
+    final result = Uri.base.queryParameters['googleLogin'];
+    if (result == null) return false;
+    _googleRedirectHandled = true;
+    if (result != 'success') {
+      emit(
+        state.copyWith(
+          status: AuthStatus.unAuthenticated,
+          authenticate: Authenticate(applicationId: applicationId),
+          message: 'تعذّر تسجيل الدخول باستخدام Google. حاول مرة أخرى.',
+        ),
+      );
+      return true;
+    }
+    try {
+      // Do not send a stale local API key when reading the newly established
+      // server session; no password or Google access token is persisted.
+      await PersistFunctions.persistKeyValue('apiKey', '');
+      await PersistFunctions.persistKeyValue('moquiSessionToken', '');
+      await PersistFunctions.removeAuthenticate();
+      await loadCurrencies(restClient);
+      final authenticated = await restClient.getAuthenticate(
+        applicationId: applicationId,
+      );
+      if (authenticated.apiKey == null || authenticated.user?.userId == null) {
+        throw StateError('No verified NASQO session returned by Google login');
+      }
+      await PersistFunctions.persistAuthenticate(authenticated);
+      await PersistFunctions.persistKeyValue('apiKey', authenticated.apiKey!);
+      await PersistFunctions.persistKeyValue(
+        'moquiSessionToken',
+        authenticated.moquiSessionToken ?? '',
+      );
+      await chat.connect(authenticated.apiKey!, authenticated.user!.userId!);
+      await notification.connect(
+        authenticated.apiKey!,
+        authenticated.user!.userId!,
+      );
+      emit(
+        state.copyWith(
+          status: AuthStatus.authenticated,
+          authenticate: authenticated,
+        ),
+      );
+    } catch (_) {
+      // A query string alone can never authenticate a user: getAuthenticate
+      // must confirm the session and return a real user + API key.
+      emit(
+        state.copyWith(
+          status: AuthStatus.unAuthenticated,
+          authenticate: Authenticate(applicationId: applicationId),
+          message:
+              'لم يكتمل تسجيل الدخول عبر Google. استخدم بريدك وكلمة مرورك أو أعد المحاولة.',
+        ),
+      );
+    }
+    return true;
   }
 
   /// Applies credentials handed off by the web startup page (see

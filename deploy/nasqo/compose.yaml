@@ -21,6 +21,11 @@ x-backend-env: &backend-env
   webapp_https_port: "443"
   webapp_http_port: "80"
   webapp_allow_origins: https://${NASQO_DOMAIN:?Set NASQO_DOMAIN}
+  # NASQO Business Google OpenID login; disabled by default and separate from Workspace.
+  NASQO_GOOGLE_LOGIN_ENABLED: ${NASQO_GOOGLE_LOGIN_ENABLED:-false}
+  GOOGLE_LOGIN_CLIENT_ID: ${GOOGLE_LOGIN_CLIENT_ID:-}
+  GOOGLE_LOGIN_CLIENT_SECRET: ${GOOGLE_LOGIN_CLIENT_SECRET:-}
+  GOOGLE_LOGIN_REDIRECT_URI: ${GOOGLE_LOGIN_REDIRECT_URI:-}
   default_locale: ar
   default_time_zone: Asia/Aden
 
