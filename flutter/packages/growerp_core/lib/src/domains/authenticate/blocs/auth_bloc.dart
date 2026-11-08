@@ -414,30 +414,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoggedOut event,
     Emitter<AuthState> emit,
   ) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    // A revoked session may cause even Logout to return HTTP 403.
+    // This must not block local sign-out and recovery.
     try {
-      emit(state.copyWith(status: AuthStatus.loading));
       await restClient.logout();
-      await clearRestCache();
-      notification.close();
-      chat.close();
-      emit(
-        state.copyWith(
-          status: AuthStatus.unAuthenticated,
-          message: AuthBlocMessageKeys.logoutSuccess,
-        ),
-      );
-      PersistFunctions.persistAuthenticate(
-        state.authenticate!.copyWith(apiKey: null),
-      );
-      PersistFunctions.persistKeyValue('apiKey', '');
-    } on DioException catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.failure,
-          message: await getDioError(e),
-        ),
-      );
+    } catch (_) {
+      // Always remove credentials locally, irrespective of server response.
     }
+    await clearRestCache();
+    await PersistFunctions.removeAuthenticate();
+    await PersistFunctions.removeKey('apiKey');
+    await PersistFunctions.removeKey('moquiSessionToken');
+    notification.close();
+    chat.close();
+    emit(
+      state.copyWith(
+        status: AuthStatus.unAuthenticated,
+        authenticate: Authenticate(applicationId: applicationId),
+        message: AuthBlocMessageKeys.logoutSuccess,
+      ),
+    );
   }
 
   /// Promote a 'setupInProgress' session to authenticated once the background demo

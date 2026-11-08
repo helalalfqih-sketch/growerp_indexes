@@ -1,4 +1,5 @@
 import 'package:bloc_test/bloc_test.dart';
+import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -81,6 +82,28 @@ void main() {
       expect: () => [
         menuState(MenuConfigStatus.loading),
         menuState(MenuConfigStatus.failure, message: 'No menu'),
+      ],
+    );
+
+    blocTest<MenuConfigBloc, MenuConfigState>(
+      'MenuConfigLoad_expiredSession_asksForFreshLogin',
+      setUp: () => when(
+        () => restClient.getMenuConfiguration(appId: appId),
+      ).thenThrow(DioException(
+        requestOptions: RequestOptions(path: '/MenuConfiguration'),
+        response: Response(
+          requestOptions: RequestOptions(path: '/MenuConfiguration'),
+          statusCode: 403,
+        ),
+      )),
+      build: build,
+      act: (bloc) => bloc.add(const MenuConfigLoad()),
+      expect: () => [
+        menuState(MenuConfigStatus.loading),
+        menuState(
+          MenuConfigStatus.failure,
+          message: 'signedOutLoginAgain',
+        ),
       ],
     );
 
