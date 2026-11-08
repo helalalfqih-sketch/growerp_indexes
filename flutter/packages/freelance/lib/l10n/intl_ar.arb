@@ -1,3 +1,6 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "pageHomeWelcome": "مرحبًا {name}",
+  "screenNotFound": "لم يتم العثور على الشاشة {screen}",
+  "applicationNotDefined": "لم يتم العثور على شركة {applicationId} في النظام\nانتقل إلى تطبيق الإدارة لإنشاء شركة."
 }

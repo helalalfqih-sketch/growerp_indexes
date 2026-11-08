@@ -1,3 +1,12 @@
 {
-  "@@locale": "ar"
+  "@@locale": "ar",
+  "wikiSpace": "مساحة الويكي",
+  "noPagesFound": "لم يتم العثور على صفحات",
+  "searchPagePath": "البحث في مسار الصفحة",
+  "addPage": "إضافة صفحة",
+  "cancel": "إلغاء",
+  "pagePathHint": "مسار الصفحة، مثل 'notes/my-page' - تجنب البادئتين المنشأتين tables/ وdatasets/",
+  "dashSpaces": "مساحات",
+  "dashPages": "صفحات",
+  "dashNoWikiSpaces": "لا توجد مساحات ويكي"
 }

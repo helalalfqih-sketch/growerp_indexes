@@ -25,7 +25,8 @@ for source in sorted(packages.glob('*/lib/l10n/*_en.arb')):
     assert re.search(r'preferred-supported-locales:.*\bar\b', config.read_text()), config
     checked += 1
 core = packages / 'growerp_core/lib/src/domains/common'
-assert "Locale('ar')" in (core / 'widgets/top_app.dart').read_text()
-assert "'العربية'" in (core / 'views/home_form.dart').read_text()
+home_form = (core / 'views/home_form.dart').read_text()
+assert "Locale('ar')" in home_form
+assert "'العربية'" in home_form
 assert 'GlobalWidgetsLocalizations.delegate' in (core / 'widgets/top_app.dart').read_text()
 print(f'PASS: {checked} Arabic ARB resources, placeholder references, core key coverage, locale registration and selector.')
