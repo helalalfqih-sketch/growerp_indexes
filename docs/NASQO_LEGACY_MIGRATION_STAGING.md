@@ -153,3 +153,39 @@ approval, creates drafts, or posts ledger entries.
 
 If a staging backend is unavailable, the identity gate must remain blocked
 with PENDING_AUTHENTICATED_STAGING_LOOKUP; a user-supplied ID is not proof.
+
+
+## Disposable PostgreSQL CI rehearsal (synthetic data only)
+
+Run:
+
+    python3 tools/test_nasqo_ephemeral_pg_rehearsal.py
+
+GitHub Actions provisions a fresh PostgreSQL 17.2 service named
+nasqo_ci_disposable (CI-only credentials, not a real tenant). The Python
+rehearsal requires an explicit opt-in flag, an SQLite filename beginning
+with synthetic_, and a table containing a hard-coded synthetic marker.
+It rejects remote hosts, production database names, non-CI usernames and
+unexpected source sizes.
+
+Inside one database transaction, it:
+
+1. Reads each synthetic SQLite table except the marker table.
+2. Computes per-row SHA-256 digests and stable source row identifiers;
+   raw names, phone numbers, prices and financial amounts are NOT sent
+   to PostgreSQL.
+3. Inserts metadata into a PostgreSQL TEMP table only, marking every
+   financial candidate BLOCKED_FINANCIAL_MAPPING.
+4. Checks source row coverage and verifies that no row was posted or
+   connected to a real company.
+5. Performs an explicit ROLLBACK and confirms the TEMP table is gone.
+
+This is an **isolated PostgreSQL transaction test**, not a Moqui service
+integration test, tenant setup, real-company import or production release.
+Do not run it on the NASQO production VPS, which serves active workloads.
+The source legacy .back is never included in GitHub Actions or uploads.
+
+The latest passing GitHub Actions evidence for this feature can be found
+under this PR's NASQO legacy SQLite staging workflow. Keep this draft PR
+open until the real target/tenant isolation and finance approval gates
+are independently reviewed.
