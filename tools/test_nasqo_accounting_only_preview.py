@@ -53,6 +53,11 @@ class AccountingOnlyPreviewTests(unittest.TestCase):
         self.assertNotIn("import groovy.sql.Sql", c)
         self.assertNotIn("acctgTransEntryId", c)
         self.assertNotIn("post#AcctgTrans", c)
+        self.assertIn("sourceCashboxes: counts.cboxes", c)
+        self.assertIn("sourceAccountGroupCount: counts.boxes", c)
+        self.assertIn("sourceChartOfAccountsRows: null", c)
+        self.assertIn("sourceMeasurementAccounts: counts.macc", c)
+        self.assertNotIn("sourceCashboxes: counts.boxes + counts.cboxes", c)
         self.assertIn("sourcePartyTypes", c)
         self.assertIn("unmatchedMovementCurrencyRefs", c)
         # Financial direction must not be automatically inferred.
@@ -104,8 +109,8 @@ class AccountingOnlyPreviewTests(unittest.TestCase):
                     "SELECT COUNT(*) FROM input_move m LEFT JOIN currencies c "
                     "ON c.id=m.cur WHERE m.cur IS NOT NULL AND c.id IS NULL"
                 ).fetchone()[0], 1)
-                self.assertEqual(db.execute("SELECT COUNT(*) FROM boxes").fetchone()[0] +
-                                 db.execute("SELECT COUNT(*) FROM cboxes").fetchone()[0], 2)
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM boxes").fetchone()[0], 1)
+                self.assertEqual(db.execute("SELECT COUNT(*) FROM cboxes").fetchone()[0], 1)
                 self.assertEqual(db.execute("SELECT COUNT(*) FROM macc").fetchone()[0], 0)
                 self.assertEqual(db.execute("PRAGMA integrity_check").fetchone()[0], "ok")
 

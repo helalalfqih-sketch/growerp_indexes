@@ -102,6 +102,23 @@ class NasqoSqliteImportPreviewHelper {
             ).collect { row ->
                 [sourceType: row.sourceType, count: (row.count as Number).longValue()]
             }
+            // boxes are user-defined account groups, referenced by customers.type.
+            // Only cboxes contains cashboxes. macc belongs to the measurements module.
+            List sourceAccountGroups = []
+            if (tables.contains('boxes')) {
+                Set groupColumns = selectRows(conn, 'PRAGMA table_info(boxes)')
+                    .collect { it.name.toString() } as Set
+                if (groupColumns.containsAll(['id', 'name'])) {
+                    sourceAccountGroups = selectRows(conn,
+                        'SELECT b.id AS sourceType, b.name AS sourceGroupName, ' +
+                        'COUNT(c.id) AS accountCount FROM boxes b ' +
+                        'LEFT JOIN customers c ON c.type=b.id GROUP BY b.id,b.name ORDER BY b.id')
+                    Map names = sourceAccountGroups.collectEntries {
+                        [(it.sourceType.toString()): it.sourceGroupName]
+                    }
+                    sourcePartyTypes.each { it.sourceGroupName = names[it.sourceType?.toString()] }
+                }
+            }
             // A financial movement is a source document, not an AcctgTrans entry.
             // Values called dain/madin have NOT been approved as debit/credit.
             List unsupportedCurrencyRefs = selectRows(conn,
@@ -137,8 +154,13 @@ class NasqoSqliteImportPreviewHelper {
                     sourceAccountingMovements: counts.input_move,
                     sourcePrimaryBillLines: counts.bill_details,
                     sourceSupplementaryBillLines: counts.bill_details2,
-                    sourceCashboxes: counts.boxes + counts.cboxes,
-                    sourceChartOfAccountsRows: counts.macc,
+                    sourceCashboxes: counts.cboxes,
+                    sourceAccountGroupCount: counts.boxes,
+                    sourceAccountGroups: sourceAccountGroups,
+                    sourceAccountRecordCount: counts.customers,
+                    // Unknown is not zero: this export has no verified NASQO-style GL chart.
+                    sourceChartOfAccountsRows: null,
+                    sourceMeasurementAccounts: counts.macc,
                     sourcePartyTypes: sourcePartyTypes,
                     unclassifiedBillTypes: billTypes.collect { it.billType }.unique(),
                     unmatchedMovementCurrencyRefs: unmatchedCurrencyRefs,
@@ -150,7 +172,9 @@ class NasqoSqliteImportPreviewHelper {
                 ],
                 warnings: [
                     'Accounting module ONLY: products and stores are references, not app-wide imports.',
-                    'No verified source chart of accounts or tax-rate mapping is available.',
+                    'Source account groups (boxes) and account records (customers) require GL mapping; macc is a measurements table.',
+                    'No verified tax-rate mapping is available.',
+                    'مجموعات الحسابات منفصلة عن الصناديق النقدية؛ لا يعني فراغ جدول المقاسات غياب الحسابات.',
                     'Do not interpret source dain/madin as ledger debit/credit.',
                     'Bills and balances cannot be posted before type, currency, tax and account mappings are approved.',
                     'Existing accounting entries require duplicate and opening-balance reconciliation.'
