@@ -29,4 +29,27 @@
   <field name="createdDate" type="date-time"/>
   <relationship type="one" related="mantle.party.Party"/>
  </entity>
+ <entity entity-name="AccountingImportPayment" package="growerp.nasqo" cache="never" optimistic-lock="true">
+  <field name="companyPartyId" type="id" is-pk="true"/>
+  <field name="sourceId" type="id" is-pk="true"/>
+  <field name="sourceSha256" type="text-medium"/>
+  <field name="sourceRowSha256" type="text-medium"/>
+  <field name="planSha256" type="text-medium"/>
+  <field name="sourceAccountId" type="id"/>
+  <field name="sourceCashboxId" type="id"/>
+  <field name="sourceCurrencyId" type="id"/>
+  <field name="sourceInvoiceId" type="id"/>
+  <field name="rawDain" type="currency-precise"/>
+  <field name="rawMadin" type="currency-precise"/>
+  <field name="paymentId" type="id"/>
+  <field name="invoiceId" type="id"/>
+  <field name="direction" type="id"/>
+  <field name="creationStatus" type="id"/>
+  <field name="financialPostingApproved" type="text-indicator" default="N"/>
+  <field name="createdDate" type="date-time"/>
+  <relationship type="one" related="mantle.party.Party"><key-map field-name="companyPartyId" related="partyId"/></relationship>
+  <relationship type="one" related="mantle.account.payment.Payment"/>
+  <relationship type="one" related="mantle.account.invoice.Invoice"/>
+  <index name="NASQO_IMPORT_PAYMENT" unique="true"><index-field name="paymentId"/></index>
+ </entity>
 </entities>

@@ -29,14 +29,24 @@
                                 .condition('invoiceId',org.moqui.entity.EntityCondition.IN,invoiceIds).list()
                             long ledgerCount=ec.entity.find('mantle.ledger.transaction.AcctgTrans')
                                 .condition('invoiceId',org.moqui.entity.EntityCondition.IN,invoiceIds).count()
-                            review.financialDocumentsCreated=invoices.size()
+                            def paymentImports=ec.entity.find('growerp.nasqo.AccountingImportPayment')
+                                .condition('companyPartyId',company).list()
+                            def paymentIds=paymentImports*.paymentId.findAll{it}
+                            def payments=paymentIds ? ec.entity.find('mantle.account.payment.Payment')
+                                .condition('paymentId',org.moqui.entity.EntityCondition.IN,paymentIds).list() : []
+                            if(paymentIds) ledgerCount+=ec.entity.find('mantle.ledger.transaction.AcctgTrans')
+                                .condition('paymentId',org.moqui.entity.EntityCondition.IN,paymentIds).count()
+                            review.financialDocumentsCreated=invoices.size()+payments.size()
                             review.postedEntries=ledgerCount
                             review.status='NATIVE_DRAFTS_CREATED_NOT_POSTED'
                             review.nativeImport=[
-                                invoiceCount:invoices.size(),paymentCount:0,
+                                invoiceCount:invoices.size(),paymentCount:payments.size(),
+                                paymentDirections:paymentImports.countBy{it.direction},
+                                paymentStatuses:payments.countBy{it.statusId},
+                                paymentReferences:payments.take(12).collect{[paymentId:it.paymentId,reference:it.pseudoId,invoiceId:it.forInvoiceId]},
                                 invoiceItems:ec.entity.find('mantle.account.invoice.InvoiceItem')
                                     .condition('invoiceId',org.moqui.entity.EntityCondition.IN,invoiceIds).count(),
-                                heldMovements:review.summary.movements-imports.size(),
+                                heldMovements:review.summary.movements-imports.size()-paymentImports.size(),
                                 sourceDocumentTypes:imports.countBy{it.sourceBillType},
                                 draftStatuses:invoices.countBy{it.statusId},
                                 sampleReferences:invoices.take(12).collect{[invoiceId:it.invoiceId,reference:it.pseudoId]}]

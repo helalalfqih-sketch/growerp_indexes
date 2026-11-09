@@ -1594,6 +1594,11 @@ limitations under the License.
         </resource>
         <!-- import/export -->
         <resource name="ImportExport">
+            <resource name="AccountingVoucherDrafts" require-authentication="true">
+                <method type="post">
+                    <service name="growerp.100.NasqoNativeVoucherImportServices100.run#NativeVoucherImport"/>
+                </method>
+            </resource>
             <resource name="AccountingDrafts" require-authentication="true">
                 <method type="post">
                     <service name="growerp.100.NasqoNativeAccountingImportServices100.run#NativeAccountingImport"/>

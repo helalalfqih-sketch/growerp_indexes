@@ -13,4 +13,25 @@
    </if>
   </actions>
  </eeca>
+ <eeca id="NasqoImportedPaymentPostingReview" entity="mantle.account.payment.Payment"
+       on-update="true" run-before="true" get-entire-entity="true" run-on-error="false">
+  <condition><expression>statusId &amp;&amp; !(statusId in ['PmntProposed','PmntCancelled'])</expression></condition>
+  <actions>
+   <entity-find entity-name="growerp.nasqo.AccountingImportPayment" list="nasqoPayments"><econdition field-name="paymentId"/></entity-find>
+   <if condition="nasqoPayments.any { it.financialPostingApproved != 'Y' }">
+    <script>throw new IllegalStateException('هذا سند مستورد للمراجعة؛ يلزم اعتماد الحساب المالي والتسوية قبل تنفيذه أو ترحيله.')</script>
+   </if>
+  </actions>
+ </eeca>
+ <eeca id="NasqoImportedPaymentApplicationReview" entity="mantle.account.payment.PaymentApplication"
+       on-create="true" on-update="true" run-before="true" get-entire-entity="true" run-on-error="false">
+  <actions>
+   <entity-find entity-name="growerp.nasqo.AccountingImportPayment" list="nasqoPayments">
+    <econditions combine="or"><econdition field-name="paymentId"/><econdition field-name="paymentId" from="toPaymentId" ignore-if-empty="true"/></econditions>
+   </entity-find>
+   <if condition="nasqoPayments.any { it.financialPostingApproved != 'Y' }">
+    <script>throw new IllegalStateException('لا يمكن تسوية سند مستورد قبل اعتماد مراجعته المحاسبية.')</script>
+   </if>
+  </actions>
+ </eeca>
 </eecas>
