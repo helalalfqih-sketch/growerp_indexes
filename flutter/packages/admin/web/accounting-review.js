@@ -14,7 +14,11 @@
     if (!r.available) return { available: false, status: r.status };
     const native = r.status === 'NATIVE_DRAFTS_CREATED_NOT_POSTED' &&
       r.nativeImport && Number.isSafeInteger(r.nativeImport.invoiceCount) && r.nativeImport.invoiceCount > 0 &&
-      r.financialDocumentsCreated === r.nativeImport.invoiceCount && r.nativeImport.paymentCount === 0 &&
+      Number.isSafeInteger(r.nativeImport.paymentCount) && r.nativeImport.paymentCount >= 0 &&
+      r.financialDocumentsCreated === r.nativeImport.invoiceCount + r.nativeImport.paymentCount &&
+      Object.keys(r.nativeImport.paymentStatuses || {}).every(s => s === 'PmntProposed') &&
+      Object.values(r.nativeImport.paymentStatuses || {}).every(n => Number.isSafeInteger(n) && n > 0) &&
+      Object.values(r.nativeImport.paymentStatuses || {}).reduce((a, n) => a + n, 0) === r.nativeImport.paymentCount &&
       Object.keys(r.nativeImport.draftStatuses || {}).every(s => ['InvoiceInProcess', 'InvoiceIncoming'].includes(s)) &&
       Object.values(r.nativeImport.draftStatuses || {}).every(n => Number.isSafeInteger(n) && n > 0) &&
       Object.values(r.nativeImport.draftStatuses || {}).reduce((a, n) => a + n, 0) === r.nativeImport.invoiceCount;
@@ -142,16 +146,23 @@
       body.append(make('p', 'العملة المعتمدة: الريال اليمني (YER) لجميع الرموز 1 و2 و3. المبالغ محفوظة كما وردت دون تحويل عملات.', 'review-note'));
     }
     body.append(make('p', r.nativeImport
-      ? 'أُنشئت الفواتير والمرتجعات الموضحة أدناه داخل نسقو كمسودات فعلية غير مُرحّلة. لم تُنقل المدفوعات أو الأرصدة الافتتاحية.'
+      ? 'أُنشئت المستندات الموضحة أدناه داخل نسقو كمسودات فعلية غير مُرحّلة. لم تُنفذ تسويات أو تُنقل أرصدة افتتاحية.'
       : 'لم تُستورد المستندات أو الأرصدة إلى المحاسبة بعد. النتائج أدناه للمراجعة قبل الاستيراد.', 'review-note'));
     if (r.nativeImport) {
       const n = r.nativeImport;
       body.append(make('h3', 'المستندات المحاسبية المنشأة في نسقو'));
       body.append(make('p', 'الفواتير والمرتجعات: ' + text(n.invoiceCount) +
-        ' · بنود الفواتير: ' + text(n.invoiceItems) + ' · حركات المصدر المعلّقة: ' + text(n.heldMovements)));
-      body.append(make('p', 'تجدها في فواتير المبيعات والمشتريات بحالة مسودة، ومراجع تبدأ بـ SAP. الاعتماد المحاسبي محظور حتى مراجعة الحسابات والضرائب والتسويات.', 'review-note'));
+        ' · سندات القبض والصرف: ' + text(n.paymentCount) + ' · بنود الفواتير: ' + text(n.invoiceItems) + ' · حركات المصدر المعلّقة: ' + text(n.heldMovements)));
+      body.append(make('p', 'تجدها في فواتير ومدفوعات المبيعات والمشتريات بحالة مسودة، ومراجع تبدأ بـ SAP. الاعتماد المحاسبي محظور حتى مراجعة الحسابات والضرائب والتسويات.', 'review-note'));
       table('مراجع بعض المستندات المنشأة', ['معرّف نسقو', 'مرجع المستند'],
         (Array.isArray(n.sampleReferences) ? n.sampleReferences : []).map(x => [x.invoiceId, x.reference]));
+      if (n.paymentCount) {
+        body.append(make('p', 'سندات قبض: ' + text(n.paymentDirections?.INCOMING || 0) +
+          ' · سندات صرف: ' + text(n.paymentDirections?.OUTGOING || 0) +
+          '. طُوبق كل سند مع رقم فاتورته وحسابه ومبلغه. حساب الصندوق ووسيلة الدفع ما زالا للمراجعة.'));
+        table('مراجع بعض السندات المنشأة', ['معرّف نسقو', 'مرجع السند', 'الفاتورة المرتبطة'],
+          (Array.isArray(n.paymentReferences) ? n.paymentReferences : []).map(x => [x.paymentId, x.reference, x.invoiceId]));
+      }
     }
     const s = r.summary || {};
     const stats = make('div', null, 'review-stats');

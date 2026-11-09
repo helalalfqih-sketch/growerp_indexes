@@ -8,6 +8,9 @@ on:
       - 'backend/entity/NasqoAccountingImport*'
       - 'backend/service/growerp/100/NasqoNativeAccountingImportServices100.xml'
       - 'tools/test_native_invoice_plan.groovy'
+      - 'tools/test_native_voucher_plan.groovy'
+      - 'tools/run_native_voucher_import.groovy'
+      - 'backend/service/growerp/100/NasqoNativeVoucherImportServices100.xml'
       - 'tools/run_native_accounting_import.groovy'
       - 'backend/service/growerp/100/NasqoSavedAccountingReviewServices100.xml'
       - 'backend/service/growerp.rest.xml'
@@ -58,3 +61,5 @@ jobs:
           java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_accounting_draft_plan.groovy tools/NasqoAccountingDraftPlan.groovy
           java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_saved_accounting_review.groovy backend/service/NasqoSavedAccountingReview.groovy
           java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_native_invoice_plan.groovy backend/service/NasqoNativeInvoicePlan.groovy
+
+          java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_native_voucher_plan.groovy backend/service/NasqoNativeVoucherPlan.groovy

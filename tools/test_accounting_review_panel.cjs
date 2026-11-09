@@ -62,3 +62,13 @@ test('native invoice results require actual unposted draft statuses and consiste
  {nativeImport:{...r.nativeImport,draftStatuses:{}}},{nativeImport:{...r.nativeImport,paymentCount:1}}])
   assert.throws(()=>project({review:{...r,...change}}));
 });
+
+test('native vouchers require proposed status and exact combined counts', () => {
+ const r={available:true,readOnly:true,status:'NATIVE_DRAFTS_CREATED_NOT_POSTED',readyForAccountingImport:false,
+ financialDocumentsCreated:5,postedEntries:0,nativeImport:{invoiceCount:2,paymentCount:3,
+ draftStatuses:{InvoiceInProcess:2},paymentStatuses:{PmntProposed:3}}};
+ assert.equal(project({review:r}),r);
+ for(const paymentStatuses of [{PmntConfirmed:3},{PmntProposed:2},{}, {PmntProposed:-1}])
+  assert.throws(()=>project({review:{...r,nativeImport:{...r.nativeImport,paymentStatuses}}}));
+ assert.throws(()=>project({review:{...r,financialDocumentsCreated:2}}));
+});
