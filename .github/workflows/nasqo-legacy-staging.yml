@@ -5,6 +5,8 @@ on:
     paths:
       - 'tools/nasqo_legacy_staging.py'
       - 'tools/test_nasqo_legacy_staging.py'
+      - 'tools/nasqo_prepare_review_candidates.py'
+      - 'tools/test_nasqo_prepare_review_candidates.py'
       - 'tools/nasqo_staging_company_identity.py'
       - 'tools/test_nasqo_staging_company_identity.py'
       - 'tools/nasqo_ephemeral_pg_rehearsal.py'
@@ -24,6 +26,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: Run staging regression tests using synthetic SQLite only
         run: python3 tools/test_nasqo_legacy_staging.py
+      - name: Verify model field mapping and unposted review candidates
+        run: python3 tools/test_nasqo_prepare_review_candidates.py
       - name: Test company partyId vs pseudoId and staging restrictions
         run: python3 tools/test_nasqo_staging_company_identity.py
       - name: Preserve the existing offline legacy-report contract
