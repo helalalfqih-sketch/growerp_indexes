@@ -1,5 +1,13 @@
 import java.sql.Connection
 import java.sql.DriverManager
+import groovy.json.JsonOutput
+import java.nio.file.Files
+import java.nio.file.LinkOption
+import java.nio.file.Path
+import java.nio.file.StandardCopyOption
+import java.nio.file.attribute.PosixFilePermissions
+import java.security.MessageDigest
+import java.time.Instant
 
 /** Strictly read-only legacy SQLite preview: returns a class for ec.resource.script(). */
 class NasqoSqliteImportPreviewHelper {
@@ -152,6 +160,132 @@ class NasqoSqliteImportPreviewHelper {
             conn.close()
         }
     }
+
+    /**
+     * Preserve an explicitly approved, authenticated company source for review.
+     *
+     * This is NOT an accounting import: no PostgreSQL access, invoices, payments,
+     * GL journals, account creation, or ledger posting occur here. One source
+     * fingerprint per company prevents accidental double-import preparation.
+     * The persistent root is an operator-controlled private Docker bind mount.
+     */
+    static Map stageForAccounting(File source, File privateRoot, String companyId) {
+        if (companyId == null || !(companyId ==~ /[A-Za-z0-9_-]{1,64}/)) {
+            throw new IllegalArgumentException('A validated company is required for staging')
+        }
+        if (source == null || !source.isFile() || source.length() < 100L ||
+                source.length() > 32L * 1024L * 1024L) {
+            throw new IllegalArgumentException('Accounting staging accepts SQLite files up to 32 MiB')
+        }
+        if (privateRoot == null || !privateRoot.isDirectory() ||
+                Files.isSymbolicLink(privateRoot.toPath())) {
+            throw new IllegalStateException('Private accounting staging storage is not mounted')
+        }
+        Path rootPath = privateRoot.toPath().toRealPath(LinkOption.NOFOLLOW_LINKS)
+        Path ownerPath = rootPath.resolve(companyId)
+        if (Files.isSymbolicLink(ownerPath)) {
+            throw new IllegalStateException('Unsafe company staging path')
+        }
+        if (!Files.exists(ownerPath, LinkOption.NOFOLLOW_LINKS)) {
+            try {
+                Files.createDirectory(ownerPath)
+            } catch (java.nio.file.FileAlreadyExistsException ignored) {
+                // A simultaneous request may create the same isolated directory.
+            }
+        }
+        if (!Files.isDirectory(ownerPath, LinkOption.NOFOLLOW_LINKS)) {
+            throw new IllegalStateException('Invalid company staging directory')
+        }
+        Files.setPosixFilePermissions(ownerPath, PosixFilePermissions.fromString('rwx------'))
+        // Re-validate the actual input without ever connecting to NASQO PostgreSQL.
+        Map reviewed = preview(source)
+        MessageDigest digest = MessageDigest.getInstance('SHA-256')
+        source.withInputStream { input ->
+            byte[] chunk = new byte[64 * 1024]
+            int amount
+            while ((amount = input.read(chunk)) != -1) {
+                digest.update(chunk, 0, amount)
+            }
+        }
+        String sha = digest.digest().collect { String.format('%02x', it & 0xff) }.join()
+        Path finalPath = ownerPath.resolve(sha)
+        if (Files.exists(finalPath, LinkOption.NOFOLLOW_LINKS)) {
+            if (Files.isSymbolicLink(finalPath) ||
+                    !Files.isRegularFile(finalPath.resolve('source.back'), LinkOption.NOFOLLOW_LINKS)) {
+                throw new IllegalStateException('Existing source staging is incomplete')
+            }
+            // Never silently accept a same-name or previously changed source.
+            MessageDigest verify = MessageDigest.getInstance('SHA-256')
+            finalPath.resolve('source.back').toFile().withInputStream { input ->
+                byte[] chunk = new byte[64 * 1024]
+                int amount
+                while ((amount = input.read(chunk)) != -1) verify.update(chunk, 0, amount)
+            }
+            String storedSha = verify.digest().collect { String.format('%02x', it & 0xff) }.join()
+            if (storedSha != sha) {
+                throw new IllegalStateException('Stored staging source failed integrity verification')
+            }
+            return [
+                status: 'REVIEW_ONLY_NOT_IMPORTED', stageId: sha.substring(0, 16),
+                sourceSha256: sha, existing: true, targetCompanyPartyId: companyId,
+                sourceRowsWrittenToAccounting: 0, postedEntries: 0
+            ]
+        }
+        File[] previouslyStaged = ownerPath.toFile().listFiles({ File f ->
+            f.isDirectory() && (f.name ==~ /[a-f0-9]{64}/)
+        } as FileFilter)
+        if (previouslyStaged == null) {
+            throw new IllegalStateException('Unable to inspect private company staging')
+        }
+        if (previouslyStaged.length > 0) {
+            throw new IllegalStateException('An accounting source is already staged for this company; reconciliation is required before replacing it')
+        }
+        Path pending = Files.createTempDirectory(ownerPath, '.pending-')
+        try {
+            Files.setPosixFilePermissions(pending, PosixFilePermissions.fromString('rwx------'))
+            Path saved = pending.resolve('source.back')
+            Files.copy(source.toPath(), saved)
+            Files.setPosixFilePermissions(saved, PosixFilePermissions.fromString('r--------'))
+            Map manifest = [
+                format: 'nasqo-smart-accountant-staging-v1',
+                status: 'BLOCKED_PENDING_ACCOUNT_MAPPING',
+                sourceType: 'SMART_ACCOUNTANT_DESKTOP_TO_ANDROID_SQLITE_EXPORT',
+                sourceSha256: sha,
+                sourceSizeBytes: source.length(),
+                targetModule: 'accounting',
+                targetCompanyPartyId: companyId,
+                createdAt: Instant.now().toString(),
+                sourceTableCounts: reviewed.counts,
+                sourceBillTypeAndStateCounts: reviewed.billTypes,
+                sourceCurrencyCount: reviewed.currencies.size(),
+                sourcePartyTypeCounts: reviewed.accountingReview.sourcePartyTypes,
+                unmatchedMovementCurrencyRefs: reviewed.accountingReview.unmatchedMovementCurrencyRefs,
+                requiredApprovals: reviewed.accountingReview.requiredApprovals,
+                postAccounting: false,
+                sourceRowsWrittenToAccounting: 0,
+                postedEntries: 0,
+                applicationWideImport: false
+            ]
+            Path manifestPath = pending.resolve('manifest.json')
+            Files.write(manifestPath, (JsonOutput.prettyPrint(JsonOutput.toJson(manifest)) + '\n')
+                .getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            Files.setPosixFilePermissions(manifestPath, PosixFilePermissions.fromString('r--------'))
+            Files.move(pending, finalPath, StandardCopyOption.ATOMIC_MOVE)
+        } finally {
+            // A successful atomic move makes pending disappear.
+            if (Files.exists(pending, LinkOption.NOFOLLOW_LINKS)) {
+                Files.deleteIfExists(pending.resolve('source.back'))
+                Files.deleteIfExists(pending.resolve('manifest.json'))
+                Files.deleteIfExists(pending)
+            }
+        }
+        return [
+            status: 'REVIEW_ONLY_NOT_IMPORTED', stageId: sha.substring(0, 16),
+            sourceSha256: sha, existing: false, targetCompanyPartyId: companyId,
+            sourceRowsWrittenToAccounting: 0, postedEntries: 0
+        ]
+    }
+
 }
 
 // Keep this helper name different from this Groovy script filename.
