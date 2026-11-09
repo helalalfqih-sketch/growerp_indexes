@@ -20,6 +20,29 @@
                     def helper = ec.resource.script(
                         'component://growerp/service/NasqoSavedAccountingReview.groovy', null)
                     review = helper.read(new File('/var/lib/nasqo-accounting-imports'), company)
+                    if (review.available) {
+                        def imports = ec.entity.find('growerp.nasqo.AccountingImportDocument')
+                            .condition('companyPartyId',company).list()
+                        if (imports) {
+                            def invoiceIds=imports*.invoiceId.findAll{it}
+                            def invoices=ec.entity.find('mantle.account.invoice.Invoice')
+                                .condition('invoiceId',org.moqui.entity.EntityCondition.IN,invoiceIds).list()
+                            long ledgerCount=ec.entity.find('mantle.ledger.transaction.AcctgTrans')
+                                .condition('invoiceId',org.moqui.entity.EntityCondition.IN,invoiceIds).count()
+                            review.financialDocumentsCreated=invoices.size()
+                            review.postedEntries=ledgerCount
+                            review.status='NATIVE_DRAFTS_CREATED_NOT_POSTED'
+                            review.nativeImport=[
+                                invoiceCount:invoices.size(),paymentCount:0,
+                                invoiceItems:ec.entity.find('mantle.account.invoice.InvoiceItem')
+                                    .condition('invoiceId',org.moqui.entity.EntityCondition.IN,invoiceIds).count(),
+                                heldMovements:review.summary.movements-imports.size(),
+                                sourceDocumentTypes:imports.countBy{it.sourceBillType},
+                                draftStatuses:invoices.countBy{it.statusId},
+                                sampleReferences:invoices.take(12).collect{[invoiceId:it.invoiceId,reference:it.pseudoId]}]
+                        }
+                    }
+
                 }
             ]]></script>
         </actions>

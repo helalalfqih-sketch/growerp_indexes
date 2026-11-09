@@ -4,6 +4,11 @@ on:
   pull_request:
     paths:
       - 'backend/service/NasqoSavedAccountingReview.groovy'
+      - 'backend/service/NasqoNative*.groovy'
+      - 'backend/entity/NasqoAccountingImport*'
+      - 'backend/service/growerp/100/NasqoNativeAccountingImportServices100.xml'
+      - 'tools/test_native_invoice_plan.groovy'
+      - 'tools/run_native_accounting_import.groovy'
       - 'backend/service/growerp/100/NasqoSavedAccountingReviewServices100.xml'
       - 'backend/service/growerp.rest.xml'
       - 'flutter/packages/admin/web/accounting-review.js'
@@ -52,3 +57,4 @@ jobs:
           )
           java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_accounting_draft_plan.groovy tools/NasqoAccountingDraftPlan.groovy
           java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_saved_accounting_review.groovy backend/service/NasqoSavedAccountingReview.groovy
+          java -cp "$task_jars/*" groovy.ui.GroovyMain tools/test_native_invoice_plan.groovy backend/service/NasqoNativeInvoicePlan.groovy

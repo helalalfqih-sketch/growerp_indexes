@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<eecas xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/entity-eca-3.xsd">
+ <eeca id="NasqoImportedInvoicePostingReview" entity="mantle.account.invoice.Invoice"
+       on-update="true" run-before="true" get-entire-entity="true" run-on-error="false">
+  <condition><expression>statusId &amp;&amp; !(statusId in ['InvoiceInProcess','InvoiceIncoming','InvoiceCancelled'])</expression></condition>
+  <actions>
+   <entity-find entity-name="growerp.nasqo.AccountingImportDocument" list="nasqoImports">
+    <econdition field-name="invoiceId"/>
+   </entity-find>
+   <if condition="nasqoImports.any { it.financialPostingApproved != 'Y' }">
+    <script>throw new IllegalStateException('هذه مسودة مستوردة؛ يجب مراجعة مطابقة الحسابات والضرائب والتسويات قبل اعتمادها محاسبيًا.')</script>
+   </if>
+  </actions>
+ </eeca>
+</eecas>
