@@ -7,13 +7,25 @@ ROOT = Path(__file__).resolve().parents[1]
 UTILITY = ROOT / "backend/service/NasqoSqliteImportUtil.groovy"
 SERVICE = ROOT / "backend/service/growerp/100/NasqoSqliteImportServices100.xml"
 
-# Moqui ec.resource.script() returns the last script expression. The helper
-# must yield its class; a class-only Groovy file yields no callable helper.
+# The source filename is NasqoSqliteImportUtil.groovy, therefore the helper
+# class MUST have a different name: Groovy generates a script class matching
+# the filename, and the same class name would fail compilation.
 utility = UTILITY.read_text(encoding="utf-8")
-assert "class NasqoSqliteImportUtil" in utility
-assert utility.rstrip().endswith("return NasqoSqliteImportUtil"), (
-    "SQLite helper must return its class to ec.resource.script()"
+assert "class NasqoSqliteImportPreviewHelper" in utility
+assert "class NasqoSqliteImportUtil" not in utility
+assert utility.rstrip().endswith("return NasqoSqliteImportPreviewHelper"), (
+    "Groovy script must return a distinct callable preview helper class"
 )
+# Groovy 5 runtime in the deployed Moqui image has no groovy-sql module.
+# Use standard JDBC instead; never attempt to write to the uploaded SQLite.
+assert "import groovy.sql.Sql" not in utility
+assert "import java.sql.DriverManager" in utility
+assert "PRAGMA query_only=ON" in utility
+assert "'jdbc:sqlite:' + uri + '?mode=ro'" in utility
+assert "'PRAGMA integrity_check'" in utility
+assert "PRAGMA integrity_check()" not in utility
+assert "conn.close()" in utility
+assert "postAccounting: false" in utility
 
 # A clean runtime may not have runtime/ownerData yet. Prepare it *before*
 # Java's File.createTempFile, not afterwards.
