@@ -1,0 +1,26 @@
+name: Saved accounting review checks
+on:
+  pull_request:
+    paths:
+      - 'backend/service/NasqoSavedAccountingReview.groovy'
+      - 'backend/service/growerp/100/NasqoSavedAccountingReviewServices100.xml'
+      - 'backend/service/growerp.rest.xml'
+      - 'flutter/packages/admin/web/accounting-review.js'
+      - 'flutter/packages/admin/web/index.html'
+      - 'tools/test_accounting_review_panel.cjs'
+      - 'tools/test_saved_accounting_review.py'
+      - '.github/workflows/nasqo-saved-accounting-review.yml'
+permissions:
+  contents: read
+jobs:
+  saved-accounting-review:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --check flutter/packages/admin/web/accounting-review.js
+      - run: node --test tools/test_accounting_review_panel.cjs
+      - run: python3 tools/test_saved_accounting_review.py
