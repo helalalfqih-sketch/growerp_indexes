@@ -388,7 +388,7 @@ void main() {
     );
 
     blocTest<AuthBloc, AuthState>(
-      'AuthLoggedOut_restThrowsDio_emitsFailure',
+      'AuthLoggedOut_expiredSession_clearsCredentials',
       setUp: () => when(() => restClient.logout()).thenThrow(dioError('Nope')),
       build: build,
       seed: () =>
@@ -397,8 +397,16 @@ void main() {
       wait: throttleWait,
       expect: () => [
         authState(AuthStatus.loading),
-        authState(AuthStatus.failure, message: 'Nope'),
+        authState(AuthStatus.unAuthenticated, message: 'authLogoutSuccess'),
       ],
+      verify: (_) async {
+        final prefs = await SharedPreferences.getInstance();
+        expect(prefs.getString('apiKey'), isNull);
+        expect(prefs.getString('moquiSessionToken'), isNull);
+        expect(await PersistFunctions.getAuthenticate(), isNull);
+        verify(() => chat.close()).called(1);
+        verify(() => notification.close()).called(1);
+      },
     );
   });
 

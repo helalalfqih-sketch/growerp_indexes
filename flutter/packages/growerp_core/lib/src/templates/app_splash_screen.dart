@@ -77,7 +77,18 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
   @override
   Widget build(BuildContext context) {
 
-    return BlocConsumer<AuthBloc, AuthState>(
+    return BlocListener<MenuConfigBloc, MenuConfigState>(
+      listenWhen: (_, current) =>
+          current.status == MenuConfigStatus.failure &&
+          current.message == 'signedOutLoginAgain',
+      listener: (context, _) {
+        // Return to login after a verified 401/403 menu response.
+        if (context.read<AuthBloc>().state.status ==
+            AuthStatus.authenticated) {
+          context.read<AuthBloc>().add(const AuthLoggedOut());
+        }
+      },
+      child: BlocConsumer<AuthBloc, AuthState>(
       // Only on the transition into authenticated: any later state change while
       // logged in (a local authenticate update) reloaded the menu again.
       listenWhen: (previous, current) =>
@@ -114,6 +125,7 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
           ),
         );
       },
+      ),
     );
   }
 
@@ -129,7 +141,9 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
         ),
         SizedBox(height: 8),
         Text(
-          menuState.message ?? 'Unknown error',
+          menuState.message == 'signedOutLoginAgain'
+              ? CoreLocalizations.of(context)!.signedOutLoginAgain
+              : (menuState.message ?? 'Unknown error'),
           style: const TextStyle(color: Colors.red),
           textAlign: TextAlign.center,
         ),

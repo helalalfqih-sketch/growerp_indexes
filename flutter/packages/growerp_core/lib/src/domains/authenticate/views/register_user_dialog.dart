@@ -22,6 +22,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:responsive_framework/responsive_framework.dart';
+
 import '../../domains.dart';
 
 class RegisterUserDialog extends StatefulWidget {
@@ -167,8 +168,7 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
             ),
             const SizedBox(height: 20),
             const SizedBox(height: 10),
-            if (kIsWeb &&
-                widget.admin &&
+            if (widget.admin &&
                 GlobalConfiguration().get('googleRegistrationEnabled') ==
                     true) ...[
               OutlinedButton.icon(
@@ -180,7 +180,14 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                       : 'Create account with Google',
                 ),
                 onPressed: () async {
-                  final uri = Uri.base.replace(
+                  // New-company registration remains on the secured NASQO
+                  // website (OAuth state + same-browser session); the native
+                  // app never receives Google client credentials.
+                  final String base = kIsWeb
+                      ? Uri.base.origin
+                      : (GlobalConfiguration().get('databaseUrl') as String? ??
+                            'https://erp.indexesstore.com');
+                  final uri = Uri.parse(base).replace(
                     path: '/googleOAuth/loginStart',
                     query: null,
                     queryParameters: {
@@ -189,7 +196,14 @@ class _RegisterUserDialogState extends State<RegisterUserDialog> {
                     },
                     fragment: null,
                   );
-                  await launchUrl(uri, webOnlyWindowName: '_self');
+                  if (uri.scheme != 'https') return;
+                  await launchUrl(
+                    uri,
+                    mode: kIsWeb
+                        ? LaunchMode.platformDefault
+                        : LaunchMode.externalApplication,
+                    webOnlyWindowName: kIsWeb ? '_self' : null,
+                  );
                 },
               ),
               const SizedBox(height: 12),

@@ -14,6 +14,7 @@
 
 import 'dart:async';
 import 'dart:ui' show Locale;
+
 import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -157,6 +158,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
         }
         await PersistFunctions.persistAuthenticate(authResult);
+        // The saved API key is used by Dio's KeyInterceptor. It must exist
+        // before protected settings/agent screens dispatch their first GET/POST.
+        await PersistFunctions.persistKeyValue('apiKey', authResult.apiKey!);
+        if (authResult.moquiSessionToken != null &&
+            authResult.moquiSessionToken!.isNotEmpty) {
+          await PersistFunctions.persistKeyValue(
+            'moquiSessionToken',
+            authResult.moquiSessionToken!,
+          );
+        }
         // chat
         await chat.connect(authResult.apiKey!, userId);
         // notification
@@ -226,8 +237,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: Authenticate(applicationId: applicationId),
-          message:
-              'تم إنشاء حسابك باستخدام Google. أكمل إعداد الشركة والاشتراك عند تسجيل الدخول.',
+          message: 'تم إنشاء حسابك باستخدام Google. أكمل إعداد الشركة والاشتراك عند تسجيل الدخول.',
         ),
       );
       return true;
@@ -279,8 +289,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         state.copyWith(
           status: AuthStatus.unAuthenticated,
           authenticate: Authenticate(applicationId: applicationId),
-          message:
-              'لم يكتمل تسجيل الدخول عبر Google. استخدم بريدك وكلمة مرورك أو أعد المحاولة.',
+          message: 'لم يكتمل تسجيل الدخول عبر Google. استخدم بريدك وكلمة مرورك أو أعد المحاولة.',
         ),
       );
     }
@@ -405,30 +414,27 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     AuthLoggedOut event,
     Emitter<AuthState> emit,
   ) async {
+    emit(state.copyWith(status: AuthStatus.loading));
+    // A revoked session may cause even Logout to return HTTP 403.
+    // This must not block local sign-out and recovery.
     try {
-      emit(state.copyWith(status: AuthStatus.loading));
       await restClient.logout();
-      await clearRestCache();
-      notification.close();
-      chat.close();
-      emit(
-        state.copyWith(
-          status: AuthStatus.unAuthenticated,
-          message: AuthBlocMessageKeys.logoutSuccess,
-        ),
-      );
-      PersistFunctions.persistAuthenticate(
-        state.authenticate!.copyWith(apiKey: null),
-      );
-      PersistFunctions.persistKeyValue('apiKey', '');
-    } on DioException catch (e) {
-      emit(
-        state.copyWith(
-          status: AuthStatus.failure,
-          message: await getDioError(e),
-        ),
-      );
+    } catch (_) {
+      // Always remove credentials locally, irrespective of server response.
     }
+    await clearRestCache();
+    await PersistFunctions.removeAuthenticate();
+    await PersistFunctions.removeKey('apiKey');
+    await PersistFunctions.removeKey('moquiSessionToken');
+    notification.close();
+    chat.close();
+    emit(
+      state.copyWith(
+        status: AuthStatus.unAuthenticated,
+        authenticate: Authenticate(applicationId: applicationId),
+        message: AuthBlocMessageKeys.logoutSuccess,
+      ),
+    );
   }
 
   /// Promote a 'setupInProgress' session to authenticated once the background demo
@@ -450,9 +456,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     Stats? stats = authenticate!.stats;
     try {
       stats =
-          (await restClient.getAuthenticate(
-            applicationId: applicationId,
-          )).stats ??
+          (await restClient.getAuthenticate(applicationId: applicationId))
+              .stats ??
           stats;
     } catch (_) {}
     final completed = authenticate.copyWith(loginStatus: null, stats: stats);
@@ -539,13 +544,18 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
             // No message here - dialogs handle their own messages
           ),
         );
-        PersistFunctions.persistAuthenticate(state.authenticate!);
-
-        PersistFunctions.persistKeyValue('apiKey', authenticate.apiKey ?? '');
-        PersistFunctions.persistKeyValue(
-          'moquiSessionToken',
-          authenticate.moquiSessionToken ?? '',
+        await PersistFunctions.persistAuthenticate(authenticate);
+        await PersistFunctions.persistKeyValue(
+          'apiKey',
+          authenticate.apiKey ?? '',
         );
+        if (authenticate.moquiSessionToken != null &&
+            authenticate.moquiSessionToken!.isNotEmpty) {
+          await PersistFunctions.persistKeyValue(
+            'moquiSessionToken',
+            authenticate.moquiSessionToken!,
+          );
+        }
       } else {
         // 'setupInProgress' is the one in-process status that comes back with a real
         // apiKey: the login itself succeeded and only the demo data is still loading.

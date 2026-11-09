@@ -92,10 +92,13 @@ class MenuConfigBloc extends Bloc<MenuConfigEvent, MenuConfigState> {
         ),
       );
     } on DioException catch (e) {
+      // Do not retry a protected menu with an expired NASQO credential.
+      final expired = e.response?.statusCode == 401 ||
+          e.response?.statusCode == 403;
       emit(
         state.copyWith(
           status: MenuConfigStatus.failure,
-          message: await getDioError(e),
+          message: expired ? 'signedOutLoginAgain' : await getDioError(e),
         ),
       );
     } catch (e) {
