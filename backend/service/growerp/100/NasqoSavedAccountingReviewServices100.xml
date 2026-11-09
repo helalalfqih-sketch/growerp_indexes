@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+    <service verb="get" noun="SavedAccountingReview" authenticate="true">
+        <description>Read the current company's private accounting source reconciliation; no financial writes.</description>
+        <out-parameters><parameter name="review" type="Map"/></out-parameters>
+        <actions>
+            <if condition="!ec.user.isInGroup('GROWERP_M_ADMIN') &amp;&amp; !ec.user.isInGroup('GROWERP_M_SYSTEM')">
+                <return error="true" message="Only a company administrator can read an accounting review"/>
+            </if>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                in-map="[userPartyId: ec.user.userAccount.partyId]" out-map="related"/>
+            <script><![CDATA[
+                ec.web?.response?.setHeader('Cache-Control', 'no-store, private')
+                ec.web?.response?.setHeader('Pragma', 'no-cache')
+                String company = related.userCompanyPartyId?.toString()
+                String allowedCompany = System.getenv('NASQO_ACCOUNTING_STAGE_COMPANY')
+                review = [available: false, status: 'NO_SAVED_REVIEW', readOnly: true]
+                if (allowedCompany && company == allowedCompany) {
+                    def helper = ec.resource.script(
+                        'component://growerp/service/NasqoSavedAccountingReview.groovy', null)
+                    review = helper.read(new File('/var/lib/nasqo-accounting-imports'), company)
+                }
+            ]]></script>
+        </actions>
+    </service>
+</services>
