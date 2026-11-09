@@ -37,11 +37,22 @@ service = next(
 script = service.find("./actions/script")
 assert script is not None and script.text
 body = script.text
-mkdir_pos = body.index("dir.mkdirs()")
+mkdir_pos = body.index("directory.mkdirs()")
 temp_pos = body.index("File.createTempFile")
 assert mkdir_pos < temp_pos, "Create the temp directory before the file"
 assert "ec.resource.script('component://growerp/service/NasqoSqliteImportUtil.groovy', null)" in body
 assert "preview = util.preview(temp)" in body
 assert "temp.delete()" in body
+# Groovy 5 does not expose File.outputStream as a Groovy dynamic property.
+# Opening a standard Java FileOutputStream is required for multipart uploads.
+assert "new java.io.FileOutputStream(temp).withCloseable" in body
+assert "temp.outputStream" not in body
+# Enforce the body limit as well as the declared upload size (do not exhaust VPS disk).
+assert "final long maxSize = 256L * 1024L * 1024L" in body
+assert "file.size <= 0L || file.size > maxSize" in body
+assert "byte[] bytes = new byte[64 * 1024]" in body
+assert "size > maxSize" in body
+assert "output.write(bytes, 0, amount)" in body
+assert "preview = util.preview(temp)" in body
 
 print("PASS: NASQO SQLite preview source contract")
