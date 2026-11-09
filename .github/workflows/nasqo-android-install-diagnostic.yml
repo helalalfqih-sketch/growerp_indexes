@@ -1,0 +1,52 @@
+name: NASQO Android 13 install diagnostic
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - diagnose/android13-install-20261109
+    paths:
+      - '.github/workflows/nasqo-android-install-diagnostic.yml'
+      - 'tools/test_android_apk_install.sh'
+
+permissions:
+  contents: read
+
+jobs:
+  apk-install:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Fetch the exact public APK
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p apk-install-report
+          curl --fail --location --retry 2 --max-time 180 \
+            https://erp.indexesstore.com/downloads/NASQO_ERP_Android_1.22.8.apk \
+            -o apk-install-report/nasqo.apk
+          echo '54b9bc84db4aaba9ddd65d545c143fa6c7748ab3bdeefedb3a95b07c6f111d18  apk-install-report/nasqo.apk' | sha256sum -c -
+      - name: Give this runner access to its emulator device
+        run: sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+      - name: Install on a clean Android 13 device
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          cores: 2
+          ram-size: 2048M
+          disk-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save
+          disable-animations: true
+          script: bash tools/test_android_apk_install.sh
+      - name: Preserve diagnostic results without the APK
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nasqo-android13-install-diagnostic
+          path: |
+            apk-install-report/*.log
+            apk-install-report/*.txt
+          retention-days: 7
