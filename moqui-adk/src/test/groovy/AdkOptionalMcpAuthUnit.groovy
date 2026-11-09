@@ -21,9 +21,18 @@ def key = field('mcpApiKey')
 def retry = field('mcpKeyRetryAfterMs')
 def service = field('sharedSessionService')
 def shutdown = field('shuttingDown')
+def artifacts = field('sharedArtifactService')
+def currentConfig = field('currentConfig')
+Map registry = field('registry').get(null) as Map
+Map agents = field('agentRegistry').get(null) as Map
+Map tenants = field('tenantRegistry').get(null) as Map
+String priorProviderProperty = System.getProperty('GOOGLE_API_KEY')
 Map toolsets = field('configMcpToolsets').get(null) as Map
 def saved = [key: key.get(null), retry: retry.get(null), service: service.get(null),
-             shutdown: shutdown.get(null), toolsets: new LinkedHashMap(toolsets)]
+             shutdown: shutdown.get(null), toolsets: new LinkedHashMap(toolsets),
+             artifacts: artifacts.get(null), currentConfig: currentConfig.get(null),
+             registry: new LinkedHashMap(registry), agents: new LinkedHashMap(agents),
+             tenants: new LinkedHashMap(tenants)]
 AtomicInteger loginCalls = new AtomicInteger()
 AtomicInteger keyCalls = new AtomicInteger()
 AtomicInteger destroyed = new AtomicInteger()
@@ -119,11 +128,49 @@ try {
     assert httpTools.contains(com.google.adk.tools.LoadArtifactsTool.INSTANCE)
     assert httpTools.findAll { !it.is(com.google.adk.tools.LoadArtifactsTool.INSTANCE) }
             .collect { it.name() } == ['getCurrentTime']
+    // Exercise complete HTTP runner construction, including the real Google ADK builder.
+    // The fake key constructs a client only; no model generation request is made.
+    key.set(null, null)
+    service.set(null, null)
+    artifacts.set(null, null)
+    String httpConfigId = 'HTTP_INTERACTIVE_test-owner'
+    registry.remove(httpConfigId); agents.remove(httpConfigId); tenants.remove('test-owner')
+    manager.initConfig(httpConfigId, 'test-owner', null, 'gemini-2.5-flash', '',
+            'test-only-not-a-provider-credential', 'gemini', null)
+    assert registry[httpConfigId] instanceof com.google.adk.runner.Runner:
+            'Optional MCP failure prevented HTTP runner registration'
+    assert tenants['test-owner'] == httpConfigId
+    def agent = agents[httpConfigId]
+    assert agent != null
+    assert agent.description().contains('internal ERP tools unavailable')
+    assert !agent.description().contains('access to Moqui MCP tools')
+    // Inspect the union before resolving it: the test must not make any network calls.
+    assert agent.toolsUnion().every { it instanceof com.google.adk.tools.BaseTool }
+    assert agent.toolsUnion().size() == 2
+    assert agent.toolsUnion().contains(com.google.adk.tools.LoadArtifactsTool.INSTANCE)
+    assert agent.toolsUnion().findAll { !it.is(com.google.adk.tools.LoadArtifactsTool.INSTANCE) }
+            .collect { it.name() } == ['getCurrentTime']
+    assert agent.canonicalTools().toList().blockingGet().size() == 2
+    String assembledPrompt = agent.canonicalInstruction(null).blockingGet().key
+    assert assembledPrompt.contains('cannot query live ERP records')
+    assert assembledPrompt.contains('{screenCatalog}')
+    assert !assembledPrompt.contains('moqui_execute_service')
+    assert !assembledPrompt.contains('searchKnowledge')
+    assert !assembledPrompt.contains('readEmails')
+    assert !assembledPrompt.contains('getFileContent')
+    assert toolsets.size() == originalToolsets
     println 'ADK_OPTIONAL_MCP_AUTH_REGRESSION_PASS'
 } finally {
     key.set(null, saved.key)
     retry.set(null, saved.retry)
     service.set(null, saved.service)
     shutdown.set(null, saved.shutdown)
+    artifacts.set(null, saved.artifacts)
+    currentConfig.set(null, saved.currentConfig)
+    registry.clear(); registry.putAll(saved.registry)
+    agents.clear(); agents.putAll(saved.agents)
+    tenants.clear(); tenants.putAll(saved.tenants)
+    if (priorProviderProperty == null) System.clearProperty('GOOGLE_API_KEY')
+    else System.setProperty('GOOGLE_API_KEY', priorProviderProperty)
     toolsets.clear(); toolsets.putAll(saved.toolsets)
 }
