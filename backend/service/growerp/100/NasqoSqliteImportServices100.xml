@@ -13,14 +13,28 @@
                 <return error="true" message="Only an administrator can preview a SQLite import"/>
             </if>
             <script><![CDATA[
-                File dir = new File(ec.factory.runtimePath, 'ownerData')
-                if (!dir.isDirectory() && !dir.mkdirs() && !dir.isDirectory()) {
-                    throw new IllegalStateException('SQLite import temporary directory unavailable')
+                File directory = new File(ec.factory.runtimePath, 'ownerData')
+                if (!directory.isDirectory() && !directory.mkdirs()) {
+                    throw new IllegalStateException('Unable to prepare SQLite review storage')
                 }
-                File temp = File.createTempFile('nasqo-sqlite-import-', '.back', dir)
+                File temp = File.createTempFile('nasqo-sqlite-import-', '.back', directory)
                 try {
+                    // Hard cap incoming upload before it can exhaust the server disk.
+                    final long maxSize = 256L * 1024L * 1024L
+                    if (file.size <= 0L || file.size > maxSize) {
+                        throw new IllegalArgumentException('SQLite backup must be 1 byte to 256 MB')
+                    }
                     file.inputStream.withCloseable { InputStream input ->
-                        temp.outputStream.withCloseable { OutputStream output -> input.transferTo(output) }
+                        new java.io.FileOutputStream(temp).withCloseable { OutputStream output ->
+                            byte[] bytes = new byte[64 * 1024]
+                            long size = 0L
+                            int amount
+                            while ((amount = input.read(bytes)) != -1) {
+                                size += amount
+                                if (size > maxSize) throw new IllegalArgumentException('SQLite upload too large')
+                                output.write(bytes, 0, amount)
+                            }
+                        }
                     }
                     def util = ec.resource.script('component://growerp/service/NasqoSqliteImportUtil.groovy', null)
                     preview = util.preview(temp)
