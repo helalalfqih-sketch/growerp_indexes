@@ -9,6 +9,7 @@ on:
       - 'tools/test_import_nasqo_sqlite_backup.py'
       - 'tools/test_nasqo_sqlite_preview_service.py'
       - 'tools/test_nasqo_accounting_only_preview.py'
+      - 'tools/test_nasqo_accounting_source_stage.py'
       - 'flutter/packages/growerp_models/lib/src/models/sqlite_import_preview_model.dart'
       - 'flutter/packages/growerp_core/lib/l10n/core_ar.arb'
       - 'flutter/packages/growerp_core/lib/l10n/core_en.arb'
@@ -28,5 +29,7 @@ jobs:
         run: python3 tools/test_import_nasqo_sqlite_backup.py
       - name: Validate accounting-only SQLite preview and source-code mapping
         run: python3 tools/test_nasqo_accounting_only_preview.py
+      - name: Test private company-scoped accounting source staging contract
+        run: python3 tools/test_nasqo_accounting_source_stage.py
       - name: Test Moqui preview service source contract
         run: python3 tools/test_nasqo_sqlite_preview_service.py
