@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<services xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+ xsi:noNamespaceSchemaLocation="http://moqui.org/xsd/service-definition-2.1.xsd">
+ <service verb="run" noun="NativeAccountingImport" authenticate="true" transaction="ignore">
+  <description>Company administrator maintenance operation: create only verified unposted source invoices. Requires the existing setup-domain write permission and company administrator role.</description>
+  <in-parameters>
+   <parameter name="sourceSha256" required="true"/>
+   <parameter name="mode" default-value="check"/>
+  </in-parameters>
+  <out-parameters><parameter name="result" type="Map"/></out-parameters>
+  <actions>
+   <if condition="!ec.user.isInGroup('GROWERP_M_ADMIN')">
+    <return error="true" message="Only the company administrator may prepare native accounting drafts"/>
+   </if>
+   <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+     in-map="[userPartyId:ec.user.userAccount.partyId]" out-map="related"/>
+   <script><![CDATA[
+    String company=related.userCompanyPartyId?.toString()
+    if(!company || company!=System.getenv('NASQO_ACCOUNTING_STAGE_COMPANY'))
+     throw new IllegalStateException('No source import is enabled for this company')
+    def helper=ec.resource.script('component://growerp/service/NasqoNativeImport.groovy',null)
+    result=helper.run(ec,company,related.ownerPartyId?.toString(),sourceSha256,mode)
+   ]]></script>
+  </actions>
+ </service>
+</services>

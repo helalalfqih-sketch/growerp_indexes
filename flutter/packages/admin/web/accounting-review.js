@@ -12,8 +12,14 @@
     const r = payload && payload.review;
     if (!r || typeof r.available !== 'boolean') throw new Error('تعذّر قراءة نتيجة المراجعة.');
     if (!r.available) return { available: false, status: r.status };
-    if (r.status !== 'REVIEW_ONLY_NOT_IMPORTED' || r.readOnly !== true ||
-        r.readyForAccountingImport !== false || r.financialDocumentsCreated !== 0 || r.postedEntries !== 0) {
+    const native = r.status === 'NATIVE_DRAFTS_CREATED_NOT_POSTED' &&
+      r.nativeImport && Number.isSafeInteger(r.nativeImport.invoiceCount) && r.nativeImport.invoiceCount > 0 &&
+      r.financialDocumentsCreated === r.nativeImport.invoiceCount && r.nativeImport.paymentCount === 0 &&
+      Object.keys(r.nativeImport.draftStatuses || {}).every(s => ['InvoiceInProcess', 'InvoiceIncoming'].includes(s)) &&
+      Object.values(r.nativeImport.draftStatuses || {}).every(n => Number.isSafeInteger(n) && n > 0) &&
+      Object.values(r.nativeImport.draftStatuses || {}).reduce((a, n) => a + n, 0) === r.nativeImport.invoiceCount;
+    if ((!native && (r.status !== 'REVIEW_ONLY_NOT_IMPORTED' || r.financialDocumentsCreated !== 0)) ||
+        r.readOnly !== true || r.readyForAccountingImport !== false || r.postedEntries !== 0) {
       throw new Error('حالة المراجعة غير متوافقة. حدّث الصفحة وأعد المحاولة.');
     }
     if (r.currencyDecision && (r.currencyDecision.targetCurrencyUomId !== 'YER' ||
@@ -135,7 +141,18 @@
     if (r.currencyDecision) {
       body.append(make('p', 'العملة المعتمدة: الريال اليمني (YER) لجميع الرموز 1 و2 و3. المبالغ محفوظة كما وردت دون تحويل عملات.', 'review-note'));
     }
-    body.append(make('p', 'لم تُستورد المستندات أو الأرصدة إلى المحاسبة بعد. النتائج أدناه للمراجعة قبل الاستيراد.', 'review-note'));
+    body.append(make('p', r.nativeImport
+      ? 'أُنشئت الفواتير والمرتجعات الموضحة أدناه داخل نسقو كمسودات فعلية غير مُرحّلة. لم تُنقل المدفوعات أو الأرصدة الافتتاحية.'
+      : 'لم تُستورد المستندات أو الأرصدة إلى المحاسبة بعد. النتائج أدناه للمراجعة قبل الاستيراد.', 'review-note'));
+    if (r.nativeImport) {
+      const n = r.nativeImport;
+      body.append(make('h3', 'المستندات المحاسبية المنشأة في نسقو'));
+      body.append(make('p', 'الفواتير والمرتجعات: ' + text(n.invoiceCount) +
+        ' · بنود الفواتير: ' + text(n.invoiceItems) + ' · حركات المصدر المعلّقة: ' + text(n.heldMovements)));
+      body.append(make('p', 'تجدها في فواتير المبيعات والمشتريات بحالة مسودة، ومراجع تبدأ بـ SAP. الاعتماد المحاسبي محظور حتى مراجعة الحسابات والضرائب والتسويات.', 'review-note'));
+      table('مراجع بعض المستندات المنشأة', ['معرّف نسقو', 'مرجع المستند'],
+        (Array.isArray(n.sampleReferences) ? n.sampleReferences : []).map(x => [x.invoiceId, x.reference]));
+    }
     const s = r.summary || {};
     const stats = make('div', null, 'review-stats');
     [['حركة في المصدر', s.movements], ['حساب في المصدر', s.sourceAccounts],
@@ -151,7 +168,7 @@
       body.append(make('h3', 'مسودات تجهيز الاستيراد'));
       body.append(make('p', 'تم تجهيز ' + text(p.preparedDrafts) + ' مسودة مصدر بالريال: ' +
         text(p.invoiceSourceDrafts) + ' فاتورة ومرتجع، و' + text(p.voucherSourceDrafts) + ' سند.'));
-      body.append(make('p', 'هذه مسودات تجهيز محفوظة على الخادم؛ لم تُنشأ فواتير أو سندات أو قيود محاسبية فعلية في نسقو. ربط الحسابات واتجاهات السندات ما زال يحتاج مراجعة.', 'review-note'));
+      body.append(make('p', r.nativeImport ? 'تظل حركات المصدر غير المنشأة معلّقة للمراجعة، بما فيها السندات والحسابات الداخلية والأرصدة السابقة.' : 'هذه مسودات تجهيز محفوظة على الخادم؛ لم تُنشأ فواتير أو سندات أو قيود محاسبية فعلية في نسقو. ربط الحسابات واتجاهات السندات ما زال يحتاج مراجعة.', 'review-note'));
       body.append(make('p', 'بنود الفواتير: ' + text(p.primaryLines) + ' · البنود الإضافية: ' +
         text(p.supplementaryLines) + ' · حركات حُسمت عملتها باعتمادك: ' + text(p.resolvedCurrencyRows)));
       table('أنواع المستندات المطابقة لتقارير المصدر', ['رمز المصدر', 'النوع في المصدر', 'عدد المسودات'],

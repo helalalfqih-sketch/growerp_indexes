@@ -53,3 +53,12 @@ test('currency approval and preparation cannot silently enable financial creatio
   assert.equal(project({review:{...r,currencyDecision,preparedImport}}).preparedImport,preparedImport);
   assert.throws(()=>project({review:{...r,preparedImport:{...preparedImport,summary:{readyForFinancialCreation:1}}}}));
 });
+
+test('native invoice results require actual unposted draft statuses and consistent counts', () => {
+ const r={available:true,readOnly:true,status:'NATIVE_DRAFTS_CREATED_NOT_POSTED',readyForAccountingImport:false,
+ financialDocumentsCreated:2,postedEntries:0,nativeImport:{invoiceCount:2,paymentCount:0,draftStatuses:{InvoiceInProcess:1,InvoiceIncoming:1}}};
+ assert.equal(project({review:r}),r);
+ for(const change of [{postedEntries:1},{financialDocumentsCreated:3},{nativeImport:{...r.nativeImport,draftStatuses:{InvoiceFinalized:2}}},
+ {nativeImport:{...r.nativeImport,draftStatuses:{}}},{nativeImport:{...r.nativeImport,paymentCount:1}}])
+  assert.throws(()=>project({review:{...r,...change}}));
+});
