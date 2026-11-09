@@ -189,3 +189,73 @@ The latest passing GitHub Actions evidence for this feature can be found
 under this PR's NASQO legacy SQLite staging workflow. Keep this draft PR
 open until the real target/tenant isolation and finance approval gates
 are independently reviewed.
+
+
+## Review candidate field mapping against actual NASQO Flutter models
+
+A new CLI prepares **review-only** candidates using known model field names,
+without guessing prices or financial signs. Run it only after creating a
+private source-matched mapping template with the preceding staging tool.
+
+First, in a PRIVATE local directory outside the Git checkout, run:
+
+    python3 tools/nasqo_legacy_staging.py /private/original.back \
+      --output /private/nasqo-review-initial
+
+This creates an aggregate manifest and mapping_template.json containing
+the SHA-256 of the exact source file. The mapping's targetCompanyPartyId and
+targetCompanyVerified must remain null/false; a production partyId is NOT an
+isolated staging company identity.
+
+Then, for a metadata-only profile of model candidates:
+
+    python3 tools/nasqo_prepare_review_candidates.py /private/original.back \
+      --mapping /private/nasqo-review-initial/mapping_template.json \
+      --output /private/nasqo-model-summary
+
+The default output is only review_manifest.json; there is NO PII row export.
+
+To opt in to reviewing individual records in a new, secure directory
+(contains personal data; DO NOT commit, email or store on a public CI runner):
+
+    python3 tools/nasqo_prepare_review_candidates.py /private/original.back \
+      --mapping /private/nasqo-review-initial/mapping_template.json \
+      --output /private/nasqo-model-private \
+      --include-private-records
+
+The local files are:
+- product_candidates.jsonl
+- party_candidates.jsonl
+- location_candidates.jsonl
+- financial_holds.jsonl
+- review_manifest.json
+
+No file is a ready-to-POST REST payload. The known model mapping is:
+- SQLite products.name -> Product.productName and barcode -> Product.barcode.
+  Product.price, Product.listPrice, Product.currency, Product.amountUom
+  and productTypeId remain null until approved. Source price/price2 are
+  retained as distinct raw fields, NOT presumed to be valid final prices.
+- SQLite customers.name -> Company.name, while role and telephoneNr remain
+  unset pending review of the 11 source party-type codes and contact rules.
+- SQLite stores.name -> Location.locationName, while locationId and branch
+  membership remain unset pending 5-location validation.
+- SQLite input_move -> BLOCKED_FINANCIAL_MAPPING metadata. FinDoc.docType
+  and grandTotal remain null; isPosted is always false. Bill details are
+  only counted, never auto-posted or reinterpreted as balanced ledger entries.
+
+All records have stable source refs incorporating the complete source
+SHA-256 and original table/row ID for later reconciled mapping. The tool
+refuses a mismatched backup hash, approved/auto-post mappings, a staging
+company identity asserted without validation, or overwriting a review folder.
+
+Both the default and opt-in modes are strictly offline. Candidate creation
+must not be described as completed data import to NASQO. For any user data,
+verify local disk encryption and access controls outside this Python CLI.
+
+Run synthetic-only regression tests:
+
+    python3 tools/test_nasqo_prepare_review_candidates.py
+
+CI executes those tests alongside the independent synthetic PostgreSQL
+rollback job. Staging Moqui writes and accountant-approved business
+reconciliation are still separate, blocked deliverables.
