@@ -651,20 +651,26 @@ CRITICAL tool-use rules — follow exactly:
     /// (e.g. saved in System Setup) takes effect on the next chat without a restart.
     /// Scheduled/specialised agent runners and the MCP toolset are left intact.
     static synchronized void reloadInteractive(ExecutionContextFactory ecf) {
+        invalidateInteractiveRunners()
+        currentConfig = [:]
+        ensureInteractiveDefault(ecf)
+    }
+
+    private static void invalidateInteractiveRunners() {
         registry.remove(DEFAULT_CONFIG)
         agentRegistry.remove(DEFAULT_CONFIG)
         // Also drop per-tenant interactive runners (INTERACTIVE_<owner>) so a key
         // change OR removal in System Setup takes effect for tenant chat. They are
         // rebuilt on the next createSession via ensureInteractiveForTenant — which
         // re-resolves the current key, so a deleted key correctly stops the chat.
-        def interactiveCids = registry.keySet().findAll { it.startsWith('INTERACTIVE_') }
+        def interactiveCids = registry.keySet().findAll {
+            it.startsWith('INTERACTIVE_') || it.startsWith('HTTP_INTERACTIVE_')
+        }
         for (String cid in interactiveCids) {
             registry.remove(cid)
             agentRegistry.remove(cid)
             tenantRegistry.entrySet().removeIf { it.value == cid }
         }
-        currentConfig = [:]
-        ensureInteractiveDefault(ecf)
     }
 
     /// Rebuild a single named config (e.g. a coordinator after its team changed) so the
@@ -1501,6 +1507,8 @@ CRITICAL tool-use rules — follow exactly:
     /** Read an agent's toolMode (readOnly | scoped | full) from its persisted config.
      *  Defaults to readOnly when unknown so new/unconfigured agents are safe by default. */
     private static String lookupToolMode(String configId) {
+        // Synthetic HTTP chat runners have no saved, approved write policy.
+        if (configId?.startsWith('HTTP_INTERACTIVE_')) return 'readOnly'
         if (!configId || configId == DEFAULT_CONFIG || sharedSessionService == null) return 'full'
         try {
             def ec = sharedSessionService.ecf.getExecutionContext()
