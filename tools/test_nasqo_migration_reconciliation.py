@@ -66,6 +66,21 @@ class ReconcileTests(unittest.TestCase):
             "withoutEitherLineType"], 0)
         self.assertFalse(report["financialPostingAllowed"])
 
+    def test_overlapping_main_and_supplementary_lines_do_not_underflow(self):
+        db = sqlite3.connect(self.source)
+        db.execute("CREATE TABLE bill_details2(id INTEGER PRIMARY KEY, bill_id INTEGER)")
+        db.execute("INSERT INTO bill_details2 VALUES(102,10)")
+        db.commit()
+        db.close()
+        report = analyze_reconciliation(self.source)
+        first = report["sourceFinance"]["perTypeLineCoverage"][0]
+        second = report["sourceFinance"]["perTypeLineCoverage"][1]
+        self.assertEqual(first["withMainLines"], 1)
+        self.assertEqual(first["withSupplementaryLines"], 1)
+        self.assertEqual(first["withoutEitherLineType"], 0)
+        self.assertEqual(second["withoutEitherLineType"], 1)
+        self.assertFalse(report["financialPostingAllowed"])
+
     def test_source_is_unchanged_by_report(self):
         analyze_reconciliation(self.source)
         self.assertEqual(self.before, hashlib.sha256(self.source.read_bytes()).hexdigest())
