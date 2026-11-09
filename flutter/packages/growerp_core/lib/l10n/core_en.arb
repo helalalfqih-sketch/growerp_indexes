@@ -1940,8 +1940,8 @@
       }
     }
   },
-  "sqliteImportTitle": "SQLite backup preview",
-  "sqliteImportInfo": "Review a legacy POS backup before importing. No records or accounting entries are created.",
+  "sqliteImportTitle": "Smart Accountant Pro accounting backup preview",
+  "sqliteImportInfo": "Review a Smart Accountant Pro database before transferring its financial records into NASQO Accounting. Preview creates no documents or accounting entries.",
   "sqliteImportSelect": "Choose SQLite backup",
   "sqliteImportReadOnly": "Read-only preview",
   "sqliteImportProducts": "Products",
@@ -1951,8 +1951,8 @@
   "sqliteImportDetails": "Bill details",
   "sqliteImportStockMoves": "Stock moves",
   "sqliteImportTransfers": "Store transfers",
-  "sqliteImportBillTypes": "Bill types requiring mapping",
-  "sqliteImportWarnings": "Import warnings",
+  "sqliteImportBillTypes": "Financial movement codes requiring mapping",
+  "sqliteImportWarnings": "Accounting migration checks and warnings",
   "sqliteImportNoFile": "No backup selected",
   "sqliteImportPreviewFailed": "SQLite backup preview failed: {message}",
   "@sqliteImportPreviewFailed": {

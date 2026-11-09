@@ -8,6 +8,10 @@ on:
       - 'tools/import_nasqo_sqlite_backup.py'
       - 'tools/test_import_nasqo_sqlite_backup.py'
       - 'tools/test_nasqo_sqlite_preview_service.py'
+      - 'tools/test_nasqo_accounting_only_preview.py'
+      - 'flutter/packages/growerp_models/lib/src/models/sqlite_import_preview_model.dart'
+      - 'flutter/packages/growerp_core/lib/l10n/core_ar.arb'
+      - 'flutter/packages/growerp_core/lib/l10n/core_en.arb'
       - '.github/workflows/nasqo-sqlite-preview.yml'
   workflow_dispatch:
 
@@ -22,5 +26,7 @@ jobs:
       - uses: actions/checkout@v4
       - name: Test offline legacy SQLite review format
         run: python3 tools/test_import_nasqo_sqlite_backup.py
+      - name: Validate accounting-only SQLite preview and source-code mapping
+        run: python3 tools/test_nasqo_accounting_only_preview.py
       - name: Test Moqui preview service source contract
         run: python3 tools/test_nasqo_sqlite_preview_service.py
