@@ -1,8 +1,10 @@
 #!/usr/bin/env python3
-"""Patch ONLY the ERP site in the existing VPSDime Caddyfile.
+"""Patch ERP routes and native API-key compatibility in the VPSDime Caddyfile.
 
 Run on a COPY and validate with Caddy before touching the live root-owned file.
-Other domains, their routes and TLS data must not be changed.
+Other domains, their routes and TLS data are preserved. The :443 listener must
+allow api_key for Moqui; Caddy still drops other underscore headers and the
+ambiguous Api-Key alias. Requires Caddy with expected_underscore_headers support.
 """
 from pathlib import Path
 import argparse
@@ -25,7 +27,74 @@ NEW_DEFAULT = """    # NASQO real ERP: API + WebSockets to Moqui, app UI to Flut
     }"""
 
 
-def patch_caddy(source: str) -> str:
+# Caddy 2.11.4+ drops underscore headers before routing. Moqui's native
+# clients authenticate with api_key; a narrow :443 allowlist restores it.
+# This is listener-wide (including other HTTPS hosts), not an ERP route.
+API_KEY_SERVER = """    servers :443 {
+        expected_underscore_headers api_key
+    }
+"""
+
+
+def _block_end(lines: list[str], start: int) -> int:
+    depth = 0
+    for index in range(start, len(lines)):
+        line = lines[index].strip()
+        if not line or line.startswith("#"):
+            continue
+        if line.endswith("{"):
+            depth += 1
+        elif line == "}":
+            depth -= 1
+            if depth == 0:
+                return index
+    raise ValueError("Unclosed Caddy block; no changes made")
+
+
+def ensure_api_key_header(source: str) -> str:
+    """Preserve api_key on HTTPS without enabling arbitrary underscore headers."""
+    lines = source.splitlines(keepends=True)
+    first = next((i for i, line in enumerate(lines)
+                  if line.strip() and not line.lstrip().startswith("#")), None)
+    if first is None:
+        raise ValueError("Empty Caddy configuration")
+    if lines[first].strip() != "{":
+        return "{\n" + API_KEY_SERVER + "}\n\n" + source
+
+    end = _block_end(lines, first)
+    server_blocks = []
+    for index in range(first + 1, end):
+        match = re.fullmatch(r"\s*servers(?:\s+(\S+))?\s*\{\s*", lines[index])
+        if match:
+            address = match.group(1)
+            if address not in (":443", ":80"):
+                raise ValueError("Review existing Caddy server policy before adding api_key")
+            if address == ":443":
+                server_blocks.append(index)
+    if len(server_blocks) > 1:
+        raise ValueError("Expected at most one servers :443 block")
+    if not server_blocks:
+        lines.insert(end, API_KEY_SERVER)
+        return "".join(lines)
+
+    start = server_blocks[0]
+    stop = _block_end(lines, start)
+    allowlists = [i for i in range(start + 1, stop)
+                  if re.match(r"\s*expected_underscore_headers(?:\s|$)", lines[i])]
+    if len(allowlists) > 1:
+        raise ValueError("Expected one underscore-header allowlist")
+    if allowlists:
+        index = allowlists[0]
+        values = lines[index].split("#", 1)[0].split()[1:]
+        if "api_key" not in [value.lower() for value in values]:
+            raise ValueError("Review existing underscore-header allowlist before adding api_key")
+        return source
+    indent = re.match(r"\s*", lines[start]).group() + "    "
+    lines.insert(start + 1, indent + "expected_underscore_headers api_key\n")
+    return "".join(lines)
+
+
+def _patch_erp_routes(source: str) -> str:
     lines = source.splitlines(keepends=True)
     matches = [i for i, line in enumerate(lines) if SITE_HEADER.fullmatch(line.strip())]
     if len(matches) != 1:
@@ -70,6 +139,10 @@ def patch_caddy(source: str) -> str:
     return result
 
 
+def patch_caddy(source: str) -> str:
+    return ensure_api_key_header(_patch_erp_routes(source))
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("source", type=Path, help="Existing root-owned Caddyfile")
@@ -81,7 +154,7 @@ def main() -> None:
     before = args.source.read_text(encoding="utf-8")
     after = patch_caddy(before)
     args.destination.write_text(after, encoding="utf-8")
-    print("Prepared NASQO Caddy site; other hosts unchanged:", args.destination)
+    print("Prepared NASQO routes and HTTPS api_key compatibility:", args.destination)
 
 
 if __name__ == "__main__":
