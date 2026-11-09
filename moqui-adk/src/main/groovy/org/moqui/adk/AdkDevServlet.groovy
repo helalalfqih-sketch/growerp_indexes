@@ -58,16 +58,52 @@ class AdkDevServlet extends HttpServlet {
         '.txt'  : 'text/plain',
     ].asImmutable()
 
+    private static final String CALLER_ATTRIBUTE = 'moqui.adk.authenticatedCaller'
+
     @Override
     protected void service(HttpServletRequest req, HttpServletResponse resp) {
-        String pathInfo = req.pathInfo ?: '/'
-        String method   = req.method
-
-        addCorsHeaders(req, resp)
-        if (method == 'OPTIONS') { resp.status = 204; return }
-
+        if (!addCorsHeaders(req, resp)) {
+            deny(resp, 403, 'Origin not allowed')
+            return
+        }
+        if (req.method == 'OPTIONS') { resp.status = 204; return }
         resp.setHeader('Cache-Control', 'no-cache, no-store')
+        ExecutionContextFactory factory = ecf(req)
+        if (factory == null) { deny(resp, 503, 'System is initializing'); return }
+        // Custom servlets do not inherit MoquiServlet's REST authorization.
+        // Start with a clean request context, and authenticate without reading
+        // the JSON body through WebFacade (which would consume its reader).
+        factory.destroyActiveExecutionContext()
+        try {
+            def ec = factory.getExecutionContext()
+            ec.user.initFromHttpRequest(req, resp)
+            String userId = ec.user.userId
+            if (!userId || req.getAttribute('moqui.login.error') == 'true') {
+                deny(resp, 401, 'Authentication required')
+                return
+            }
+            boolean admin = ec.user.isInGroup('ADMIN') || ec.user.isInGroup('GROWERP_M_ADMIN')
+            if (!admin && !ec.user.isInGroup('AdkUsers')) {
+                deny(resp, 403, 'ADK access required')
+                return
+            }
+            def account = ec.entity.find('moqui.security.UserAccount')
+                    .condition('userId', userId).disableAuthz().one()
+            def party = account?.partyId ? ec.entity.find('mantle.party.Party')
+                    .condition('partyId', account.partyId).disableAuthz().one() : null
+            String owner = party?.ownerPartyId
+            if (!owner) { deny(resp, 403, 'Company context required'); return }
+            req.setAttribute(CALLER_ATTRIBUTE,
+                    [userId: userId, ownerPartyId: owner, admin: admin].asImmutable())
+            dispatchAuthorized(req, resp)
+        } finally {
+            factory.destroyActiveExecutionContext()
+        }
+    }
 
+    private void dispatchAuthorized(HttpServletRequest req, HttpServletResponse resp) {
+        String pathInfo = req.pathInfo ?: '/'
+        String method = req.method
         // ── API routes ────────────────────────────────────────────────────────
         if (pathInfo == '/list-apps' || pathInfo == '/list-apps/') {
             AdkManager.lazyInit(ecf(req))
@@ -75,17 +111,14 @@ class AdkDevServlet extends HttpServlet {
             return
         }
         if (pathInfo.startsWith('/apps/')) {
-            AdkManager.lazyInit(ecf(req))
             handleApps(pathInfo, method, req, resp)
             return
         }
         if (pathInfo == '/run' && method == 'POST') {
-            AdkManager.lazyInit(ecf(req))
             handleRun(req, resp, false)
             return
         }
         if (pathInfo == '/run_sse' && method == 'POST') {
-            AdkManager.lazyInit(ecf(req))
             handleRun(req, resp, true)
             return
         }
@@ -104,6 +137,32 @@ class AdkDevServlet extends HttpServlet {
 
     // ── API handlers ──────────────────────────────────────────────────────────
 
+    private static Map caller(HttpServletRequest req) {
+        req.getAttribute(CALLER_ATTRIBUTE) as Map
+    }
+
+    private static void deny(HttpServletResponse resp, int status, String message) {
+        resp.status = status
+        json(resp, [error: message])
+    }
+
+    private boolean ownsSession(HttpServletRequest req, HttpServletResponse resp, String sessionId) {
+        Map principal = caller(req)
+        def ec = ecf(req).getExecutionContext()
+        def session = ec.entity.find('moqui.adk.AdkSession')
+                .condition('adkSessionId', sessionId).condition('appName', AdkManager.APP_NAME)
+                .condition('userId', principal.userId).disableAuthz().one()
+        Map state = [:]
+        try { state = new JsonSlurper().parseText(session?.stateJson ?: '{}') as Map }
+        catch (Exception ignored) {}
+        if (!session || state.tenantId != principal.ownerPartyId ||
+                session.configId != 'HTTP_INTERACTIVE_' + principal.ownerPartyId) {
+            deny(resp, 404, 'Session not found')
+            return false
+        }
+        return true
+    }
+
     private void handleListApps(HttpServletResponse resp) {
         json(resp, AdkManager.listAgents())
     }
@@ -111,14 +170,21 @@ class AdkDevServlet extends HttpServlet {
     private void handleApps(String path, String method, HttpServletRequest req, HttpServletResponse resp) {
         // path: /apps/{app}/users/{userId}/sessions[/{sessionId}]
         String[] parts = path.split('/')
-        if (parts.length < 6) { resp.sendError(400, 'Invalid path'); return }
-        String userId    = parts[4]
+        if (!(parts.length in [6, 7]) || parts[1] != 'apps' ||
+                parts[2] != AdkManager.APP_NAME || parts[3] != 'users' || parts[5] != 'sessions') {
+            deny(resp, 400, 'Invalid path'); return
+        }
+        Map principal = caller(req)
+        String userId = parts[4]
         String sessionId = parts.length > 6 ? parts[6] : null
+        if (userId != principal.userId) { deny(resp, 403, 'User does not match caller'); return }
+        if (sessionId && !ownsSession(req, resp, sessionId)) return
+        if (method == 'POST' && sessionId) { deny(resp, 400, 'Invalid session creation path'); return }
+        if (method == 'DELETE' && !sessionId) { deny(resp, 400, 'Session ID required'); return }
 
         switch (method) {
             case 'POST':
-                // Read body FIRST (before buildContext → initWebFacade calls getReader);
-                // the client may seed session state (e.g. screenCatalog) here.
+                // Read the JSON body once; only the screen catalog is client-supplied.
                 Map clientState = [:]
                 try {
                     String rawBody = req.reader.text
@@ -130,9 +196,15 @@ class AdkDevServlet extends HttpServlet {
                     }
                 } catch (Exception ignored) {}
                 Map<String, Object> initialState = buildContext(req, resp)
-                initialState.putAll(clientState)
+                // Only UI context may be supplied by the client. Identity,
+                // company and memory always come from the authenticated caller.
+                if (clientState.containsKey('screenCatalog')) {
+                    initialState.screenCatalog = clientState.screenCatalog
+                }
+                initialState.currentUserId = principal.userId
                 try {
-                    json(resp, AdkManager.createSession(userId, initialState))
+                    AdkManager.lazyInit(ecf(req))
+                    json(resp, AdkManager.createSession(userId, initialState, true))
                 } catch (IllegalStateException e) {
                     // Expected when no LLM key is configured — return a clean 503 + JSON
                     // (the chat UI matches the message to prompt for System Setup) instead
@@ -145,15 +217,28 @@ class AdkDevServlet extends HttpServlet {
             case 'GET':
 
                 if (sessionId) {
-                    def s = AdkManager.getSession(userId, sessionId)
+                    AdkManager.lazyInit(ecf(req))
+                    def s = AdkManager.getSession(userId, sessionId, principal.ownerPartyId as String)
                     if (!s) { resp.sendError(404); return }
                     json(resp, s)
                 } else {
-                    json(resp, AdkManager.listSessions(userId))
+                    // Filter by both user and tenant before returning identifiers.
+                    def ec = ecf(req).getExecutionContext()
+                    def sessions = ec.entity.find('moqui.adk.AdkSession')
+                            .condition('appName', AdkManager.APP_NAME).condition('userId', userId)
+                            .disableAuthz().list()
+                    json(resp, sessions.findAll { entry ->
+                        try {
+                            (new JsonSlurper().parseText(entry.stateJson ?: '{}') as Map).tenantId ==
+                                    principal.ownerPartyId &&
+                                    entry.configId == 'HTTP_INTERACTIVE_' + principal.ownerPartyId
+                        } catch (Exception ignored) { false }
+                    }.collect { entry -> [id: entry.adkSessionId, appName: AdkManager.APP_NAME, userId: userId] })
                 }
                 break
             case 'DELETE':
-                if (sessionId) AdkManager.deleteSession(userId, sessionId)
+                AdkManager.lazyInit(ecf(req))
+                if (sessionId) AdkManager.deleteSession(userId, sessionId, principal.ownerPartyId as String)
                 resp.status = 200
                 break
             default:
@@ -163,12 +248,19 @@ class AdkDevServlet extends HttpServlet {
 
     private void handleRun(HttpServletRequest req, HttpServletResponse resp, boolean sse) {
 
-        def body      = new JsonSlurper().parse(req.inputStream)
-        String userId = (body.userId    ?: 'anonymous') as String
-        String sid    = (body.sessionId ?: '') as String
-        String text   = (body.newMessage?.parts?.find { it.text }?.text ?: '') as String
-
-        if (!sid) sid = AdkManager.createSession(userId, buildContext(req, resp)).id as String
+        Map body
+        try { body = new JsonSlurper().parseText(req.reader.text ?: '{}') as Map }
+        catch (Exception ignored) { deny(resp, 400, 'Invalid JSON body'); return }
+        Map principal = caller(req)
+        String userId = principal.userId
+        if (body.userId != userId || body.appName != AdkManager.APP_NAME) {
+            deny(resp, 403, 'User or application does not match caller'); return
+        }
+        String sid = (body.sessionId ?: '') as String
+        String text = (body.newMessage?.parts?.find { it.text }?.text ?: '') as String
+        if (!sid) { deny(resp, 400, 'Session ID required'); return }
+        if (!ownsSession(req, resp, sid)) return
+        AdkManager.lazyInit(ecf(req))
 
         if (sse) {
             resp.contentType = 'text/event-stream; charset=utf-8'
@@ -187,10 +279,11 @@ class AdkDevServlet extends HttpServlet {
                     }
                     writer.write("data: [DONE]\n\n")
                     writer.flush()
-                }
+                },
+                principal.ownerPartyId as String, true
             )
         } else {
-            json(resp, AdkManager.runAgent(userId, sid, text))
+            json(resp, AdkManager.runAgent(userId, sid, text, principal.ownerPartyId as String))
         }
     }
 
@@ -199,8 +292,7 @@ class AdkDevServlet extends HttpServlet {
     private void handleConfigs(String path, String method, HttpServletRequest req, HttpServletResponse resp) {
         ExecutionContextFactory ecf = ecf(req)
 
-        // Read POST body FIRST — initWebFacade internally calls getReader(),
-        // and Jetty forbids mixing getReader() with getInputStream().
+        // Read the JSON body once after the request authentication guard.
         String rawBody = (method == 'POST') ? req.reader.text : null
 
         // configId from path: /configs/{configId}
@@ -209,32 +301,10 @@ class AdkDevServlet extends HttpServlet {
 
         def ec = ecf.getExecutionContext()
         try {
-            // Authenticate the caller from HTTP headers (api_key / moquiSessionToken).
-            // Body is already consumed above so getReader() inside initWebFacade is safe.
-            if (ec.getWebImpl() == null) {
-                try {
-                    ec.initWebFacade(req.servletContext.getInitParameter('moqui-name') ?: 'webroot', req, resp)
-                } catch (Exception ignored) {}
-            }
-
-            // Resolve ownerPartyId for tenant-scoping
-            String ownerPartyId = null
-            if (ec.user?.userId) {
-                try {
-                    boolean wasDisabled = ec.artifactExecution.disableAuthz()
-                    try {
-                        def userAcct = ec.entity.find('moqui.security.UserAccount')
-                            .condition('userId', ec.user.userId)
-                            .selectField('partyId').one()
-                        String userPartyId = userAcct?.partyId
-                        if (userPartyId) {
-                            def userParty = ec.entity.find('mantle.party.Party')
-                                .condition('partyId', userPartyId)
-                                .selectField('ownerPartyId').one()
-                            ownerPartyId = userParty?.ownerPartyId ?: null
-                        }
-                    } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
-                } catch (Exception ignored) {}
+            Map principal = caller(req)
+            String ownerPartyId = principal.ownerPartyId
+            if (method != 'GET' && !principal.admin) {
+                deny(resp, 403, 'Company administrator access required'); return
             }
 
             switch (method) {
@@ -242,7 +312,7 @@ class AdkDevServlet extends HttpServlet {
                     boolean wasDisabled = ec.artifactExecution.disableAuthz()
                     try {
                         def find = ec.entity.find('moqui.adk.AdkAgentConfig')
-                        if (ownerPartyId) find = find.condition('ownerPartyId', ownerPartyId)
+                        find = find.condition('ownerPartyId', ownerPartyId)
                         def list = find.list().collect { cfg ->
                             [adkAgentConfigId   : cfg.adkAgentConfigId,
                              agentName          : cfg.agentName,
@@ -261,8 +331,11 @@ class AdkDevServlet extends HttpServlet {
 
                 case 'POST':
                     def body = new JsonSlurper().parseText(rawBody ?: '{}') as Map
+                    if (body.ownerPartyId && body.ownerPartyId != ownerPartyId) {
+                        deny(resp, 403, 'Company does not match caller'); return
+                    }
                     Map params = [
-                        ownerPartyId      : ownerPartyId ?: body.ownerPartyId,
+                        ownerPartyId      : ownerPartyId,
                         agentName         : body.agentName,
                         // no default here: an empty modelName lets AdkManager.defaultModelFor
                         // resolve it at agent-build time (SystemDefault -> env -> constant)
@@ -275,8 +348,8 @@ class AdkDevServlet extends HttpServlet {
                         scheduleChatRoomId: body.scheduleChatRoomId,
                     ]
                     if (body.apiKey) params.apiKey = body.apiKey
-                    // Servlet already enforces AdkUsers/ADMIN access; skip redundant
-                    // artifact-level authz check so the call runs as the authenticated user.
+                    // The request guard requires an authenticated tenant admin;
+                    // this operation is pinned to that caller's ownerPartyId.
                     boolean wasDisabledPost = ec.artifactExecution.disableAuthz()
                     Map result
                     try {
@@ -292,7 +365,8 @@ class AdkDevServlet extends HttpServlet {
                     boolean wasDisabled2 = ec.artifactExecution.disableAuthz()
                     try {
                         def cfg = ec.entity.find('moqui.adk.AdkAgentConfig')
-                            .condition('adkAgentConfigId', configId).one()
+                            .condition('adkAgentConfigId', configId)
+                            .condition('ownerPartyId', ownerPartyId).one()
                         if (!cfg) { resp.sendError(404); return }
                         cfg.delete()
                         resp.status = 200
@@ -304,13 +378,16 @@ class AdkDevServlet extends HttpServlet {
                     resp.sendError(405)
             }
         } finally {
-            ec.destroy()
+            // The service method owns and closes the request execution context.
         }
     }
 
     // ── Static file serving ───────────────────────────────────────────────────
 
     private void serveStatic(String path, HttpServletResponse resp) {
+        if (!path.matches('[A-Za-z0-9_./-]*') || path.split('/').any { it == '..' }) {
+            deny(resp, 400, 'Invalid asset path'); return
+        }
         if (path == '/' || path.isEmpty()) path = '/index.html'
         // SPA client-side routing: paths without a file extension → index.html
         if (!path.contains('.')) path = '/index.html'
@@ -347,18 +424,24 @@ class AdkDevServlet extends HttpServlet {
         (ExecutionContextFactory) req.servletContext.getAttribute('executionContextFactory')
     }
 
-    private static void addCorsHeaders(HttpServletRequest req, HttpServletResponse resp) {
+    private static boolean addCorsHeaders(HttpServletRequest req, HttpServletResponse resp) {
         String origin = req.getHeader('Origin')
         if (origin) {
+            try {
+                URI uri = new URI(origin)
+                String authority = req.getHeader('Host') ?: req.serverName
+                String scheme = req.getHeader('X-Forwarded-Proto')?.split(',')?.first()?.trim() ?: req.scheme
+                if (uri.scheme != scheme || !uri.rawAuthority?.equalsIgnoreCase(authority) ||
+                        (uri.rawPath && uri.rawPath != '/') || uri.rawQuery || uri.rawFragment) return false
+            } catch (Exception ignored) { return false }
             resp.setHeader('Access-Control-Allow-Origin', origin)
-            resp.setHeader('Access-Control-Allow-Credentials', 'true')
             resp.setHeader('Vary', 'Origin')
-        } else {
-            resp.setHeader('Access-Control-Allow-Origin', '*')
+            resp.setHeader('Access-Control-Allow-Credentials', 'true')
         }
         resp.setHeader('Access-Control-Allow-Methods', 'GET, POST, DELETE, OPTIONS')
         resp.setHeader('Access-Control-Allow-Headers', 'Content-Type, Authorization, api_key, moquiSessionToken')
         resp.setHeader('Access-Control-Max-Age', '3600')
+        return true
     }
 
     /**
@@ -370,12 +453,12 @@ class AdkDevServlet extends HttpServlet {
      */
     private Map<String, Object> buildContext(HttpServletRequest req, HttpServletResponse resp) {
         Map<String, Object> ctx = [
-            userId          : 'anonymous',
-            username        : 'anonymous',
+            userId          : caller(req).userId,
+            username        : '',
             userFullName    : '',
             organizationName: '',
             companyPseudoId : '',
-            tenantId        : 'DEFAULT',
+            tenantId        : caller(req).ownerPartyId,
             timeZone        : 'UTC',
             locale          : 'en_US',
             // Default for the {screenCatalog} instruction placeholder; the Flutter
@@ -389,18 +472,8 @@ class AdkDevServlet extends HttpServlet {
             if (!ecf) return ctx
             def ec = ecf.getExecutionContext()
             try {
-                // Initialize web facade to natively parse api_key/moquiSessionToken from headers.
-                // Wrapped separately: initWebFacade may throw during visit/screen-URL stats tracking
-                // for non-screen paths like /adk/apps/... — but api_key auth inside
-                // initFromHttpRequest runs first and may have already succeeded.
-                if (ec.getWebImpl() == null) {
-                    try {
-                        ec.initWebFacade(req.servletContext.getInitParameter("moqui-name") ?: "webroot", req, resp)
-                    } catch (Exception ignored) {}
-                }
-
-                // Always read user after the initWebFacade attempt — auth may have succeeded
-                // even if WebFacade setup partially failed (e.g. screen URL resolution error).
+                // Authentication already ran before dispatch without consuming
+                // the body. Never initialize or replace identity from client state.
                 if (ec.user?.userId) {
                     ctx.userId   = ec.user.userId   ?: 'anonymous'
                     ctx.username = ec.user.username ?: 'anonymous'
@@ -467,7 +540,7 @@ class AdkDevServlet extends HttpServlet {
                     } catch (Exception ignored) { /* best-effort */ }
                 }
             } finally {
-                ec.destroy()
+                // Keep the guard's request context until service() completes.
             }
         } catch (Exception e) {
             // Context is best-effort; never block session creation
