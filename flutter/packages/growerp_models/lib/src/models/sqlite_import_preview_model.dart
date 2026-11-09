@@ -7,6 +7,8 @@ class SqliteImportPreview {
   final List<Map<String, dynamic>> currencies;
   final List<Map<String, dynamic>> stores;
   final List<String> warnings;
+  /// Accounting-only import readiness, never a posting authorization.
+  final Map<String, dynamic> accountingReview;
 
   const SqliteImportPreview({
     this.format,
@@ -16,6 +18,7 @@ class SqliteImportPreview {
     this.currencies = const [],
     this.stores = const [],
     this.warnings = const [],
+    this.accountingReview = const {},
   });
 
   factory SqliteImportPreview.fromJson(Map<String, dynamic> json) {
@@ -34,6 +37,9 @@ class SqliteImportPreview {
       warnings: (value['warnings'] as List<dynamic>? ?? [])
           .map((item) => item.toString())
           .toList(),
+      accountingReview: value['accountingReview'] is Map<String, dynamic>
+          ? value['accountingReview'] as Map<String, dynamic>
+          : const {},
     );
   }
 
