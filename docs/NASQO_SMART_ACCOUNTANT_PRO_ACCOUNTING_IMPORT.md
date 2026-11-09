@@ -55,6 +55,41 @@ The Flutter model can parse the accounting-specific review response and the Arab
 
 Never commit the owner's private backup or raw PII to GitHub. Sensitive data is not needed for the tests.
 
+## Current-VPS source staging (opt-in, **not a financial import**)
+
+NASQO's existing admin-only `SqliteImport/Preview` endpoint can persist an
+owner-approved source, **only** when the production backend operator sets
+`NASQO_ACCOUNTING_STAGE_COMPANY` to the authenticated source company's
+`companyPartyId`. If the environment variable is missing or mismatched,
+the preview stays ephemeral and leaves no source archive.
+
+On an opt-in preview, the server:
+
+1. Runs the normal read-only SQLite integrity/schema review, and rejects any
+   source over 32 MiB for persistent staging.
+2. Validates the authenticated server-derived company ID, not any client-provided
+   company identifier; never grants staging to another company.
+3. Saves the SQLite source at `/var/lib/nasqo-accounting-imports/<companyPartyId>/<sourceSHA256>/source.back`
+   in a **private, persistent VPS Docker bind mount**, with owner-only permissions.
+4. Saves a small private `manifest.json` containing aggregates, source SHA-256,
+   company scope and **`BLOCKED_PENDING_ACCOUNT_MAPPING`**. No customer
+   names, phones or financial line data appear in the manifest.
+5. Rejects a different second source for the same company until the first is
+   explicitly reconciled; repeated identical uploads are idempotent.
+6. Appends a visible Arabic warning to the existing preview explaining whether
+   the source was prepared, without claiming that GL entries were imported.
+
+**Source .back remains private and never goes to GitHub, client logs or public
+web storage. No NASQO PostgreSQL tables are touched by this path.** The user
+must reupload the original `.back` through the existing admin preview control
+*once* to stage it after the opt-in backend deployment. A prior preview upload
+was ephemeral and was deleted.
+
+Before the actual accounting import, resolve source bill types, status codes,
+party roles, currencies, cashboxes, GL accounts, duplicate invoices, opening
+balances and trial-balance reconciliation. Posting is blocked until these
+mappings and totals are explicitly approved.
+
 ## Next phase (not implemented)
 
 A separate, tenant-scoped accounting migration ingestion service within the **current NASQO deployment** should store a private review manifest and migration keys, validate mappings and duplicate reconciliation, then create strictly unposted documents only after explicit approval. It must never call `post#AcctgTrans` implicitly.

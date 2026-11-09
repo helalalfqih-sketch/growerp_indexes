@@ -38,6 +38,25 @@
                     }
                     def util = ec.resource.script('component://growerp/service/NasqoSqliteImportUtil.groovy', null)
                     preview = util.preview(temp)
+                    // Explicit company-scoped operator opt-in; no other tenant is
+                    // allowed to persist a source by calling this preview.
+                    String stagingCompany = System.getenv('NASQO_ACCOUNTING_STAGE_COMPANY')
+                    if (stagingCompany && companyPartyId?.toString() == stagingCompany) {
+                        try {
+                            File privateRoot = new File('/var/lib/nasqo-accounting-imports')
+                            preview.accountingStage = util.stageForAccounting(
+                                temp, privateRoot, companyPartyId.toString())
+                            preview.warnings <<
+                                'تم حفظ ملف المصدر في مساحة مراجعة محاسبية خاصة على خادم نسقو. لم تُرحّل أي قيود أو أرصدة.'
+                        } catch (Exception reviewError) {
+                            preview.accountingStage = [
+                                status: 'NOT_STAGED', postedEntries: 0,
+                                sourceRowsWrittenToAccounting: 0
+                            ]
+                            preview.warnings <<
+                                'تعذّر تجهيز الملف للمراجعة المحاسبية؛ لا توجد قيود أو أرصدة مستوردة.'
+                        }
+                    }
                 } finally {
                     temp.delete()
                 }
