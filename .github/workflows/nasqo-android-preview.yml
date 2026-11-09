@@ -52,20 +52,34 @@ jobs:
         working-directory: flutter/packages/admin
         run: |
           flutter build apk --debug --no-pub --dart-define=BACKEND_URL=https://erp.indexesstore.com
+      - name: Verify signed APK for Android
+        shell: bash
+        run: |
+          set -euo pipefail
+          apk=flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk
+          test -s "$apk"
+          apksigner="$(find "$ANDROID_HOME/build-tools" -type f -name apksigner | sort -V | tail -1)"
+          aapt="$(find "$ANDROID_HOME/build-tools" -type f -name aapt | sort -V | tail -1)"
+          test -x "$apksigner" && test -x "$aapt"
+          "$apksigner" verify --verbose --print-certs "$apk"
+          "$aapt" dump badging "$apk" | tee /tmp/nasqo-apk-badging.txt | grep -E '^(package:|sdkVersion:|targetSdkVersion:|application-label:|native-code:)' | head -10
+          grep -q "name='org.growerp.admin.nasqo.preview.v1228'" /tmp/nasqo-apk-badging.txt
+          unzip -tq "$apk"
+          echo NASQO_ANDROID_1228_PACKAGE_AND_SIGNATURE_PASS
       - name: Package verified APK
         shell: bash
         run: |
           set -euo pipefail
           install -d dist
-          install -m 644 flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk dist/NASQO_ERP_Android_Preview_1.22.7.apk
-          (cd dist && sha256sum NASQO_ERP_Android_Preview_1.22.7.apk > SHA256SUMS)
-          test -s dist/NASQO_ERP_Android_Preview_1.22.7.apk
+          install -m 644 flutter/packages/admin/build/app/outputs/flutter-apk/app-debug.apk dist/NASQO_ERP_Android_Preview_1.22.8.apk
+          (cd dist && sha256sum NASQO_ERP_Android_Preview_1.22.8.apk > SHA256SUMS)
+          test -s dist/NASQO_ERP_Android_Preview_1.22.8.apk
           echo 'APK_PREVIEW_CREATED'
           ls -lh dist/*
       - name: Upload Android APK
         uses: actions/upload-artifact@v4
         with:
-          name: NASQO_ERP_Android_Preview_1.22.7
+          name: NASQO_ERP_Android_Preview_1.22.8
           path: dist/
           retention-days: 30
           if-no-files-found: error
