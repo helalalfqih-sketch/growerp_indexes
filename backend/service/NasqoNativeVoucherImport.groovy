@@ -61,6 +61,9 @@ class NasqoNativeVoucherImportHelper {
   def prepared=planner.prepare(plan,headers,invoices)
   def result=[status:'CHECKED_NATIVE_VOUCHERS',companyPartyId:company,sourceSha256:sha,
    eligible:prepared.summary,heldReasonCounts:prepared.held.countBy{it.reason},created:0,existing:0,postedEntries:0,applicationsCreated:0]
+  def plannedIds=prepared.payments*.sourceId as Set
+  def existingRecords=ec.entity.find('growerp.nasqo.AccountingImportPayment').condition('companyPartyId',company).list()
+  if(existingRecords.any{!plannedIds.contains(it.sourceId)})throw new IllegalStateException('Previously imported voucher no longer matches its source invoice')
   if(mode=='check')return result
   def registry='growerp.nasqo.AccountingImportPayment'
   def call={name,p->def r=ec.service.sync().name(name).parameters(p).call();if(ec.message.hasError())throw new IllegalStateException(ec.message.errorsString);r}

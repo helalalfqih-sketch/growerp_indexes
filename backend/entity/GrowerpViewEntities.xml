@@ -976,6 +976,7 @@ limitations under the License.
         <member-entity entity-alias="VROLE" entity-name="mantle.party.PartyRole"
             join-from-alias="VPARTY" join-optional="true">
             <key-map field-name="partyId" />
+            <entity-condition><econdition field-name="vendorRoleTypeId" value="Vendor"/></entity-condition>
         </member-entity>
         <member-entity entity-alias="VPAY" entity-name="mantle.account.method.PaymentMethod"
             join-from-alias="VPARTY" join-optional="true">
@@ -1016,6 +1017,7 @@ limitations under the License.
         <member-entity entity-alias="CROLE" entity-name="mantle.party.PartyRole"
             join-from-alias="CPARTY" join-optional="true">
             <key-map field-name="partyId" />
+            <entity-condition><econdition field-name="customerRoleTypeId" value="Customer"/></entity-condition>
         </member-entity>
         <member-entity entity-alias="CPAY" entity-name="mantle.account.method.PaymentMethod"
             join-from-alias="CPARTY" join-optional="true">
