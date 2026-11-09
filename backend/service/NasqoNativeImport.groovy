@@ -133,10 +133,17 @@ class NasqoNativeImportHelper {
    try{
     selected.each{createOne(it)};selected.each{createOne(it)}
     assert result.created==selected.size() && result.existing==selected.size()
-    def rec=ec.entity.find(registry).condition([companyPartyId:company,sourceId:selected[0].sourceId]).one()
+    def guardSample=selected.find{it.statusId=='InvoiceInProcess'}
+    assert guardSample
+    def rec=ec.entity.find(registry).condition([companyPartyId:company,sourceId:guardSample.sourceId]).one()
     boolean blocked=false
     try{call('update#mantle.account.invoice.Invoice',[invoiceId:rec.invoiceId,statusId:'InvoiceFinalized'])}
-    catch(Exception expected){blocked=true}
+    catch(Exception expected){
+     def messages=[];def cause=expected
+     while(cause!=null){messages<<cause.message;cause=cause.cause}
+     messages<<ec.message.errorsString
+     blocked=messages.join(' ').contains('هذه مسودة مستوردة')
+    }
     assert blocked
     result.postingGuardVerified=true
    }finally{ec.transaction.rollback(began,'Native import rollback verification',null);ec.message.clearErrors()}
