@@ -18,7 +18,7 @@ OLD_DEFAULT = re.compile(
     r"[ \t]*\}"
 )
 NEW_DEFAULT = """    # NASQO real ERP: API + WebSockets to Moqui, app UI to Flutter Web.
-    @nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws* /googleOAuth*
+    @nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws* /googleOAuth* /adk /adk/*
     handle @nasqoApi {
         reverse_proxy nasqo-backend:80
     }
@@ -112,17 +112,21 @@ def _patch_erp_routes(source: str) -> str:
 
     # Safe to run a second time; never insert duplicate route definitions.
     if "reverse_proxy nasqo-web:80" in block and "erp-moqui:80" not in block:
-        # Keep re-running this patch safe on pre-existing NASQO deployments.
-        # OAuth callbacks must reach Moqui, not the Flutter SPA catch-all.
-        if "/googleOAuth*" in block:
-            return source
-        if block.count("@nasqoApi path ") != 1:
+        # Existing deployments must also receive new backend-only routes.
+        # ADK must reach the authenticated servlet, not the Flutter catch-all.
+        matcher = re.compile(r"(?m)^([ \t]*@nasqoApi path )([^\r\n]+)(\r?)$")
+        matches = list(matcher.finditer(block))
+        if len(matches) != 1:
             raise ValueError("Missing unique NASQO API matcher")
-        block = block.replace(
-            "@nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws*",
-            "@nasqoApi path /rest/* /rpc/* /status /vapps* /chat* /notws* /googleOAuth*",
-            1,
-        )
+        match = matches[0]
+        paths = match.group(2).split()
+        if "/adk*" in paths:
+            raise ValueError("Review broad ADK route before patching")
+        for path in ("/googleOAuth*", "/adk", "/adk/*"):
+            if path not in paths:
+                paths.append(path)
+        block = (block[:match.start()] + match.group(1) + " ".join(paths) +
+                 match.group(3) + block[match.end():])
         return "".join(lines[:start]) + block + "".join(lines[end + 1:])
     if block.count("reverse_proxy erp-moqui:80") < 2:
         raise ValueError("Unexpected ERP Caddy structure; no changes made")
