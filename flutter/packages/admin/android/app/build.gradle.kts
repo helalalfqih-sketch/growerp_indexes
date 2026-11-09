@@ -44,7 +44,7 @@ android {
         debug {
             // Installable test build, independent of any previously installed app
             // signed with a different GrowERP/Play keystore.
-            applicationIdSuffix = ".nasqo.preview"
+            applicationIdSuffix = ".nasqo.preview.v1228"
         }
         release {
             signingConfig = signingConfigs.getByName("release")
