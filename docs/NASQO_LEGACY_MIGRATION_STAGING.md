@@ -259,3 +259,35 @@ Run synthetic-only regression tests:
 CI executes those tests alongside the independent synthetic PostgreSQL
 rollback job. Staging Moqui writes and accountant-approved business
 reconciliation are still separate, blocked deliverables.
+
+
+## Aggregate data reconciliation gate (read-only)
+
+The reconciliation CLI is available for a private source copy:
+
+    python3 tools/nasqo_migration_reconciliation.py /private/original.back \
+      --output /private/nasqo-reconciliation.json
+
+It **never emits names, phone numbers, addresses, prices or invoice rows**.
+Only row counts, SHA-256 source fingerprint, numeric source type codes,
+unmatched reference counts and blocked financial status are recorded.
+The output path must be outside the Git repository, and overwrite is refused.
+
+The check counts movements per source bill_type and compares main bill-line
+coverage with supplementary bill-line coverage. It separately handles rows
+with both kinds of lines so those do not inflate a missing-lines number.
+It also reports declared FK violations, multi-unit product counts, product
+name collision groups and source party role codes as **unclassified**.
+
+No target NASQO database or API is contacted. Equal dain/madin numbers do
+not prove balanced accounting entries. The output always sets
+dataCanBeImportedToProduction=false, financialPostingAllowed=false,
+destinationWrites=0 and accountingReconciliationApproved=false.
+
+Use synthetic fixtures in CI:
+
+    python3 tools/test_nasqo_migration_reconciliation.py
+
+This supplements, but cannot replace, a source-system accountant-approved
+bill-type lookup, owner-tenant mapping, or a true Moqui staging integration
+test with rollback and private backup evidence.
