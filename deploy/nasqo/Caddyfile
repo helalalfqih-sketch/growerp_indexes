@@ -1,3 +1,11 @@
+# Moqui native clients use api_key. Keep only this underscore header on HTTPS;
+# Caddy rejects its ambiguous Api-Key alias and repeated values.
+{
+    servers :443 {
+        expected_underscore_headers api_key
+    }
+}
+
 # Automatic HTTPS requires a real DNS record and reachable ports 80 and 443.
 {$NASQO_DOMAIN} {
     encode zstd gzip
