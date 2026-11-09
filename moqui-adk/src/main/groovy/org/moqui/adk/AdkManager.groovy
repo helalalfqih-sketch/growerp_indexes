@@ -163,9 +163,11 @@ class AdkManager {
     // rebuilt on reloadConfig; closed on destroy.
     private static final Map<String, List<com.google.adk.tools.mcp.McpToolset>> configExternalToolsets = new ConcurrentHashMap<>()
     private static volatile String mcpApiKey = null
+    private static volatile long mcpKeyRetryAfterMs = 0L
+    private static final long MCP_KEY_RETRY_DELAY_MS = 300_000L
     static  volatile Map<String, Object>  currentConfig = [:]
 
-    static final String CONTEXT_PREAMBLE = '''\
+    private static final String SESSION_PREAMBLE = '''\
 You are running inside a GrowERP / Moqui ERP system.
 
 Current execution context (always up-to-date for this session):
@@ -186,6 +188,9 @@ Do not call any tool for this.
 MEMORY (continuity across conversations):
 {memory}
 
+'''
+
+    private static final String MCP_PREAMBLE = '''\
 STABLE DOMAIN KNOWLEDGE (OKF):
 The curated OKF knowledge bundle holds stable domain knowledge: entity/data-model definitions
 with schemas and relationships, business structure, module relationships. For questions like
@@ -210,6 +215,9 @@ or guess a service name (no getPending#X, updateContent#X): when unsure of the e
 parameters, then execute exactly the returned name. Prompts ('moqui_prompts_get') are documentation
 templates, not services.
 
+'''
+
+    private static final String NAVIGATION_PREAMBLE = '''\
 SCREEN NAVIGATION — opening operational app screens
 The GrowERP front-end (Flutter) screens available in this session are listed in this
 catalog (JSON: widgetName, description, keywords, parameters):
@@ -266,6 +274,28 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
 
 '''
 
+    static final String CONTEXT_PREAMBLE = SESSION_PREAMBLE + MCP_PREAMBLE + NAVIGATION_PREAMBLE
+
+    private static final String MCP_UNAVAILABLE_INSTRUCTIONS = '''\
+ERP TOOL AVAILABILITY:
+The internal Moqui MCP tools are unavailable in this session.
+You can answer general questions, use only the other tools actually supplied, and help the user
+navigate with the screen catalog. You cannot query live ERP records, company knowledge, or OKF
+through MCP in this session. Never invent data, claim you checked records, or claim an ERP action
+succeeded. When a request needs unavailable tools, explain this limitation clearly and offer the
+matching screen. Do not mention credentials or suggest bypassing account access controls.
+
+'''
+
+    private static String contextPreambleForMcp(boolean available) {
+        if (available) return CONTEXT_PREAMBLE
+        // Keep identity and navigation, but do not advertise tools absent from this runner.
+        String navigation = NAVIGATION_PREAMBLE.replace(
+                'resolve its id with read-only tools first\n(moqui_search_services / moqui_execute_service), then emit the directive with that id.',
+                'ask the user for its record ID or open the matching list screen. Never invent an ID.')
+        return SESSION_PREAMBLE + MCP_UNAVAILABLE_INSTRUCTIONS + navigation
+    }
+
     // ── Initialisation ────────────────────────────────────────────────────────
 
     /**
@@ -320,15 +350,18 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
             LlmAgent agent
 
             // In-process FunctionTools (read-only set + writes when allowed), plus the MCP toolset.
-            List allTools = assembleFunctionTools(allowWrites,
-                    effectiveProvider == 'gemini' && lookupWebSearch(configId), modelArg)
+            boolean httpInteractive = configId?.startsWith('HTTP_INTERACTIVE_')
+            List allTools = httpInteractive ? assembleHttpFunctionTools() :
+                    assembleFunctionTools(allowWrites,
+                            effectiveProvider == 'gemini' && lookupWebSearch(configId), modelArg)
             if (agentMcpToolset) allTools.add(agentMcpToolset)
             // External (tenant-registered) MCP servers attached to this agent — wrapped so a
             // tool name that collides with the internal server or an earlier external server
             // gets logged instead of silently shadowing (see CollisionLoggingToolset).
             Set<String> seenMcpToolNames = Collections.synchronizedSet(new HashSet<>(INTERNAL_MCP_TOOL_NAMES))
             int externalServerIdx = 0
-            loadExternalMcpToolsets(configId, ownerPartyId).each { ts ->
+            List externalToolsets = httpInteractive ? [] : loadExternalMcpToolsets(configId, ownerPartyId)
+            externalToolsets.each { ts ->
                 externalServerIdx++
                 allTools.add(new CollisionLoggingToolset(ts, configId, "external MCP server #${externalServerIdx}", seenMcpToolNames))
             }
@@ -336,8 +369,10 @@ pre-filled dialog. Order/shipment specifics still work: "enter a sales order" �
             if (!agentName) {
                 agent = LlmAgent.builder()
                     .name('growerp-agent')
-                    .description('GrowERP / Moqui ERP assistant with access to Moqui MCP tools')
-                    .instruction(CONTEXT_PREAMBLE + '''\
+                    .description(agentMcpToolset ?
+                            'GrowERP / Moqui ERP assistant with access to Moqui MCP tools' :
+                            'GrowERP assistant for general help and navigation; internal ERP tools unavailable')
+                    .instruction(contextPreambleForMcp(agentMcpToolset != null) + (agentMcpToolset ? '''\
 You are GrowERP Assistant, an AI agent for the GrowERP / Moqui ERP system.
 Answer the user's questions using the available Moqui MCP tools.
 
@@ -349,12 +384,15 @@ How to use the Moqui tools:
   shipments, invoices or payments search "FinDoc" — the sales-order list is
   'growerp.100.FinDocServices100.get#FinDoc' with parameters {docType:"order", sales:true}.
 - Use 'moqui_get_service_details' to learn a service's parameters.
-- Use 'moqui_execute_service' to run a service.
+- Use 'moqui_execute_service' to run a service only when that tool is supplied.
+''' : '') + (httpInteractive ?
+                            "- Use 'getCurrentTime' only when asked about the current time in a city.\n" : '''\
 - Use 'getCurrentTime' only when asked about the current time in a city.
 - Use 'sendEmail' to send email; always pass ownerPartyId from your context ({tenantId}). Returns an error if email is not configured for this tenant.
 - Use 'readEmails' to poll and read recent incoming email; always pass ownerPartyId from your context ({tenantId}). Returns an error if email is not configured.
 - Use the GitHub tools ('getLatestTestRun', 'getTestExceptions', 'getMainSha', 'getFileContent', 'createBranch', 'updateFileContent', 'createPullRequest', 'addComment') to interact with GitHub. Always pass ownerPartyId from your context ({tenantId}) so that the tenant's GitHub token configuration is retrieved.
 
+''' ) + '''\
 CRITICAL tool-use rules — follow exactly:
 - After a tool returns a result, NEVER call that same tool again with the same arguments.
 - As soon as a tool result contains the information needed, STOP calling tools and write
@@ -372,7 +410,8 @@ CRITICAL tool-use rules — follow exactly:
                         // tells the coordinator's LLM when to delegate here.
                         .description(description ?: agentName ?: 'GrowERP agent')
                         .model(modelArg)
-                        .instruction(CONTEXT_PREAMBLE + (instruction ?: ''))
+                        .instruction(contextPreambleForMcp(agentMcpToolset != null) + (instruction ?: '') +
+                                (agentMcpToolset ? '' : MCP_UNAVAILABLE_INSTRUCTIONS))
                         .tools(allTools)
                         .build()
             }
@@ -413,30 +452,43 @@ CRITICAL tool-use rules — follow exactly:
     }
 
     /**
-     * Generate a UserLoginKey for SystemSupport so the MCP SSE connection can authenticate
-     * via 'api_key' header on every request (both SSE GET and subsequent POSTs).
-     * Basic auth headers only work if the header survives through Moqui's web facade init;
-     * api_key header is checked unconditionally in initFromHttpRequest.
+     * Generate a UserLoginKey only after the dedicated account successfully authenticates.
+     * A disabled/missing service account is not bypassed with guessed Basic credentials.
      */
     private static String generateMcpApiKey(ExecutionContextFactory ecf) {
-        // Must run in a fresh thread: ecf.getExecutionContext() returns the thread-local EC,
-        // so calling it on the request thread would grab (and then destroy) the caller's EC.
+        // Must use a fresh thread so this never changes or destroys the HTTP caller's EC.
         String[] result = [null]
         Thread t = new Thread({
             def ec = ecf.getExecutionContext()
             try {
-                ec.user.internalLoginUser('SystemSupport')
-                result[0] = ec.user.getLoginKey(8760f)  // 1-year expiry
-                logger.info('Generated MCP API key for SystemSupport (valid 1 year)')
+                boolean loggedIn = ec.user.internalLoginUser('SystemSupport')
+                if (!loggedIn || !ec.user.userId || ec.user.username != 'SystemSupport') {
+                    logger.warn('Internal MCP authentication unavailable; ERP tools will be omitted')
+                    return
+                }
+                result[0] = ec.user.getLoginKey(8760f)
+                if (result[0]) logger.info('Generated internal MCP service-account key')
             } catch (Exception e) {
-                logger.warn("Could not generate MCP API key, falling back to Basic auth: ${e.message}")
+                logger.warn('Internal MCP authentication unavailable; ERP tools will be omitted')
             } finally {
                 ec.destroy()
             }
         }, 'adk-mcpkey-gen')
+        t.daemon = true
         t.start()
         t.join(5000L)
         return result[0]
+    }
+
+    private static synchronized String resolveMcpApiKey(ExecutionContextFactory ecf) {
+        if (mcpApiKey) return mcpApiKey
+        long now = System.currentTimeMillis()
+        if (ecf == null || now < mcpKeyRetryAfterMs) return null
+        // Reserve the cooldown before trying, including failures and a slow login thread.
+        mcpKeyRetryAfterMs = now + MCP_KEY_RETRY_DELAY_MS
+        mcpApiKey = generateMcpApiKey(ecf)
+        if (mcpApiKey) mcpKeyRetryAfterMs = 0L
+        return mcpApiKey
     }
 
     static void initSessionService(ExecutionContextFactory ecf) {
@@ -1361,16 +1413,15 @@ CRITICAL tool-use rules — follow exactly:
      *  {@link #MCP_WRITE_TOOL_NAME} from the exposed tool list. */
     private static com.google.adk.tools.mcp.McpToolset buildMcpToolset(String configId, String ownerPartyId = null, String toolMode = null,
                                                                     boolean dryRun = false) {
-        if (shuttingDown) return null
-        if (mcpApiKey == null && sharedSessionService != null) {
-            mcpApiKey = generateMcpApiKey(sharedSessionService.ecf)
-        }
-        Map<String, String> sseHeaders = ['Accept': 'application/json, text/event-stream']
-        if (mcpApiKey) {
-            sseHeaders['api_key'] = mcpApiKey
-        } else {
-            sseHeaders['Authorization'] = 'Basic ' + 'SystemSupport:moqui'.bytes.encodeBase64().toString()
-        }
+        // HTTP sessions must not inherit a shared administrative MCP identity. A future
+        // caller-scoped adapter must enforce both tenant reads and per-user authorization.
+        if (shuttingDown || configId?.startsWith('HTTP_INTERACTIVE_')) return null
+        String apiKey = resolveMcpApiKey(sharedSessionService?.ecf)
+        if (!apiKey) return null
+        Map<String, String> sseHeaders = [
+                'Accept': 'application/json, text/event-stream',
+                'api_key': apiKey
+        ]
         if (configId && configId != DEFAULT_CONFIG) sseHeaders['adk_config_id'] = configId
         // Tenant owner — lets searchKnowledge resolve the company even for the general
         // per-tenant interactive agent (whose configId is not an AdkAgentConfig row).
@@ -1668,6 +1719,13 @@ CRITICAL tool-use rules — follow exactly:
     /** Build a coordinator LlmAgent that delegates to its team members as AgentTools (router).
      *  sequential/parallel/loop orchestration is Phase 4b — for now it routes via AgentTool too. */
     /** The in-process FunctionTools every agent gets (read-only set, plus write tools when allowed). */
+    /** HTTP runners must not expose legacy helpers that trust model-supplied tenant IDs. */
+    private static List assembleHttpFunctionTools() {
+        List tools = [com.google.adk.tools.LoadArtifactsTool.INSTANCE]
+        tools.addAll(com.google.adk.tools.FunctionTool.create(HelloTimeAgent.class, 'getCurrentTime'))
+        return tools
+    }
+
     private static List assembleFunctionTools(boolean allowWrites, boolean webSearch = false, def modelArg = null) {
         List allTools = new ArrayList()
         // lets the agent pull saved artifacts (PDFs/images) into context only when needed
@@ -1864,6 +1922,7 @@ use your own Moqui tools. Keep delegation minimal: pick the best-matching specia
         providerRegistry.clear()
         sharedSessionService = null
         mcpApiKey = null
+        mcpKeyRetryAfterMs = 0L
     }
 
     /** Wraps an external (tenant-registered) MCP toolset so its resolved tool names are checked
