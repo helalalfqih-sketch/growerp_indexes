@@ -55,13 +55,60 @@ class NasqoSavedAccountingReviewHelper {
                 report.financialDocumentsCreated!=0 || report.postedEntries!=0 ||
                 report.readyForAccountingImport!=false)
             throw new IllegalStateException('Saved reconciliation verification failed')
+        Map currencyDecision=null
+        Map preparedImport=null
+        File decisionFile=new File(stage,'import-decisions-v1.json')
+        if(Files.exists(decisionFile.toPath(),LinkOption.NOFOLLOW_LINKS)) {
+            Map decision=parsePrivate(decisionFile,1024L*1024)
+            Map cp=decision.currencyPolicy as Map
+            if(decision.format!='nasqo-accounting-decisions-v1' ||
+                    decision.companyPartyId!=company || decision.sourceSha256!=stage.name ||
+                    decision.financialPostingAllowed!=false ||
+                    decision.approval?.authority!='OWNER_INSTRUCTION' ||
+                    cp?.mode!='SINGLE_CURRENCY_AS_DECLARED' || cp.targetCurrencyUomId!='YER' ||
+                    cp.sourceCurrencyIds!=[1,2,3] || cp.amountTreatment!='PRESERVE_NUMERIC_VALUES' ||
+                    cp.fxConversion!=false)
+                throw new IllegalStateException('Currency decision verification failed')
+            currencyDecision=[targetCurrencyUomId:'YER',sourceCurrencyIds:[1,2,3],
+                amountTreatment:'PRESERVE_NUMERIC_VALUES',fxConversion:false,
+                resolvedSourceCurrencyRows:(report.currencyExceptions ?: []).count{
+                    cp.sourceCurrencyIds.contains(it.sourceCurrencyId)}]
+            File planManifestFile=new File(stage,'draft-plan-manifest-v1.json')
+            if(Files.exists(planManifestFile.toPath(),LinkOption.NOFOLLOW_LINKS)) {
+                Map pm=parsePrivate(planManifestFile,1024L*1024)
+                File planFile=new File(stage,'draft-plan-v1.json')
+                if(pm.format!='nasqo-accounting-draft-manifest-v1' ||
+                        pm.companyPartyId!=company || pm.sourceSha256!=stage.name ||
+                        pm.decisionSha256!=sha256(decisionFile) ||
+                        pm.status!='PREPARED_REQUIRES_MAPPING' || pm.currencyUomId!='YER' ||
+                        pm.financialDocumentsCreated!=0 || pm.postedEntries!=0 ||
+                        pm.readyForAccountingImport!=false ||
+                        pm.summary?.readyForFinancialCreation!=0 ||
+                        pm.summary?.preparedDrafts!=report.summary.movements ||
+                        Files.isSymbolicLink(planFile.toPath()) || !planFile.isFile() ||
+                        planFile.length()>64L*1024*1024 || pm.planSha256!=sha256(planFile))
+                    throw new IllegalStateException('Prepared draft verification failed')
+                preparedImport=[status:pm.status,currencyUomId:'YER',
+                    summary:(pm.summary as Map).subMap(['preparedDrafts','invoiceSourceDrafts',
+                        'voucherSourceDrafts','primaryLines','supplementaryLines',
+                        'resolvedCurrencyRows','unresolvedCurrencyRows','openingHeldRows',
+                        'transferHeldRows','readyForFinancialCreation']),
+                    documentTypes:(pm.documentTypes ?: []).take(20).collect{
+                        (it as Map).subMap(['sourceBillType','sourceLabel','count'])}]
+            }
+        }
         def pick={Map row,List keys -> row.subMap(keys)}
         List allowedSummary=['movements','accountGroups','sourceAccounts','cashboxes',
             'unknownCurrencyRows','openingLabelRows','unbalancedTransferPairs',
             'ambiguousTransferPartners','transferDateMismatches','sourceStructureCounts']
+        Map summary=pick(report.summary as Map,allowedSummary)
+        if(currencyDecision) {
+            summary.sourceUnknownCurrencyRows=summary.unknownCurrencyRows ?: 0
+            summary.unknownCurrencyRows=(report.currencyExceptions ?: []).size()-currencyDecision.resolvedSourceCurrencyRows
+        }
         [available:true,status:'REVIEW_ONLY_NOT_IMPORTED',readOnly:true,
          companyPartyId:company,sourceReference:stage.name.substring(0,16),
-         summary:pick(report.summary as Map,allowedSummary),
+         summary:summary,currencyDecision:currencyDecision,preparedImport:preparedImport,
          invoiceLines:manifest.sourceTableCounts?.bill_details ?: 0,
          groups:(report.accountGroups ?: []).take(500).collect {pick(it as Map,['id','name'])},
          cashboxes:(report.cashboxes ?: []).take(100).collect {pick(it as Map,['id','name','cur'])},

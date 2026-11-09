@@ -35,6 +35,36 @@ try {
   new File(stage,'source.back').text='changed'
   try {helper.read(root,'TEST');assert false} catch(IllegalStateException expected){}
   new File(stage,'source.back').bytes=sourceData
+  report.currencyExceptions[0].sourceCurrencyId=2
+  report.summary.unknownCurrencyRows=1
+  reportFile.text=JsonOutput.toJson(report)
+  def decision=[format:'nasqo-accounting-decisions-v1',companyPartyId:'TEST',sourceSha256:sha,
+    financialPostingAllowed:false,approval:[authority:'OWNER_INSTRUCTION'],currencyPolicy:[
+      mode:'SINGLE_CURRENCY_AS_DECLARED',targetCurrencyUomId:'YER',sourceCurrencyIds:[1,2,3],
+      amountTreatment:'PRESERVE_NUMERIC_VALUES',fxConversion:false]]
+  def decisionFile=new File(stage,'import-decisions-v1.json')
+  decisionFile.text=JsonOutput.toJson(decision)
+  def approved=helper.read(root,'TEST')
+  assert approved.currencyDecision.targetCurrencyUomId=='YER'
+  assert approved.summary.unknownCurrencyRows==0 && approved.summary.sourceUnknownCurrencyRows==1
+  assert approved.currencyExceptions[0].rawDain=='10.20'
+  def digest={File f->MessageDigest.getInstance('SHA-256').digest(f.bytes).encodeHex().toString()}
+  def planFile=new File(stage,'draft-plan-v1.json');planFile.text='synthetic-private-plan'
+  def pm=[format:'nasqo-accounting-draft-manifest-v1',companyPartyId:'TEST',sourceSha256:sha,
+    decisionSha256:digest(decisionFile),planSha256:digest(planFile),
+    status:'PREPARED_REQUIRES_MAPPING',currencyUomId:'YER',financialDocumentsCreated:0,postedEntries:0,
+    readyForAccountingImport:false,summary:[readyForFinancialCreation:0,preparedDrafts:2],
+    documentTypes:[[sourceBillType:3,sourceLabel:'فاتورة شراء',count:2,private:'MUST_NOT_LEAK']]]
+  def pmFile=new File(stage,'draft-plan-manifest-v1.json');pmFile.text=JsonOutput.toJson(pm)
+  assert helper.read(root,'TEST').preparedImport.summary.preparedDrafts==2
+  assert !JsonOutput.toJson(helper.read(root,'TEST')).contains('MUST_NOT_LEAK')
+  planFile.text='tampered'
+  try {helper.read(root,'TEST');assert false} catch(IllegalStateException expected){}
+  planFile.text='synthetic-private-plan'
+  decision.companyPartyId='OTHER';decisionFile.text=JsonOutput.toJson(decision)
+  try {helper.read(root,'TEST');assert false} catch(IllegalStateException expected){}
+  decision.companyPartyId='TEST';decisionFile.text=JsonOutput.toJson(decision)
+  assert java.util.Arrays.equals(before,new File(stage,'source.back').bytes)
   assert reportFile.delete()
   def outside=new File(root,'outside.json');outside.text=JsonOutput.toJson(report)
   Files.createSymbolicLink(reportFile.toPath(),outside.toPath())
