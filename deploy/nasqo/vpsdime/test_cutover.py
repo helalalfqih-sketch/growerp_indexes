@@ -72,6 +72,40 @@ for conflicting in [
     else:
         raise AssertionError("Conflicting server policy must require review")
 
+
+# Upgrade the previously deployed matcher, including partial route updates.
+for old_routes in [
+    patched.replace(" /adk /adk/*", ""),
+    patched.replace(" /googleOAuth* /adk /adk/*", ""),
+    patched.replace(" /adk/*", ""),
+    patched.replace(" /adk /adk/*", " /adk/*"),
+]:
+    upgraded = patch_caddy(old_routes)
+    assert "/googleOAuth*" in upgraded
+    assert upgraded.count("expected_underscore_headers api_key") == 1
+    matcher = next(line.split()[2:] for line in upgraded.splitlines()
+                   if line.strip().startswith("@nasqoApi path "))
+    assert matcher.count("/adk") == 1 and matcher.count("/adk/*") == 1
+    assert "/adk*" not in matcher
+    assert patch_caddy(upgraded) == upgraded
+try:
+    patch_caddy(patched.replace(" /adk /adk/*", " /adk*"))
+except ValueError:
+    pass
+else:
+    raise AssertionError("Broad ADK route must require review")
+
+
+def walk(value):
+    """Visit nested Caddy JSON routes and handlers without a text-only check."""
+    yield value
+    if isinstance(value, dict):
+        for child in value.values():
+            yield from walk(child)
+    elif isinstance(value, list):
+        for child in value:
+            yield from walk(child)
+
 # Parse with the production Caddy version, so a misplaced/unsupported option
 # cannot pass merely because its text happens to occur in the generated file.
 for config in [patched, with_global, with_server,
@@ -83,12 +117,29 @@ for config in [patched, with_global, with_server,
          "--config", "/dev/stdin", "--adapter", "caddyfile"],
         input=config, capture_output=True, text=True, check=True,
     )
-    servers = json.loads(adapted.stdout)["apps"]["http"]["servers"].values()
+    config_json = json.loads(adapted.stdout)
+    servers = config_json["apps"]["http"]["servers"].values()
     https = [server for server in servers if ":443" in server["listen"]]
     assert https and all(
         server.get("expected_underscore_headers") == ["api_key"]
         for server in https
     ), "Caddy must apply the exact api_key allowlist on HTTPS"
+
+    adk_routes = [
+        route for route in walk(config_json)
+        if isinstance(route, dict) and isinstance(route.get("match"), list)
+        and any("/adk" in match.get("path", []) for match in route["match"])
+    ]
+    assert adk_routes, "ADK must have an explicit backend route"
+    for route in adk_routes:
+        paths = [path for match in route["match"] for path in match.get("path", [])]
+        assert "/adk" in paths and "/adk/*" in paths and "/adk*" not in paths
+        assert "/googleOAuth*" in paths
+        dials = [node["dial"] for node in walk(route.get("handle", []))
+                 if isinstance(node, dict) and "dial" in node]
+        assert len(dials) == 1 and dials[0] in ("backend:80", "nasqo-backend:80"), (
+            "ADK must route only to Moqui, never the Flutter frontend"
+        )
 
 compose_text = (HERE / "compose.yaml").read_text()
 assert "indexes-waha_default" in compose_text
