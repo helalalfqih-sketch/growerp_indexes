@@ -157,6 +157,16 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
           );
         }
         await PersistFunctions.persistAuthenticate(authResult);
+        // The saved API key is used by Dio's KeyInterceptor. It must exist
+        // before protected settings/agent screens dispatch their first GET/POST.
+        await PersistFunctions.persistKeyValue('apiKey', authResult.apiKey!);
+        if (authResult.moquiSessionToken != null &&
+            authResult.moquiSessionToken!.isNotEmpty) {
+          await PersistFunctions.persistKeyValue(
+            'moquiSessionToken',
+            authResult.moquiSessionToken!,
+          );
+        }
         // chat
         await chat.connect(authResult.apiKey!, userId);
         // notification
