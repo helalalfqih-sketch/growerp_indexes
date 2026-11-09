@@ -706,13 +706,16 @@ CRITICAL tool-use rules — follow exactly:
 
     // ── Session management ────────────────────────────────────────────────────
 
-    static Map createSession(String userId, Map<String, Object> initialState = [:]) {
+    static Map createSession(String userId, Map<String, Object> initialState = [:], boolean requireTenant = false) {
         String tenantId = initialState?.get('tenantId') as String
         // Interactive chat must run as a general per-tenant agent (NOT a scheduled/named
         // agent like the CI Monitor) so it carries the tenant owner for searchKnowledge.
         if (tenantId && tenantId != 'DEFAULT') ensureInteractiveForTenant(tenantId)
-        String configId = resolveConfigId(tenantId)
-        Runner runner   = registry[configId] ?: registry.values().find()
+        // HTTP sessions must never borrow another company's runner/tools.
+        // Legacy scheduled/internal callers retain their explicit default behavior.
+        String configId = requireTenant ? tenantRegistry[tenantId] : resolveConfigId(tenantId)
+        Runner runner = requireTenant ? (configId ? registry[configId] : null) :
+                (registry[configId] ?: registry.values().find())
         if (!runner) throw new IllegalStateException('ADK not initialized — add an LLM API key in System Setup')
 
         def session = runner.sessionService()
