@@ -573,14 +573,14 @@ CRITICAL tool-use rules — follow exactly:
     /// the tenant's chat route. Built once per owner (configId 'INTERACTIVE_<owner>'); its
     /// McpToolset carries the owner so searchKnowledge can resolve the tenant. No-op when
     /// already registered. Falls back to the global default if no key can be found.
-    static synchronized void ensureInteractiveForTenant(String ownerPartyId) {
+    static synchronized void ensureInteractiveForTenant(String ownerPartyId, boolean strictTenant = false) {
         if (!ownerPartyId || sharedSessionService == null) return
-        String cid = 'INTERACTIVE_' + ownerPartyId
+        String cid = (strictTenant ? 'HTTP_INTERACTIVE_' : 'INTERACTIVE_') + ownerPartyId
         if (registry.containsKey(cid)) return
         // A coordinator (or already-built interactive agent) may already own this tenant's chat
         // route — don't shadow it with the generic interactive default.
-        if (tenantRegistry.containsKey(ownerPartyId)) return
-        Map llm = resolveTenantLlm(ownerPartyId)
+        if (!strictTenant && tenantRegistry.containsKey(ownerPartyId)) return
+        Map llm = resolveTenantLlm(ownerPartyId, strictTenant)
         if (!llm) {
             logger.warn("ensureInteractiveForTenant: no LLM key for owner=${ownerPartyId}; " +
                     "interactive chat will use the global default (no tenant knowledge access)")
@@ -596,7 +596,7 @@ CRITICAL tool-use rules — follow exactly:
     /// Resolve an API key for [ownerPartyId] and [provider]: this owner's LlmConfig → any
     /// LlmConfig for that provider → a key borrowed from an AdkAgentConfig → env vars.
     /// Returns '' when none found.
-    private static String resolveTenantKey(String ownerPartyId, String provider = 'gemini') {
+    private static String resolveTenantKey(String ownerPartyId, String provider = 'gemini', boolean strictTenant = false) {
         String key = ''
         try {
             def ec = sharedSessionService.ecf.getExecutionContext()
@@ -606,7 +606,7 @@ CRITICAL tool-use rules — follow exactly:
                         .condition('ownerPartyId', ownerPartyId)
                         .condition('llmProvider', provider).one()
                 key = lc?.getString('apiKey') ?: ''
-                if (!key) {
+                if (!key && !strictTenant) {
                     for (def row in ec.entity.find('growerp.general.LlmConfig')
                             .condition('llmProvider', provider).list()) {
                         String k = row.getString('apiKey')
@@ -622,7 +622,7 @@ CRITICAL tool-use rules — follow exactly:
                             .condition('llmProvider', provider).list()
                     for (def row in ac) { String k = row.getString('apiKey'); if (k) { key = k; break } }
                 }
-                if (!key) {
+                if (!key && !strictTenant) {
                     for (def row in ec.entity.find('moqui.adk.AdkAgentConfig')
                             .condition('llmProvider', provider).list()) {
                         String k = row.getString('apiKey')
@@ -633,15 +633,15 @@ CRITICAL tool-use rules — follow exactly:
         } catch (Exception e) {
             logger.warn("resolveTenantKey(${ownerPartyId}, ${provider}) failed: ${e.message}")
         }
-        if (!key) key = envKeyFor(provider)
+        if (!key && !strictTenant) key = envKeyFor(provider)
         return key
     }
 
     /// The provider and key to serve [ownerPartyId] with: the supported providers in order,
     /// first one that has a key anywhere. Returns null when nothing is configured.
-    private static Map resolveTenantLlm(String ownerPartyId) {
+    private static Map resolveTenantLlm(String ownerPartyId, boolean strictTenant = false) {
         for (String provider in SUPPORTED_PROVIDERS) {
-            String key = resolveTenantKey(ownerPartyId, provider)
+            String key = resolveTenantKey(ownerPartyId, provider, strictTenant)
             if (key) return [provider: provider, key: key]
         }
         return null
@@ -710,10 +710,10 @@ CRITICAL tool-use rules — follow exactly:
         String tenantId = initialState?.get('tenantId') as String
         // Interactive chat must run as a general per-tenant agent (NOT a scheduled/named
         // agent like the CI Monitor) so it carries the tenant owner for searchKnowledge.
-        if (tenantId && tenantId != 'DEFAULT') ensureInteractiveForTenant(tenantId)
+        if (tenantId && tenantId != 'DEFAULT') ensureInteractiveForTenant(tenantId, requireTenant)
         // HTTP sessions must never borrow another company's runner/tools.
         // Legacy scheduled/internal callers retain their explicit default behavior.
-        String configId = requireTenant ? tenantRegistry[tenantId] : resolveConfigId(tenantId)
+        String configId = requireTenant ? 'HTTP_INTERACTIVE_' + tenantId : resolveConfigId(tenantId)
         Runner runner = requireTenant ? (configId ? registry[configId] : null) :
                 (registry[configId] ?: registry.values().find())
         if (!runner) throw new IllegalStateException('ADK not initialized — add an LLM API key in System Setup')
@@ -736,8 +736,8 @@ CRITICAL tool-use rules — follow exactly:
          lastUpdateTime: System.currentTimeMillis()]
     }
 
-    static Map getSession(String userId, String sessionId) {
-        def runner = runnerForSession(sessionId)
+    static Map getSession(String userId, String sessionId, String ownerPartyId = null) {
+        def runner = runnerForSession(sessionId, ownerPartyId)
         def sessionOpt = runner.sessionService()
                 .getSession(APP_NAME, userId, sessionId, Optional.empty())
                 .blockingGet()
@@ -757,8 +757,8 @@ CRITICAL tool-use rules — follow exactly:
         response?.sessions()?.collect { s -> [id: s.id(), appName: APP_NAME, userId: s.userId()] } ?: []
     }
 
-    static void deleteSession(String userId, String sessionId) {
-        def runner = runnerForSession(sessionId)
+    static void deleteSession(String userId, String sessionId, String ownerPartyId = null) {
+        def runner = runnerForSession(sessionId, ownerPartyId)
         runner.sessionService().deleteSession(APP_NAME, userId, sessionId).blockingAwait()
         sessionOwn.remove(sessionId)
         turnCounts.remove(sessionId)
@@ -959,8 +959,9 @@ CRITICAL tool-use rules — follow exactly:
         t.start()
     }
 
-    static List<Map> runAgent(String userId, String sessionId, String text) {
+    static List<Map> runAgent(String userId, String sessionId, String text, String ownerPartyId = null) {
         if (shuttingDown) return []
+        Runner runner = runnerForSession(sessionId, ownerPartyId)
         String runConfigId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
         String blocked = allowanceBlock(runConfigId, sessionId)
         if (blocked) return [blockedEvent(blocked)]
@@ -968,7 +969,7 @@ CRITICAL tool-use rules — follow exactly:
         List<Map> events = []
         Set<String> delegateNames = new HashSet<>()
         Throwable[] err  = [null]
-        runnerForSession(sessionId).runAsync(userId, sessionId, userContent, defaultRunConfig(runConfigId))
+        runner.runAsync(userId, sessionId, userContent, defaultRunConfig(runConfigId))
             .blockingSubscribe(
                 { Event e -> collectDelegateNames(e, delegateNames); events << eventToMap(e) },
                 { Throwable t -> err[0] = t; logger.error("ADK runAgent error (session={}): {}", sessionId, t.message, t) }
@@ -1206,30 +1207,38 @@ CRITICAL tool-use rules — follow exactly:
     }
 
     static void runAgentSse(String userId, String sessionId, String text,
-                            Closure eventCallback, Closure doneCallback) {
+                            Closure eventCallback, Closure doneCallback,
+                            String ownerPartyId = null, boolean blockUntilComplete = false) {
         if (shuttingDown) { doneCallback(null); return }
+        // Resolve the exact caller-owned runner before any provider allowance call.
+        Runner runner = runnerForSession(sessionId, ownerPartyId)
         String runConfigId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
         String blocked = allowanceBlock(runConfigId, sessionId)
         if (blocked) { eventCallback(blockedEvent(blocked)); doneCallback(null); return }
         Content userContent = buildUserContent(text)
         Set<String> delegateNames = java.util.concurrent.ConcurrentHashMap.newKeySet()
         List<Map> collectedEvents = Collections.synchronizedList(new ArrayList<>())
-        runnerForSession(sessionId).runAsync(userId, sessionId, userContent, defaultRunConfig(runConfigId))
-            .subscribe(
-                { Event e ->
-                    def em = eventToMap(e)
-                    collectDelegateNames(e, delegateNames)
-                    collectedEvents.add(em)
-                    eventCallback(em)
-                },
-                { Throwable t -> logChatTurn(sessionId, text, collectedEvents); doneCallback(t) },
-                {
-                    logChatTurn(sessionId, text, collectedEvents)
-                    logDelegations(sessionId, delegateNames)
-                    maybeSummarize(sessionId)
-                    doneCallback(null)
-                }
-            )
+        def events = runner.runAsync(userId, sessionId, userContent, defaultRunConfig(runConfigId))
+        Closure onEvent = { Event e ->
+            def em = eventToMap(e)
+            collectDelegateNames(e, delegateNames)
+            collectedEvents.add(em)
+            eventCallback(em)
+        }
+        Closure onError = { Throwable t ->
+            logChatTurn(sessionId, text, collectedEvents)
+            doneCallback(t)
+        }
+        Closure onComplete = {
+            logChatTurn(sessionId, text, collectedEvents)
+            logDelegations(sessionId, delegateNames)
+            maybeSummarize(sessionId)
+            doneCallback(null)
+        }
+        // A servlet response must remain open through the final SSE event.
+        // Background/internal consumers retain the original nonblocking behavior.
+        if (blockUntilComplete) events.blockingSubscribe(onEvent, onError, onComplete)
+        else events.subscribe(onEvent, onError, onComplete)
     }
 
     // ── Internal helpers ──────────────────────────────────────────────────────
@@ -1240,8 +1249,22 @@ CRITICAL tool-use rules — follow exactly:
         return registry.containsKey(DEFAULT_CONFIG) ? DEFAULT_CONFIG : (registry.keySet().find() ?: DEFAULT_CONFIG)
     }
 
-    private static Runner runnerForSession(String sessionId) {
-        String configId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId) ?: DEFAULT_CONFIG
+    private static Runner runnerForSession(String sessionId, String ownerPartyId = null) {
+        String configId = sessionOwn[sessionId] ?: lookupConfigIdFromDb(sessionId)
+        if (ownerPartyId) {
+            String expected = 'HTTP_INTERACTIVE_' + ownerPartyId
+            if (configId != expected) {
+                throw new IllegalStateException('ADK session is unavailable — reopen the assistant')
+            }
+            // Rebuild this tenant's dedicated HTTP runner after a process restart.
+            ensureInteractiveForTenant(ownerPartyId, true)
+            Runner ownedRunner = registry[expected]
+            if (!ownedRunner) {
+                throw new IllegalStateException('ADK not initialized — add an LLM API key in System Setup')
+            }
+            return ownedRunner
+        }
+        configId = configId ?: DEFAULT_CONFIG
         if (configId && configId != DEFAULT_CONFIG) sessionOwn[sessionId] = configId  // cache it
         return registry[configId] ?: registry.values().find() ?: { throw new IllegalStateException('ADK not initialized — add an LLM API key in System Setup') }()
     }

@@ -155,7 +155,8 @@ class AdkDevServlet extends HttpServlet {
         Map state = [:]
         try { state = new JsonSlurper().parseText(session?.stateJson ?: '{}') as Map }
         catch (Exception ignored) {}
-        if (!session || state.tenantId != principal.ownerPartyId) {
+        if (!session || state.tenantId != principal.ownerPartyId ||
+                session.configId != 'HTTP_INTERACTIVE_' + principal.ownerPartyId) {
             deny(resp, 404, 'Session not found')
             return false
         }
@@ -217,7 +218,7 @@ class AdkDevServlet extends HttpServlet {
 
                 if (sessionId) {
                     AdkManager.lazyInit(ecf(req))
-                    def s = AdkManager.getSession(userId, sessionId)
+                    def s = AdkManager.getSession(userId, sessionId, principal.ownerPartyId as String)
                     if (!s) { resp.sendError(404); return }
                     json(resp, s)
                 } else {
@@ -229,14 +230,15 @@ class AdkDevServlet extends HttpServlet {
                     json(resp, sessions.findAll { entry ->
                         try {
                             (new JsonSlurper().parseText(entry.stateJson ?: '{}') as Map).tenantId ==
-                                    principal.ownerPartyId
+                                    principal.ownerPartyId &&
+                                    entry.configId == 'HTTP_INTERACTIVE_' + principal.ownerPartyId
                         } catch (Exception ignored) { false }
                     }.collect { entry -> [id: entry.adkSessionId, appName: AdkManager.APP_NAME, userId: userId] })
                 }
                 break
             case 'DELETE':
                 AdkManager.lazyInit(ecf(req))
-                if (sessionId) AdkManager.deleteSession(userId, sessionId)
+                if (sessionId) AdkManager.deleteSession(userId, sessionId, principal.ownerPartyId as String)
                 resp.status = 200
                 break
             default:
@@ -277,10 +279,11 @@ class AdkDevServlet extends HttpServlet {
                     }
                     writer.write("data: [DONE]\n\n")
                     writer.flush()
-                }
+                },
+                principal.ownerPartyId as String, true
             )
         } else {
-            json(resp, AdkManager.runAgent(userId, sid, text))
+            json(resp, AdkManager.runAgent(userId, sid, text, principal.ownerPartyId as String))
         }
     }
 
@@ -382,6 +385,9 @@ class AdkDevServlet extends HttpServlet {
     // ── Static file serving ───────────────────────────────────────────────────
 
     private void serveStatic(String path, HttpServletResponse resp) {
+        if (!path.matches('[A-Za-z0-9_./-]*') || path.split('/').any { it == '..' }) {
+            deny(resp, 400, 'Invalid asset path'); return
+        }
         if (path == '/' || path.isEmpty()) path = '/index.html'
         // SPA client-side routing: paths without a file extension → index.html
         if (!path.contains('.')) path = '/index.html'
