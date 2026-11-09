@@ -23,4 +23,4 @@ adb shell pidof "$package" | tee "$report/pid.txt"
 adb uninstall "$package" | tee "$report/uninstall.log"
 adb install --no-streaming "$apk" 2>&1 | tee "$report/reinstall.log"
 tr -d '\r' < "$report/reinstall.log" | grep -qx Success
-echo ANDROID_13_FRESH_INSTALL_LAUNCH_AND_REINSTALL_PASS
+echo ANDROID_13_FRESH_INSTALL_AND_REINSTALL_PASS
