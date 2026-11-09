@@ -6,6 +6,12 @@ import org.moqui.context.ExecutionContextFactory
 import org.moqui.context.UserFacade
 import java.util.concurrent.atomic.AtomicInteger
 
+// internalLoginUser is implementation-only in Moqui 4.0; expose it on the test
+// proxy as well so the fake executes the same dynamic call as UserFacadeImpl.
+interface InternalLoginUserFacade extends UserFacade {
+    boolean internalLoginUser(String username)
+}
+
 Class manager = Class.forName('org.moqui.adk.AdkManager')
 def field = { String name ->
     def f = manager.getDeclaredField(name)
@@ -54,7 +60,7 @@ def user = [
         assert loginAllowed && loggedInUser && loggedInName == 'SystemSupport'
         'test-only-internal-key'
     }
-] as UserFacade
+] as InternalLoginUserFacade
 def ec = [getUser: { user }, destroy: { destroyed.incrementAndGet(); null }] as ExecutionContext
 def ecf = [getExecutionContext: { ec }] as ExecutionContextFactory
 def resolve = method('resolveMcpApiKey', ExecutionContextFactory)
