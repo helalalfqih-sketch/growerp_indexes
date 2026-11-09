@@ -33,7 +33,12 @@ def linkage_by_type(db) -> list[dict]:
           ) THEN 1 ELSE 0 END) AS with_main_lines,
           SUM(CASE WHEN EXISTS (
             SELECT 1 FROM bill_details2 e WHERE e.bill_id=m.id
-          ) THEN 1 ELSE 0 END) AS with_supplementary_lines
+          ) THEN 1 ELSE 0 END) AS with_supplementary_lines,
+          SUM(CASE WHEN NOT EXISTS (
+            SELECT 1 FROM bill_details b WHERE b.bill_id=m.id
+          ) AND NOT EXISTS (
+            SELECT 1 FROM bill_details2 e WHERE e.bill_id=m.id
+          ) THEN 1 ELSE 0 END) AS without_either_lines
         FROM input_move m GROUP BY m.bill_type ORDER BY m.bill_type
     """
     return [
@@ -42,9 +47,9 @@ def linkage_by_type(db) -> list[dict]:
             "count": count,
             "withMainLines": main,
             "withSupplementaryLines": extra,
-            "withoutEitherLineType": count - main - extra,
+            "withoutEitherLineType": neither,
         }
-        for code, count, main, extra in db.execute(query)
+        for code, count, main, extra, neither in db.execute(query)
     ]
 
 
