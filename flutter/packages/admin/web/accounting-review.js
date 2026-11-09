@@ -16,6 +16,12 @@
         r.readyForAccountingImport !== false || r.financialDocumentsCreated !== 0 || r.postedEntries !== 0) {
       throw new Error('حالة المراجعة غير متوافقة. حدّث الصفحة وأعد المحاولة.');
     }
+    if (r.currencyDecision && (r.currencyDecision.targetCurrencyUomId !== 'YER' ||
+        r.currencyDecision.amountTreatment !== 'PRESERVE_NUMERIC_VALUES' || r.currencyDecision.fxConversion !== false))
+      throw new Error('تعذّر التحقق من قرار العملة.');
+    if (r.preparedImport && (r.preparedImport.status !== 'PREPARED_REQUIRES_MAPPING' ||
+        r.preparedImport.currencyUomId !== 'YER' || r.preparedImport.summary?.readyForFinancialCreation !== 0))
+      throw new Error('تعذّر التحقق من مسودات التجهيز.');
     return r;
   }
   if (typeof module !== 'undefined' && module.exports) {
@@ -126,6 +132,9 @@
       return;
     }
     body.append(make('p', 'الشركة: ' + text(r.companyPartyId) + ' · مرجع النسخة: ' + text(r.sourceReference), 'review-muted'));
+    if (r.currencyDecision) {
+      body.append(make('p', 'العملة المعتمدة: الريال اليمني (YER) لجميع الرموز 1 و2 و3. المبالغ محفوظة كما وردت دون تحويل عملات.', 'review-note'));
+    }
     body.append(make('p', 'لم تُستورد المستندات أو الأرصدة إلى المحاسبة بعد. النتائج أدناه للمراجعة قبل الاستيراد.', 'review-note'));
     const s = r.summary || {};
     const stats = make('div', null, 'review-stats');
@@ -137,6 +146,18 @@
       stats.append(card);
     });
     body.append(stats);
+    if (r.preparedImport) {
+      const p = r.preparedImport.summary || {};
+      body.append(make('h3', 'مسودات تجهيز الاستيراد'));
+      body.append(make('p', 'تم تجهيز ' + text(p.preparedDrafts) + ' مسودة مصدر بالريال: ' +
+        text(p.invoiceSourceDrafts) + ' فاتورة ومرتجع، و' + text(p.voucherSourceDrafts) + ' سند.'));
+      body.append(make('p', 'هذه مسودات تجهيز محفوظة على الخادم؛ لم تُنشأ فواتير أو سندات أو قيود محاسبية فعلية في نسقو. ربط الحسابات واتجاهات السندات ما زال يحتاج مراجعة.', 'review-note'));
+      body.append(make('p', 'بنود الفواتير: ' + text(p.primaryLines) + ' · البنود الإضافية: ' +
+        text(p.supplementaryLines) + ' · حركات حُسمت عملتها باعتمادك: ' + text(p.resolvedCurrencyRows)));
+      table('أنواع المستندات المطابقة لتقارير المصدر', ['رمز المصدر', 'النوع في المصدر', 'عدد المسودات'],
+        (Array.isArray(r.preparedImport.documentTypes) ? r.preparedImport.documentTypes : [])
+          .map(t => [t.sourceBillType, t.sourceLabel, t.count]));
+    }
     body.append(make('h3', 'حالات تحتاج إلى مراجعة'));
     body.append(make('p', 'حركات بعملات غير معرّفة: ' + text(s.unknownCurrencyRows) +
       ' · أزواج تحويل غير متوازنة: ' + text(s.unbalancedTransferPairs) +
@@ -145,8 +166,10 @@
     table('الصناديق النقدية', ['رقم المصدر', 'الاسم', 'رمز العملة في المصدر'],
       cashboxes.map(c => [c.id, c.name, c.cur]));
     const exceptions = Array.isArray(r.currencyExceptions) ? r.currencyExceptions : [];
-    table('حركات العملات غير المعرّفة', ['رقم الحركة', 'التاريخ', 'رمز العملة', 'عليه في المصدر', 'له في المصدر'],
-      exceptions.map(x => [x.sourceId, x.date, x.sourceCurrencyId, x.rawDain, x.rawMadin]));
+    table(r.currencyDecision ? 'حركات اعتمدت بالريال مع حفظ رمزها الأصلي' : 'حركات العملات غير المعرّفة',
+      ['رقم الحركة', 'التاريخ', 'رمز العملة الأصلي', 'العملة المعتمدة', 'عليه في المصدر', 'له في المصدر'],
+      exceptions.map(x => [x.sourceId, x.date, x.sourceCurrencyId,
+        r.currencyDecision?.sourceCurrencyIds?.includes(x.sourceCurrencyId) ? 'YER' : 'غير محددة', x.rawDain, x.rawMadin]));
     const pairs = Array.isArray(r.transferPairs) ? r.transferPairs : [];
     table('أزواج التحويل المرشحة للمطابقة', ['الحركات', 'قيمة الطرف الأول', 'قيمة الطرف الثاني', 'الفرق', 'المراجعة'],
       pairs.map(p => [(p.sourceIds || []).join(' / '), p.dainAmount, p.madinAmount, p.difference,

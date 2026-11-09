@@ -42,3 +42,14 @@ test('review button follows Flutter history navigation without hashchange', () =
   window.location.hash='#/customers';intervals.forEach(run=>run());
   assert.equal(trigger.hidden,true);
 });
+
+test('currency approval and preparation cannot silently enable financial creation', () => {
+  const r={available:true,readOnly:true,status:'REVIEW_ONLY_NOT_IMPORTED',readyForAccountingImport:false,financialDocumentsCreated:0,postedEntries:0};
+  const currencyDecision={targetCurrencyUomId:'YER',amountTreatment:'PRESERVE_NUMERIC_VALUES',fxConversion:false};
+  assert.equal(project({review:{...r,currencyDecision}}).currencyDecision,currencyDecision);
+  for(const change of [{targetCurrencyUomId:'USD'},{fxConversion:true},{amountTreatment:'CONVERT'}])
+    assert.throws(()=>project({review:{...r,currencyDecision:{...currencyDecision,...change}}}));
+  const preparedImport={status:'PREPARED_REQUIRES_MAPPING',currencyUomId:'YER',summary:{readyForFinancialCreation:0}};
+  assert.equal(project({review:{...r,currencyDecision,preparedImport}}).preparedImport,preparedImport);
+  assert.throws(()=>project({review:{...r,preparedImport:{...preparedImport,summary:{readyForFinancialCreation:1}}}}));
+});
