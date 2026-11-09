@@ -13,6 +13,9 @@
  */
 
 import 'dart:async';
+import 'dart:convert';
+
+import 'package:dio/dio.dart';
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -63,6 +66,29 @@ class _GoogleDeviceLoginDialogState extends State<GoogleDeviceLoginDialog> {
     _start();
   }
 
+  // Depending on the HTTP adapter Retrofit may return JSON as a Map or String.
+  static Map<String, dynamic> _responseMap(Object? raw) {
+    final Object? result = raw is String ? jsonDecode(raw) : raw;
+    if (result is! Map) {
+      throw const FormatException('Invalid NASQO response');
+    }
+    return Map<String, dynamic>.from(result);
+  }
+
+  String _safeNetworkMessage(DioException error) {
+    final status = error.response?.statusCode;
+    if (status != null) {
+      return _text(
+        'تعذّر بدء Google: الخادم أعاد HTTP $status.',
+        'Google sign-in failed: HTTP $status.',
+      );
+    }
+    return _text(
+      'تعذّر الاتصال بخادم نسقو. تحقق من الإنترنت ثم أعد المحاولة.',
+      'NASQO connection failed. Check internet and retry.',
+    );
+  }
+
   Future<void> _start() async {
     _pollTimer?.cancel();
     setState(() {
@@ -75,14 +101,18 @@ class _GoogleDeviceLoginDialogState extends State<GoogleDeviceLoginDialog> {
       _finished = false;
     });
     try {
-      final result = await widget.restClient.startGoogleDeviceLogin(
+      final response = await widget.restClient.startGoogleDeviceLogin(
         applicationId: widget.applicationId,
       );
       if (!mounted) return;
+      final result = _responseMap(response);
       final url = (result['authUrl'] ?? '').toString();
       final device = (result['deviceCode'] ?? '').toString();
       final code = (result['pairingCode'] ?? '').toString();
-      final lifetime = result['expiresInSeconds'];
+      final rawLifetime = result['expiresInSeconds'];
+      final lifetime = rawLifetime is num
+          ? rawLifetime
+          : num.tryParse(rawLifetime?.toString() ?? '');
       if (Uri.tryParse(url)?.host != 'accounts.google.com' ||
           !url.startsWith('https://') ||
           !RegExp(r'^[A-Za-z0-9_-]{40,100}$').hasMatch(device) ||
@@ -99,13 +129,28 @@ class _GoogleDeviceLoginDialogState extends State<GoogleDeviceLoginDialog> {
         _expiresAt = DateTime.now().add(Duration(seconds: lifetime.toInt()));
         _loading = false;
       });
+    } on DioException catch (error) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = _safeNetworkMessage(error);
+      });
+    } on FormatException catch (_) {
+      if (!mounted) return;
+      setState(() {
+        _loading = false;
+        _message = _text(
+          'استجابة نسقو غير صالحة. يلزم تحديث التطبيق أو الخادم.',
+          'Invalid NASQO response. An update may be needed.',
+        );
+      });
     } catch (_) {
       if (!mounted) return;
       setState(() {
         _loading = false;
         _message = _text(
-          'تعذّر إعداد الدخول عبر Google. تحقق من إعدادات نسقو واتصال الإنترنت.',
-          'Could not start Google sign-in. Check NASQO settings and connectivity.',
+          'تعذّر إعداد Google في التطبيق. راجع إصدار نسقو ثم أعد المحاولة.',
+          'Could not prepare Google sign-in. Check your NASQO version.',
         );
       });
     }
@@ -162,11 +207,12 @@ class _GoogleDeviceLoginDialogState extends State<GoogleDeviceLoginDialog> {
     }
     _polling = true;
     try {
-      final result = await widget.restClient.pollGoogleDeviceLogin(
+      final response = await widget.restClient.pollGoogleDeviceLogin(
         applicationId: widget.applicationId,
         deviceCode: code,
       );
       if (!mounted || _finished) return;
+      final result = _responseMap(response);
       if (result['status'] == 'pending') return;
       if (result['status'] != 'authenticated' ||
           result['authenticate'] is! Map) {
@@ -183,13 +229,17 @@ class _GoogleDeviceLoginDialogState extends State<GoogleDeviceLoginDialog> {
       _finished = true;
       _pollTimer?.cancel();
       Navigator.of(context).pop(auth);
+    } on DioException catch (error) {
+      if (!mounted || _finished) return;
+      _pollTimer?.cancel();
+      setState(() => _message = _safeNetworkMessage(error));
     } catch (_) {
       if (!mounted || _finished) return;
       _pollTimer?.cancel();
       setState(() {
         _message = _text(
-          'لم تكتمل المصادقة. تحقق من رمز المطابقة ثم اختر إعادة المحاولة.',
-          'Sign-in did not complete. Check the pairing code and try again.',
+          'لم تكتمل المصادقة. تأكد من رمز المطابقة وابدأ محاولة جديدة.',
+          'Sign-in did not complete. Verify pairing and start a new attempt.',
         );
       });
     } finally {
@@ -235,10 +285,8 @@ class _GoogleDeviceLoginDialogState extends State<GoogleDeviceLoginDialog> {
                 SelectableText(
                   _pairingCode!,
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                    letterSpacing: 2,
-                    fontWeight: FontWeight.bold,
-                  ),
+                  style: Theme.of(context).textTheme.headlineMedium
+                      ?.copyWith(letterSpacing: 2, fontWeight: FontWeight.bold),
                 ),
                 const SizedBox(height: 8),
                 OutlinedButton.icon(
