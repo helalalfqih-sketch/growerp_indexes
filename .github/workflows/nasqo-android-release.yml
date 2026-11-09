@@ -5,6 +5,7 @@ on:
     branches: [fix/nasqo-android-release-20261110]
     paths:
       - 'flutter/**'
+      - '!flutter/packages/admin/web/**'
       - 'tools/test_nasqo_android_release.sh'
       - '.github/workflows/nasqo-android-release.yml'
 permissions:
