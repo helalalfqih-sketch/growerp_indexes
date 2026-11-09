@@ -196,7 +196,9 @@
       body.replaceChildren(make('p', error.name === 'AbortError' ? 'انتهت مهلة التحميل. أغلق اللوحة وأعد المحاولة.' : error.message));
     } finally { clearTimeout(timeout); }
   }
+  let observedHash = null;
   function syncRoute() {
+    observedHash = window.location.hash;
     const visible = routeMatches(window.location.hash);
     trigger.hidden = !visible;
     if (!visible) dismiss();
@@ -207,5 +209,11 @@
   dialog.addEventListener('cancel', () => { clearRequest(); body.replaceChildren(); });
   window.addEventListener('hashchange', syncRoute);
   window.addEventListener('pagehide', dismiss);
+  window.addEventListener('popstate', syncRoute);
+  // Flutter can navigate with history.pushState/replaceState, which do not
+  // dispatch hashchange. Keep the review entry point in sync with that route.
+  setInterval(() => {
+    if (window.location.hash !== observedHash) syncRoute();
+  }, 500);
   syncRoute();
 })();

@@ -7,6 +7,8 @@ on:
       - 'backend/service/growerp.rest.xml'
       - 'flutter/packages/admin/web/accounting-review.js'
       - 'flutter/packages/admin/web/index.html'
+      - 'flutter/packages/admin/web/session-resume.js'
+      - 'tools/test_session_resume.cjs'
       - 'tools/test_accounting_review_panel.cjs'
       - 'tools/test_saved_accounting_review.py'
       - '.github/workflows/nasqo-saved-accounting-review.yml'
@@ -21,6 +23,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - run: node --check flutter/packages/admin/web/session-resume.js
+      - run: node --test tools/test_session_resume.cjs
       - run: node --check flutter/packages/admin/web/accounting-review.js
       - run: node --test tools/test_accounting_review_panel.cjs
       - run: python3 tools/test_saved_accounting_review.py
