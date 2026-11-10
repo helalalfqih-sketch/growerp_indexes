@@ -640,9 +640,66 @@ CRITICAL tool-use rules — follow exactly:
         }
         // agentName=null → builds the general 'growerp-agent'; ownerPartyId set + unnamed →
         // claims tenantRegistry[owner] and its McpToolset carries adk_owner_party_id.
-        initConfig(cid, ownerPartyId, null, defaultModelFor(llm.provider as String), '',
+        initConfig(cid, ownerPartyId, null,
+                interactiveModelFor(ownerPartyId, llm.provider as String, strictTenant), '',
                 llm.key as String, llm.provider as String)
         logger.info("Registered per-tenant interactive agent configId='${cid}' (owner=${ownerPartyId})")
+    }
+
+    /** HTTP chat has no persisted AgentConfig model, so honour only its own tenant's
+     *  System Setup choice. Never send a model to a different provider's key. Internal
+     *  and named agents keep their existing model-selection rules. */
+    private static String interactiveModelFor(String ownerPartyId, String provider, boolean strictTenant) {
+        if (strictTenant && ownerPartyId && sharedSessionService != null) {
+            try {
+                def ec = sharedSessionService.ecf.getExecutionContext()
+                boolean wasDisabled = ec.artifactExecution.disableAuthz()
+                try {
+                    def settings = ec.entity.find('growerp.general.SystemSettings')
+                            .condition('ownerPartyId', ownerPartyId).one()
+                    String model = (settings?.aiModelName as String)?.trim()
+                    if (model) {
+                        String modelProvider = (settings.aiProvider as String)?.trim()
+                        if (!modelProvider) {
+                            modelProvider = model.startsWith('claude') ? 'anthropic' :
+                                    ((model.startsWith('gpt') || model ==~ /^o\d.*/) ? 'openai' : 'gemini')
+                        }
+                        if (modelProvider == provider) return model
+                    }
+                } finally { if (!wasDisabled) ec.artifactExecution.enableAuthz() }
+            } catch (Exception e) {
+                logger.warn("interactiveModelFor: tenant model lookup failed for owner=${ownerPartyId}")
+            }
+        }
+        return defaultModelFor(provider)
+    }
+
+    /** Model-only settings changes invalidate just this tenant's HTTP runner. The next
+     *  owned session lookup rebuilds it from committed settings and the same-owner key. */
+    static synchronized void invalidateHttpInteractive(String ownerPartyId) {
+        if (!ownerPartyId) return
+        String cid = 'HTTP_INTERACTIVE_' + ownerPartyId
+        registry.remove(cid)
+        agentRegistry.remove(cid)
+        tenantRegistry.entrySet().removeIf { it.value == cid }
+    }
+
+    /** Do not let another request rebuild this runner from uncommitted settings. */
+    static void invalidateHttpInteractiveAfterCommit(org.moqui.context.TransactionFacade transaction,
+                                                     String ownerPartyId) {
+        if (!ownerPartyId) return
+        if (transaction != null && transaction.isTransactionInPlace()) {
+            transaction.registerSynchronization([
+                    beforeCompletion: { },
+                    afterCompletion: { int status ->
+                        if (status == jakarta.transaction.Status.STATUS_COMMITTED) {
+                            invalidateHttpInteractive(ownerPartyId)
+                        }
+                    }
+            ] as jakarta.transaction.Synchronization)
+        } else {
+            invalidateHttpInteractive(ownerPartyId)
+        }
     }
 
     /// Resolve an API key for [ownerPartyId] and [provider]: this owner's LlmConfig → any

@@ -2781,6 +2781,9 @@ limitations under the License.
                 <set field="ss.githubRepository" from="githubRepository.take(255)"/>
                 <script>System.setProperty('growerp.github.repo', githubRepository.take(255))</script>
             </if>
+            <!-- Compare before assigning: an omitted model/provider is not a change. -->
+            <set field="aiModelChanged" from="(aiModelName != null &amp;&amp; (aiModelName ?: '') != (ss.aiModelName ?: '')) ||
+                    (aiProvider != null &amp;&amp; (aiProvider ?: '') != (ss.aiProvider ?: ''))"/>
             <if condition="aiModelName != null"><set field="ss.aiModelName" from="aiModelName"/></if>
             <if condition="aiProvider != null"><set field="ss.aiProvider" from="aiProvider"/></if>
             <!-- an own cap only makes sense on an own key: accept it when the tenant already
@@ -2858,6 +2861,16 @@ limitations under the License.
                         catch (Throwable t) { ec.logger.warn("ADK reload skipped: ${t.message}") }
                     ]]></script>
                 </if>
+            </if>
+
+            <!-- A model/provider-only save must refresh the tenant HTTP runner too.
+                 Keep the existing key-change reload path above; never reset other tenants here. -->
+            <if condition="aiModelChanged">
+                <script><![CDATA[
+                    if (ec.service.isServiceDefined('AdkServices100.reload#HttpAdk')) {
+                        ec.service.sync().name('AdkServices100.reload#HttpAdk').call()
+                    }
+                ]]></script>
             </if>
 
             <!-- Sync to moqui.basic.email.EmailServer so poll#EmailServer / send#EmailMessage work -->

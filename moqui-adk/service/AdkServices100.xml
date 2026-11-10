@@ -463,6 +463,19 @@
 
     <!-- Re-create the interactive chat runner so a newly saved LLM key (e.g. from
          System Setup → LlmConfig) takes effect without a backend restart. -->
+    <service verb="reload" noun="HttpAdk" authenticate="true">
+        <description>Invalidate only the caller's HTTP chat runner after a model change.
+            The owner is resolved from the current user and is never accepted as an input.</description>
+        <actions>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                out-map="relInfo"/>
+            <if condition="!relInfo.ownerPartyId">
+                <return error="true" message="ownerPartyId not found for current user"/>
+            </if>
+            <script>org.moqui.adk.AdkManager.invalidateHttpInteractiveAfterCommit(ec.transaction, relInfo.ownerPartyId as String)</script>
+        </actions>
+    </service>
+
     <service verb="reload" noun="Adk">
         <actions>
             <script>org.moqui.adk.AdkManager.reloadInteractive(ec.factory)</script>
