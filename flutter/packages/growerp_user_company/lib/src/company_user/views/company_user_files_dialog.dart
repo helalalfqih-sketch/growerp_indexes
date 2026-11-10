@@ -49,7 +49,7 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
           children: [
             popUpDialog(
               context: context,
-              title: "CompanyUser Up/Download",
+              title: localizations.companiesUsersUpDownload,
               children: [
                 const SizedBox(height: 40),
                 Text(UserCompanyLocalizations.of(context)!.downloadFirstToObtainTheFormat),
