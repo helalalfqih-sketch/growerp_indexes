@@ -1445,11 +1445,15 @@ CRITICAL tool-use rules — follow exactly:
         Optional<Content> contentOpt = e.content()
         if (contentOpt.isPresent()) {
             Content c = contentOpt.get()
+            // Installed clients retain one text part per event. Join visible answer parts
+            // without inserting separators, and never send model thought text to the UI.
+            // This changes only the wire projection; the SDK event/session stays unchanged.
+            List<String> visibleTextParts = c.parts().orElse([]).findAll { Part p ->
+                !p.thought().orElse(false) && p.text().isPresent()
+            }.collect { Part p -> p.text().get() }
             m.content = [
                 role : c.role().isPresent() ? c.role().get() : '',
-                parts: c.parts().isPresent() ? c.parts().get().collect { Part p ->
-                    p.text().isPresent() ? [text: p.text().get()] : [:]
-                } : []
+                parts: visibleTextParts.isEmpty() ? [] : [[text: visibleTextParts.join('')]]
             ]
         }
 
