@@ -1,0 +1,65 @@
+name: NASQO legacy SQLite staging (no production writes)
+
+on:
+  pull_request:
+    paths:
+      - 'tools/nasqo_legacy_staging.py'
+      - 'tools/test_nasqo_legacy_staging.py'
+      - 'tools/nasqo_prepare_review_candidates.py'
+      - 'tools/test_nasqo_prepare_review_candidates.py'
+      - 'tools/nasqo_migration_reconciliation.py'
+      - 'tools/test_nasqo_migration_reconciliation.py'
+      - 'tools/nasqo_staging_company_identity.py'
+      - 'tools/test_nasqo_staging_company_identity.py'
+      - 'tools/nasqo_ephemeral_pg_rehearsal.py'
+      - 'tools/test_nasqo_ephemeral_pg_rehearsal.py'
+      - 'docs/NASQO_LEGACY_MIGRATION_STAGING.md'
+      - '.github/workflows/nasqo-legacy-staging.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  synthetic-sqlite:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run staging regression tests using synthetic SQLite only
+        run: python3 tools/test_nasqo_legacy_staging.py
+      - name: Verify aggregate source reconciliation without posting
+        run: python3 tools/test_nasqo_migration_reconciliation.py
+      - name: Verify model field mapping and unposted review candidates
+        run: python3 tools/test_nasqo_prepare_review_candidates.py
+      - name: Test company partyId vs pseudoId and staging restrictions
+        run: python3 tools/test_nasqo_staging_company_identity.py
+      - name: Preserve the existing offline legacy-report contract
+        run: python3 tools/test_import_nasqo_sqlite_backup.py
+
+  ephemeral-postgresql:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    services:
+      postgres:
+        image: postgres:17.2
+        env:
+          POSTGRES_USER: nasqo_ci
+          POSTGRES_PASSWORD: nasqo_ci_synthetic_only
+          POSTGRES_DB: nasqo_ci_disposable
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U nasqo_ci -d nasqo_ci_disposable"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 12
+    env:
+      NASQO_SYNTHETIC_REHEARSAL: '1'
+      NASQO_CI_POSTGRES_DSN: postgresql://nasqo_ci:nasqo_ci_synthetic_only@127.0.0.1:5432/nasqo_ci_disposable
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install PostgreSQL test driver
+        run: python3 -m pip install --quiet 'psycopg[binary]==3.2.12'
+      - name: Rehearse synthetic-only staging in temporary PostgreSQL rows and rollback
+        run: python3 tools/test_nasqo_ephemeral_pg_rehearsal.py
