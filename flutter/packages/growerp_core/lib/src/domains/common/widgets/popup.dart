@@ -13,9 +13,11 @@
  */
 
 import 'package:flutter/material.dart';
-import '../../../../growerp_core.dart';
 
-/// Premium popup dialog with gradient header matching the app's design system.
+import '../functions/screen_size.dart';
+import 'dialog_close_button.dart';
+
+/// Shared dialog body for account, invoice and inventory editors.
 Widget popUp({
   Widget? child,
   String title = '',
@@ -31,76 +33,38 @@ Widget popUp({
   if (width == null) {
     isPhone(context) ? width = 450 : width = 700;
   }
-  return Stack(
-    clipBehavior: Clip.none,
-    children: [
-      SizedBox(
-        width: width,
-        height: height,
-        child: Column(
-          children: [
-            // Premium gradient header matching navigation rail and theme picker
-            Container(
-              height: 50,
-              decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [
-                    colorScheme.primaryContainer,
-                    colorScheme.secondaryContainer.withValues(alpha: 0.8),
-                  ],
-                ),
-                borderRadius: const BorderRadius.only(
-                  topLeft: Radius.circular(20),
-                  topRight: Radius.circular(20),
+  return SizedBox(
+    width: width,
+    height: height,
+    child: Column(
+      children: [
+        Padding(
+          padding: const EdgeInsetsDirectional.fromSTEB(20, 12, 12, 12),
+          child: Row(
+            children: [
+              Expanded(
+                child: Text(
+                  title,
+                  key: const Key('topHeader'),
+                  style:
+                      Theme.of(context).dialogTheme.titleTextStyle ??
+                      Theme.of(context).textTheme.titleLarge,
                 ),
               ),
-              child: Stack(
-                children: [
-                  Center(
-                    child: Text(
-                      title,
-                      key: const Key('topHeader'),
-                      textAlign: TextAlign.center,
-                      style: TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 0.3,
-                        color: colorScheme.onSurface,
-                      ),
-                    ),
-                  ),
-                  if (actions != null)
-                    Positioned(
-                      right: closeButton == true ? 40 : 10,
-                      top: 0,
-                      bottom: 0,
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: actions,
-                      ),
-                    ),
-                ],
-              ),
-            ),
-            Expanded(
-              child: Material(
-                color: Theme.of(context).brightness == Brightness.dark
-                    ? colorScheme.surfaceContainerHighest
-                    : colorScheme.surface,
-                borderRadius: const BorderRadius.only(
-                  bottomLeft: Radius.circular(20),
-                  bottomRight: Radius.circular(20),
-                ),
-                child: Padding(padding: EdgeInsets.all(padding), child: child),
-              ),
-            ),
-          ],
+              if (actions != null) ...actions,
+              if (closeButton == true) const DialogCloseButton(),
+            ],
+          ),
         ),
-      ),
-      if (closeButton == true)
-        const PositionedDirectional(top: 15, end: 15, child: DialogCloseButton()),
-    ],
+        Expanded(
+          child: Material(
+            color: Theme.of(context).brightness == Brightness.dark
+                ? colorScheme.surfaceContainerHighest
+                : colorScheme.surface,
+            child: Padding(padding: EdgeInsets.all(padding), child: child),
+          ),
+        ),
+      ],
+    ),
   );
 }

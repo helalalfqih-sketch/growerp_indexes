@@ -95,6 +95,7 @@ class AdminDashboardContent extends StatelessWidget {
                       child: TabBarView(
                         children: [
                           NasqoQuickAccess(
+                            stats: stats,
                             items: dashboardOptions,
                             userGroup: authState.authenticate?.user?.userGroup,
                             onNavigate: (route) => context.go(route),

@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/location_bloc.dart';
+
 import 'package:growerp_inventory/l10n/generated/inventory_localizations.dart';
 
 /// Returns column definitions for location list based on device type
@@ -81,14 +82,16 @@ List<Widget> getLocationListRow({
         children: [
           Text(location.pseudoId ?? '', key: Key('id$index')),
           Text(
-            (location.locationName ?? '').truncate(20),
+            location.locationName ?? '',
             key: Key('name$index'),
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Text(
-                'Qty: ${qohTotal.toString()}',
+                '${InventoryLocalizations.of(context)!.tableHdrQty}: $qohTotal',
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,
@@ -97,7 +100,7 @@ List<Widget> getLocationListRow({
               ),
               const SizedBox(width: 8),
               Text(
-                '${location.assets.length} assets',
+                '${InventoryLocalizations.of(context)!.tableHdrAssets}: ${location.assets.length}',
                 style: TextStyle(
                   fontSize: 12,
                   color: Theme.of(context).colorScheme.onSurfaceVariant,

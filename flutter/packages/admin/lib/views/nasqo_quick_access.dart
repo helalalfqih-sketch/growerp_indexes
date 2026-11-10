@@ -29,6 +29,7 @@ List<MenuItem> selectNasqoQuickActions(
   const preferredRoutes = [
     '/orders',
     '/acct-sales',
+    '/acct-purchase',
     '/inventory',
     '/catalog',
     '/crm',
@@ -62,7 +63,7 @@ List<MenuItem> selectNasqoQuickActions(
   final remaining = available.values.toList()
     ..sort((a, b) => a.sequenceNum.compareTo(b.sequenceNum));
   result.addAll(remaining);
-  return result.take(6).toList();
+  return result.take(8).toList();
 }
 
 class NasqoQuickAccess extends StatelessWidget {
@@ -71,11 +72,13 @@ class NasqoQuickAccess extends StatelessWidget {
     required this.items,
     required this.onNavigate,
     this.userGroup,
+    this.stats,
   });
 
   final List<MenuItem> items;
   final ValueChanged<String> onNavigate;
   final UserGroup? userGroup;
+  final Stats? stats;
 
   String _label(BuildContext context, MenuItem item) {
     final l10n = AdminLocalizations.of(context)!;
@@ -100,6 +103,7 @@ class NasqoQuickAccess extends StatelessWidget {
   IconData _icon(String route) => switch (route) {
     '/orders' => Icons.shopping_bag_outlined,
     '/acct-sales' => Icons.receipt_long_outlined,
+    '/acct-purchase' => Icons.shopping_cart_outlined,
     '/inventory' => Icons.warehouse_outlined,
     '/catalog' => Icons.inventory_2_outlined,
     '/crm' => Icons.people_alt_outlined,
@@ -159,7 +163,7 @@ class NasqoQuickAccess extends StatelessWidget {
                           const gap = 12.0;
                           final columns = width.maxWidth >= 820
                               ? 3
-                              : width.maxWidth >= 420
+                              : width.maxWidth >= 300
                               ? 2
                               : 1;
                           final tileWidth =
@@ -174,6 +178,13 @@ class NasqoQuickAccess extends StatelessWidget {
                                   child: Card(
                                     margin: EdgeInsets.zero,
                                     clipBehavior: Clip.antiAlias,
+                                    shape: RoundedRectangleBorder(
+                                      borderRadius: BorderRadius.circular(14),
+                                      side: BorderSide(
+                                        color: theme.colorScheme.primary,
+                                        width: 1.5,
+                                      ),
+                                    ),
                                     child: InkWell(
                                       key: Key('nasqo-quick-${item.route}'),
                                       onTap: () => onNavigate(item.route!),
@@ -182,24 +193,47 @@ class NasqoQuickAccess extends StatelessWidget {
                                           horizontal: 16,
                                           vertical: 20,
                                         ),
-                                        child: Row(
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.min,
                                           children: [
-                                            Icon(
-                                              _icon(item.route!),
-                                              color: theme.colorScheme.primary,
-                                            ),
-                                            const SizedBox(width: 12),
-                                            Expanded(
-                                              child: Text(
-                                                _label(context, item),
-                                                style:
-                                                    theme.textTheme.titleSmall,
+                                            CircleAvatar(
+                                              radius: 28,
+                                              backgroundColor: theme
+                                                  .colorScheme
+                                                  .primaryContainer,
+                                              child: Icon(
+                                                _icon(item.route!),
+                                                size: 30,
+                                                color:
+                                                    theme.colorScheme.primary,
                                               ),
                                             ),
-                                            const Icon(
-                                              Icons.chevron_right,
-                                              size: 18,
+                                            const SizedBox(height: 14),
+                                            Text(
+                                              _label(context, item),
+                                              textAlign: TextAlign.center,
+                                              style: theme.textTheme.titleMedium
+                                                  ?.copyWith(
+                                                    color: theme
+                                                        .colorScheme
+                                                        .primary,
+                                                    fontWeight: FontWeight.w600,
+                                                  ),
                                             ),
+                                            if (getStatsForRoute(
+                                                  context,
+                                                  item.route,
+                                                  stats,
+                                                )
+                                                case final String summary) ...[
+                                              const SizedBox(height: 8),
+                                              Text(
+                                                summary,
+                                                textAlign: TextAlign.center,
+                                                style:
+                                                    theme.textTheme.bodySmall,
+                                              ),
+                                            ],
                                           ],
                                         ),
                                       ),

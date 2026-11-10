@@ -103,6 +103,7 @@ class CompanyListState extends State<CompanyList> {
           }).toList();
 
           return StyledDataTable(
+            cardRows: isPhone,
             columns: getCompanyListColumns(context, role: widget.role),
             rows: rows,
             isLoading: _isLoading && companies.isEmpty,
@@ -243,9 +244,8 @@ class CompanyListState extends State<CompanyList> {
                                   builder: (BuildContext context) =>
                                       const OwnerDataDialog(),
                                 ),
-                                tooltip: CoreLocalizations.of(
-                                  context,
-                                )!.ownerDataUpload,
+                                tooltip: CoreLocalizations.of(context)!
+                                    .ownerDataUpload,
                                 child: const Icon(Icons.upload),
                               ),
                               const SizedBox(height: 10),

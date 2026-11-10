@@ -13,9 +13,10 @@
  */
 
 import 'package:flutter/material.dart';
-import '../../domains.dart';
 
-/// Premium popup dialog with gradient header matching the app's design system.
+import 'popup.dart';
+
+/// Fixed-body adapter for the shared popup used by existing callers.
 Widget popUpDialog({
   required BuildContext context,
   required List<Widget> children,
@@ -24,66 +25,17 @@ Widget popUpDialog({
   double width = 400,
   Key key = const Key('popUp'),
 }) {
-  final colorScheme = Theme.of(context).colorScheme;
-
   return Dialog(
+    key: key,
     insetPadding: const EdgeInsets.all(10),
-    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
-    child: Stack(
-      clipBehavior: Clip.none,
-      children: [
-        SizedBox(
-          width: width,
-          height: height,
-          child: Column(
-            children: [
-              // Premium gradient header
-              Container(
-                height: 50,
-                decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: [
-                      colorScheme.primaryContainer,
-                      colorScheme.secondaryContainer.withValues(alpha: 0.8),
-                    ],
-                  ),
-                  borderRadius: const BorderRadius.only(
-                    topLeft: Radius.circular(20),
-                    topRight: Radius.circular(20),
-                  ),
-                ),
-                child: Center(
-                  child: Text(
-                    title,
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.w600,
-                      letterSpacing: 0.3,
-                      color: colorScheme.onSurface,
-                    ),
-                  ),
-                ),
-              ),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Theme.of(context).brightness == Brightness.dark
-                        ? colorScheme.surfaceContainerHighest
-                        : colorScheme.surface,
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(20),
-                    child: Column(children: children),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
-        const PositionedDirectional(top: 10, end: 10, child: DialogCloseButton()),
-      ],
+    clipBehavior: Clip.antiAlias,
+    child: popUp(
+      context: context,
+      title: title,
+      height: height,
+      width: width,
+      padding: 20,
+      child: Column(children: children),
     ),
   );
 }

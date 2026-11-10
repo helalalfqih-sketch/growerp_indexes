@@ -57,7 +57,11 @@ class TopApp extends StatefulWidget {
     this.widgetMetadata = const [],
     this.forceUpdateInfo,
     this.onChangeCompany,
+    this.themeBuilder,
   });
+
+  /// Applies application styling to both themes without replacing routing or blocs.
+  final ThemeData Function(ThemeData)? themeBuilder;
 
   final RestClient restClient;
   final String applicationId;
@@ -92,6 +96,9 @@ class TopApp extends StatefulWidget {
 }
 
 class _TopAppState extends State<TopApp> {
+  ThemeData _appTheme(ThemeData base) =>
+      widget.themeBuilder?.call(base) ?? base;
+
   MenuConfigBloc? _menuConfigBloc;
 
   /// Built once: [getCoreBlocProviders] constructs AuthBloc and ChatRoomBloc
@@ -357,107 +364,111 @@ class _TopAppState extends State<TopApp> {
                         return Scaffold(body: appContent);
                       },
                       themeMode: themeState.themeMode,
-                      theme: FlexThemeData.light(
-                        colors: themeState.colorScheme == FlexScheme.jungle
-                            ? growerpPremium.light
-                            : null,
-                        scheme: themeState.colorScheme,
-                        fontFamily: 'Outfit',
-                        blendLevel: 10,
-                        subThemesData: const FlexSubThemesData(
-                          blendOnLevel: 10,
-                          blendOnColors: false,
-                          useM2StyleDividerInM3: true,
-                          dialogBackgroundSchemeColor: SchemeColor.surface,
-                          inputDecoratorBorderType:
-                              FlexInputBorderType.underline,
-                          inputDecoratorRadius: 25.0,
-                          defaultRadius: 25.0,
-                          useInputDecoratorThemeInDialogs: true,
-                          cardElevation: 2,
-                          dialogElevation: 3,
-                        ),
-                        useMaterial3: true,
-                        visualDensity: VisualDensity.adaptivePlatformDensity,
-                        pageTransitionsTheme: const PageTransitionsTheme(
-                          builders: {
-                            TargetPlatform.android:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.iOS:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.linux:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.macOS:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.windows:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                          },
+                      theme: _appTheme(
+                        FlexThemeData.light(
+                          colors: themeState.colorScheme == FlexScheme.jungle
+                              ? growerpPremium.light
+                              : null,
+                          scheme: themeState.colorScheme,
+                          fontFamily: 'Outfit',
+                          blendLevel: 10,
+                          subThemesData: const FlexSubThemesData(
+                            blendOnLevel: 10,
+                            blendOnColors: false,
+                            useM2StyleDividerInM3: true,
+                            dialogBackgroundSchemeColor: SchemeColor.surface,
+                            inputDecoratorBorderType:
+                                FlexInputBorderType.underline,
+                            inputDecoratorRadius: 25.0,
+                            defaultRadius: 25.0,
+                            useInputDecoratorThemeInDialogs: true,
+                            cardElevation: 2,
+                            dialogElevation: 3,
+                          ),
+                          useMaterial3: true,
+                          visualDensity: VisualDensity.adaptivePlatformDensity,
+                          pageTransitionsTheme: const PageTransitionsTheme(
+                            builders: {
+                              TargetPlatform.android:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.iOS:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.linux:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.macOS:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.windows:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                            },
+                          ),
                         ),
                       ),
-                      darkTheme: FlexThemeData.dark(
-                        colors: themeState.colorScheme == FlexScheme.jungle
-                            ? growerpPremium.dark
-                            : null,
-                        scheme: themeState.colorScheme,
-                        fontFamily: 'Outfit',
-                        blendLevel: 13,
-                        subThemesData: const FlexSubThemesData(
-                          blendOnLevel: 20,
-                          useM2StyleDividerInM3: true,
-                          dialogBackgroundSchemeColor: SchemeColor.surface,
-                          inputDecoratorBorderType:
-                              FlexInputBorderType.underline,
-                          inputDecoratorRadius: 25.0,
-                          defaultRadius: 25.0,
-                          useInputDecoratorThemeInDialogs: true,
-                          cardElevation: 2,
-                          dialogElevation: 3,
-                        ),
-                        useMaterial3: true,
-                        visualDensity: VisualDensity.adaptivePlatformDensity,
-                        pageTransitionsTheme: const PageTransitionsTheme(
-                          builders: {
-                            TargetPlatform.android:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.iOS:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.linux:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.macOS:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                            TargetPlatform.windows:
-                                SharedAxisPageTransitionsBuilder(
-                                  transitionType:
-                                      SharedAxisTransitionType.horizontal,
-                                ),
-                          },
+                      darkTheme: _appTheme(
+                        FlexThemeData.dark(
+                          colors: themeState.colorScheme == FlexScheme.jungle
+                              ? growerpPremium.dark
+                              : null,
+                          scheme: themeState.colorScheme,
+                          fontFamily: 'Outfit',
+                          blendLevel: 13,
+                          subThemesData: const FlexSubThemesData(
+                            blendOnLevel: 20,
+                            useM2StyleDividerInM3: true,
+                            dialogBackgroundSchemeColor: SchemeColor.surface,
+                            inputDecoratorBorderType:
+                                FlexInputBorderType.underline,
+                            inputDecoratorRadius: 25.0,
+                            defaultRadius: 25.0,
+                            useInputDecoratorThemeInDialogs: true,
+                            cardElevation: 2,
+                            dialogElevation: 3,
+                          ),
+                          useMaterial3: true,
+                          visualDensity: VisualDensity.adaptivePlatformDensity,
+                          pageTransitionsTheme: const PageTransitionsTheme(
+                            builders: {
+                              TargetPlatform.android:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.iOS:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.linux:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.macOS:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                              TargetPlatform.windows:
+                                  SharedAxisPageTransitionsBuilder(
+                                    transitionType:
+                                        SharedAxisTransitionType.horizontal,
+                                  ),
+                            },
+                          ),
                         ),
                       ),
                       routerConfig: widget.router,

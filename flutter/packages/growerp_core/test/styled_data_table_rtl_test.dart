@@ -3,6 +3,58 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:growerp_core/src/domains/common/widgets/styled_data_table.dart';
 
 void main() {
+  testWidgets('compact cards grow for Arabic text and keep action callbacks', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(320, 720);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.resetPhysicalSize);
+    addTearDown(tester.view.resetDevicePixelRatio);
+    var rowTaps = 0;
+    var actionTaps = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: MediaQuery(
+            data: const MediaQueryData(textScaler: TextScaler.linear(1.5)),
+            child: Scaffold(
+              body: StyledDataTable(
+                cardRows: true,
+                columns: const [
+                  StyledColumn(header: 'التفاصيل'),
+                  StyledColumn(header: ''),
+                ],
+                onRowTap: (_) => rowTaps++,
+                rows: [
+                  [
+                    const Text(
+                      'محمد جعيد المتجر الصيني — فاتورة مشتريات تفصيلية طويلة',
+                      key: Key('details'),
+                    ),
+                    IconButton(
+                      key: const Key('edit'),
+                      onPressed: () => actionTaps++,
+                      icon: const Icon(Icons.edit),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    expect(tester.takeException(), isNull);
+    expect(find.byType(Card), findsOneWidget);
+    await tester.tap(find.byKey(const Key('edit')));
+    expect(actionTaps, 1);
+    expect(rowTaps, 0);
+    await tester.tap(find.byKey(const Key('details')));
+    expect(rowTaps, 1);
+    expect(tester.takeException(), isNull);
+  });
+
   for (final direction in TextDirection.values) {
     testWidgets('table aligns start and end cells in $direction', (
       tester,
