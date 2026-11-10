@@ -168,7 +168,11 @@ class AdkManager {
     static  volatile Map<String, Object>  currentConfig = [:]
 
     private static final String SESSION_PREAMBLE = '''\
-You are running inside a GrowERP / Moqui ERP system.
+You are the NASQO (نسقو) assistant inside the NASQO ERP application.
+When naming this product in Arabic, use «نسقو»; in other languages, use NASQO.
+Keep this product identity even if earlier messages or memory use an older name.
+Reply in the user's language. Use the product name in introductions and ordinary help.
+Technical tool/service identifiers and underlying framework names remain technical references.
 
 Current execution context (always up-to-date for this session):
   User ID          : {userId}
@@ -219,7 +223,7 @@ templates, not services.
 
     private static final String NAVIGATION_PREAMBLE = '''\
 SCREEN NAVIGATION — opening operational app screens
-The GrowERP front-end (Flutter) screens available in this session are listed in this
+The NASQO front-end (Flutter) screens available in this session are listed in this
 catalog (JSON: widgetName, description, keywords, parameters):
 {screenCatalog}
 
@@ -370,10 +374,10 @@ matching screen. Do not mention credentials or suggest bypassing account access 
                 agent = LlmAgent.builder()
                     .name('growerp-agent')
                     .description(agentMcpToolset ?
-                            'GrowERP / Moqui ERP assistant with access to Moqui MCP tools' :
-                            'GrowERP assistant for general help and navigation; internal ERP tools unavailable')
+                            'NASQO ERP assistant with access to Moqui MCP tools' :
+                            'NASQO assistant for general help and navigation; internal ERP tools unavailable')
                     .instruction(contextPreambleForMcp(agentMcpToolset != null) + (agentMcpToolset ? '''\
-You are GrowERP Assistant, an AI agent for the GrowERP / Moqui ERP system.
+You are NASQO Assistant, an AI agent for the NASQO (نسقو) ERP system.
 Answer the user's questions using the available Moqui MCP tools.
 
 How to use the Moqui tools:
@@ -408,7 +412,7 @@ CRITICAL tool-use rules — follow exactly:
                         // A non-null description is REQUIRED when this agent is wrapped as an
                         // AgentTool by a coordinator (AgentTool.declaration NPEs on null), and it
                         // tells the coordinator's LLM when to delegate here.
-                        .description(description ?: agentName ?: 'GrowERP agent')
+                        .description(description ?: agentName ?: 'NASQO agent')
                         .model(modelArg)
                         .instruction(contextPreambleForMcp(agentMcpToolset != null) + (instruction ?: '') +
                                 (agentMcpToolset ? '' : MCP_UNAVAILABLE_INSTRUCTIONS))
@@ -1232,7 +1236,7 @@ CRITICAL tool-use rules — follow exactly:
             String agentName = sanitizeAgentName((cfg.agentName ?: configId) as String)
             LlmAgent agent = LlmAgent.builder()
                     .name(agentName)
-                    .description((cfg.description ?: cfg.agentName ?: 'GrowERP agent') as String)
+                    .description((cfg.description ?: cfg.agentName ?: 'NASQO agent') as String)
                     .model(modelArg)
                     .instruction(CONTEXT_PREAMBLE + withParameters(cfg.instruction as String, cfg.parameters as String))
                     .tools(tools)
@@ -1843,7 +1847,7 @@ CRITICAL tool-use rules — follow exactly:
         if (ts) tools.add(ts)
         return LlmAgent.builder()
                 .name(sanitizeAgentName((cfg.agentName ?: memberConfigId) as String))
-                .description((cfg.description ?: cfg.agentName ?: 'GrowERP agent') as String)
+                .description((cfg.description ?: cfg.agentName ?: 'NASQO agent') as String)
                 .instruction(CONTEXT_PREAMBLE + withParameters(cfg.instruction as String, cfg.parameters as String))
                 .model(modelArg)
                 .tools(tools)
@@ -1876,7 +1880,7 @@ CRITICAL tool-use rules — follow exactly:
                 return null
             }
             String wfName = sanitizeAgentName(agentName ?: (type + '_' + configId))
-            String wfDesc = "GrowERP ${type} workflow over ${subAgents.size()} specialist(s)"
+            String wfDesc = "NASQO ${type} workflow over ${subAgents.size()} specialist(s)"
             switch (type) {
                 case 'sequential':
                     return com.google.adk.agents.SequentialAgent.builder()
@@ -1928,7 +1932,7 @@ use your own Moqui tools. Keep delegation minimal: pick the best-matching specia
 '''
         return LlmAgent.builder()
                 .name(agentName ?: ('coordinator_' + configId))
-                .description('GrowERP coordinator delegating to specialist agents')
+                .description('NASQO coordinator delegating to specialist agents')
                 .instruction(coordInstr)
                 .model(modelArg)
                 .tools(memberTools)
