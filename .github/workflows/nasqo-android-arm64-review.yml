@@ -1,0 +1,77 @@
+name: NASQO Android arm64 release build (unsigned review artifact)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/nasqo-android-arm64-review.yml'
+      - 'flutter/packages/admin/**'
+      - 'flutter/packages/growerp_core/lib/**'
+      - 'flutter/packages/growerp_order_accounting/lib/**'
+      - 'flutter/packages/growerp_user_company/lib/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-arm64:
+    if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'master'
+    runs-on: ubuntu-latest
+    timeout-minutes: 80
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - uses: ./.github/actions/bootstrap
+      - name: Confirm NASQO production endpoints, Android application ID and version
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import json,re
+          from pathlib import Path
+          cfg=json.loads(Path('flutter/packages/admin/assets/cfg/app_settings.json').read_text())
+          assert cfg['applicationId']=='AppAdmin'
+          assert cfg['databaseUrl']=='https://erp.indexesstore.com'
+          assert cfg['chatUrl']=='wss://erp.indexesstore.com'
+          assert cfg['googleLoginEnabled'] is True
+          assert cfg['googleRegistrationEnabled'] is True
+          assert re.search(r'^version:\s*1\.22\.10\+147$',Path('flutter/packages/admin/pubspec.yaml').read_text(),re.M)
+          gradle=Path('flutter/packages/admin/android/app/build.gradle.kts').read_text()
+          assert 'applicationId = "com.indexesstore.nasqo"' in gradle
+          assert 'NASQO_BUILD_UNSIGNED' in gradle
+          assert Path('flutter/packages/admin/assets/icon/icon.png').is_file()
+          print('NASQO_ANDROID_RELEASE_CONFIG_VERIFIED')
+          PY
+      - name: Generate launcher icons
+        working-directory: flutter/packages/admin
+        run: dart run flutter_launcher_icons
+      - name: Build arm64 release APK unsigned (signing key stays on the VPS)
+        working-directory: flutter/packages/admin
+        env:
+          NASQO_BUILD_UNSIGNED: 'true'
+        run: flutter build apk --release --split-per-abi --target-platform android-arm64 --no-pub
+      - name: Package unsigned artifact for private signing
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=flutter/packages/admin/build/app/outputs/flutter-apk/app-arm64-v8a-release.apk
+          test -s "$file"
+          unzip -t "$file" | tail -2
+          mkdir -p dist
+          cp "$file" dist/NASQO_ERP_Android_1.22.10_arm64-unsigned.apk
+          (cd dist && sha256sum NASQO_ERP_Android_1.22.10_arm64-unsigned.apk > SHA256SUMS)
+          ls -lh dist
+      - name: Upload unsigned APK for private VPS signing
+        uses: actions/upload-artifact@v4
+        with:
+          name: nasqo-android-arm64-unsigned-1.22.10
+          path: dist/
+          retention-days: 7
+          if-no-files-found: error
