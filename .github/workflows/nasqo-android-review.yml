@@ -59,7 +59,14 @@ jobs:
             "$build_tools/aapt2" dump badging "$apk" > "release-test-report/$abi-badging.txt"
             grep -q "name='com.indexesstore.nasqo'" "release-test-report/$abi-badging.txt"
             grep -q "versionName='1.22.10'" "release-test-report/$abi-badging.txt"
-            grep -q "versionCode='147'" "release-test-report/$abi-badging.txt"
+            # Flutter split-per-abi multiplies the base versionCode: prior
+            # NASQO 1.22.9 ARM64 was 2146 and x86_64 was 4146.
+            # Confirm the new per-ABI code is an in-place upgrade.
+            case "$abi" in
+              arm64-v8a) expected_version_code=2147 ;;
+              x86_64) expected_version_code=4147 ;;
+            esac
+            grep -q "versionCode='$expected_version_code'" "release-test-report/$abi-badging.txt"
             grep -q "native-code: '$abi'" "release-test-report/$abi-badging.txt"
             ! grep -q application-debuggable "release-test-report/$abi-badging.txt"
             "$build_tools/zipalign" -c -P 16 4 "$apk"
