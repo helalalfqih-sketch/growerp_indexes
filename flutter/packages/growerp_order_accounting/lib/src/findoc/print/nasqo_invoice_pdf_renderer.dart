@@ -1,3 +1,4 @@
+import 'invoice_print_data.dart';
 import 'dart:typed_data';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:growerp_models/growerp_models.dart';
@@ -30,29 +31,28 @@ class NasqoInvoicePdfRenderer {
     String? verifiedWarehouseName,
     String? returnPolicy,
   }) async {
-    if (finDoc.docType != FinDocType.invoice) {
-      throw ArgumentError('Only invoice FinDoc is supported');
-    }
-    if (finDoc.grandTotal == null) throw StateError('Authoritative grandTotal is required');
-    if (currencyId.trim().isEmpty) throw StateError('Currency is required');
+    final printData = InvoicePrintData.fromFinDoc(
+      document: finDoc,
+      verifiedCurrencyId: currencyId,
+      verifiedWarehouseName: verifiedWarehouseName,
+    );
     final fontData = await rootBundle.load(
       'packages/growerp_order_accounting/assets/fonts/DejaVuSans.ttf');
     final font = pw.Font.ttf(fontData);
     final pdf = pw.Document();
     final theme = pw.ThemeData.withFont(base: font, bold: font);
-    final number = finDoc.pseudoId ?? finDoc.invoiceId ?? '—';
-    final date = finDoc.creationDate?.toIso8601String().split('T').first ?? '—';
+    final number = printData.invoiceNumber;
+    final date = printData.createdAt.toIso8601String().split('T').first;
     final party = finDoc.otherCompany?.name ?? finDoc.otherUser?.name ?? '—';
-    final warehouse = verifiedWarehouse(verifiedWarehouseName);
-    final rows = finDoc.items.asMap().entries.map((e) {
+    final warehouse = printData.warehouseName;
+    final rows = printData.lines.asMap().entries.map((e) {
       final item = e.value;
-      final total = item.quantity != null && item.price != null
-        ? (item.quantity! * item.price!).toString() : '—';
+      final total = item.calculatedTotal?.toString() ?? '—';
       return <String>[
         (e.key + 1).toString(),
-        item.description ?? item.product?.productName ?? '—',
-        '', // Expiry requires a verified inventory lot; never fabricated.
-        item.product?.amountUom?.abbreviation ?? '',
+        item.description,
+        item.expiryDate?.toIso8601String().split('T').first ?? '',
+        item.unitName ?? '',
         item.quantity?.toString() ?? '—',
         item.price?.toString() ?? '—',
         total,
@@ -81,7 +81,7 @@ class NasqoInvoicePdfRenderer {
         pw.SizedBox(height: 8),
         pw.Container(color: blue,
           padding: const pw.EdgeInsets.all(7),
-          child: pw.Center(child: pw.Text(title(finDoc),
+          child: pw.Center(child: pw.Text(printData.title,
             style: pw.TextStyle(color: PdfColors.white, fontSize: 14,
               fontWeight: pw.FontWeight.bold)))),
         pw.SizedBox(height: 8),
@@ -130,7 +130,7 @@ class NasqoInvoicePdfRenderer {
           child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text('صافي الفاتورة'),
-              pw.Text(finDoc.grandTotal.toString() + ' ' + currencyId,
+              pw.Text(printData.authoritativeTotal.toString() + ' ' + printData.currencyId,
                 textDirection: pw.TextDirection.ltr,
                 style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
             ])),
