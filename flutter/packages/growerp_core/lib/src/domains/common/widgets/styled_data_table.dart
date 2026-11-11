@@ -46,6 +46,14 @@ class StyledDataTable extends StatelessWidget {
   /// Number of skeleton rows to show when loading
   final int skeletonRowCount;
 
+  /// Optional context-specific empty message; distinguishes an empty result
+  /// after filtering from an actually empty dataset.
+  final String? emptyMessage;
+
+  /// Optional action to reset a filter without navigating away.
+  final VoidCallback? onClearFilter;
+  final String? clearFilterLabel;
+
   const StyledDataTable({
     super.key,
     required this.columns,
@@ -55,7 +63,10 @@ class StyledDataTable extends StatelessWidget {
     this.scrollController,
     this.isLoading = false,
     this.skeletonRowCount = 8,
-  });
+    this.emptyMessage,
+    this.onClearFilter,
+    this.clearFilterLabel,
+  }) : assert(onClearFilter == null || clearFilterLabel != null);
 
   @override
   Widget build(BuildContext context) {
@@ -71,18 +82,28 @@ class StyledDataTable extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Icon(
-              Icons.inbox_outlined,
+              onClearFilter == null ? Icons.inbox_outlined : Icons.search_off_outlined,
               size: 64,
               color: colorScheme.onSurfaceVariant.withValues(alpha: 0.5),
             ),
             const SizedBox(height: 16),
             Text(
-              CoreLocalizations.of(context)!.noDataFound,
+              emptyMessage ?? CoreLocalizations.of(context)!.noDataFound,
+              textAlign: TextAlign.center,
               style: TextStyle(
                 fontSize: 16,
                 color: colorScheme.onSurfaceVariant,
               ),
             ),
+            if (onClearFilter != null) ...[
+              const SizedBox(height: 12),
+              OutlinedButton.icon(
+                key: const Key('clearFilterEmptyState'),
+                onPressed: onClearFilter,
+                icon: const Icon(Icons.filter_alt_off_outlined),
+                label: Text(clearFilterLabel!),
+              ),
+            ],
           ],
         ),
       );

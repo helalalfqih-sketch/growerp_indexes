@@ -12,6 +12,8 @@ on:
       - 'flutter/packages/growerp_user_company/test/company_user/**'
       - 'flutter/packages/growerp_core/test/get_dio_error_test.dart'
       - 'flutter/packages/growerp_core/test/blocs/auth_bloc_test.dart'
+      - 'flutter/packages/growerp_core/test/styled_data_table_rtl_test.dart'
+      - 'flutter/packages/growerp_order_accounting/test/accounting/balance_summary_filter_test.dart'
   workflow_dispatch:
 
 permissions:
@@ -35,6 +37,10 @@ jobs:
         run: |
           flutter test test/company_user/company_user_bloc_test.dart
           flutter test test/company_user/company_user_csv_encoding_test.dart
+      - name: Test filtered empty tables, RTL and accounting balance display
+        run: |
+          (cd flutter/packages/growerp_core && flutter test test/styled_data_table_rtl_test.dart)
+          (cd flutter/packages/growerp_order_accounting && flutter test test/accounting/balance_summary_filter_test.dart)
       - name: Build the admin web entrypoint (no production deployment)
         working-directory: flutter/packages/admin
         run: flutter build web --release --no-pub --no-tree-shake-icons

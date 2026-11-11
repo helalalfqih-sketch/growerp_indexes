@@ -220,6 +220,22 @@ class FinDocListState extends State<FinDocList> {
           applicationId: applicationId,
         ),
         rows: rows,
+        emptyMessage:
+            searchString.trim().isNotEmpty ? _localizations.noSearchResults : null,
+        onClearFilter: searchString.trim().isNotEmpty
+            ? () {
+                _searchController.clear();
+                searchString = '';
+                _finDocBloc.add(
+                  FinDocSearchChanged(
+                    searchString: '',
+                    my: my,
+                    status: widget.status,
+                  ),
+                );
+              }
+            : null,
+        clearFilterLabel: _localizations.clearSearchFilter,
         isLoading: _isLoading && finDocs.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 80 : 56,

@@ -49,4 +49,50 @@ void main() {
       expect(tester.takeException(), isNull);
     });
   }
+  testWidgets('filtered empty state explains no results and clears the query',
+      (tester) async {
+    var clearCount = 0;
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Directionality(
+          textDirection: TextDirection.rtl,
+          child: Scaffold(
+            body: StyledDataTable(
+              columns: const [StyledColumn(header: 'الحساب')],
+              rows: const [],
+              emptyMessage: 'لا توجد نتائج مطابقة للبحث',
+              onClearFilter: () => clearCount++,
+              clearFilterLabel: 'مسح البحث',
+            ),
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('لا توجد نتائج مطابقة للبحث'), findsOneWidget);
+    expect(find.byKey(const Key('clearFilterEmptyState')), findsOneWidget);
+    await tester.tap(find.byKey(const Key('clearFilterEmptyState')));
+    expect(clearCount, 1);
+    expect(tester.takeException(), isNull);
+  });
+
+  testWidgets('explicit empty state does not suggest clearing a filter',
+      (tester) async {
+    await tester.pumpWidget(
+      const MaterialApp(
+        home: Scaffold(
+          body: StyledDataTable(
+            columns: [StyledColumn(header: 'الحساب')],
+            rows: [],
+            emptyMessage: 'لا توجد أرصدة في هذه الفترة',
+          ),
+        ),
+      ),
+    );
+
+    expect(find.text('لا توجد أرصدة في هذه الفترة'), findsOneWidget);
+    expect(find.byKey(const Key('clearFilterEmptyState')), findsNothing);
+    expect(tester.takeException(), isNull);
+  });
+
 }
