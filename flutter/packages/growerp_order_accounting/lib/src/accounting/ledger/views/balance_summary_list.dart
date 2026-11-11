@@ -97,7 +97,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.arrow_back),
-                            tooltip: 'Previous Year',
+                            tooltip: OrderAccountingLocalizations.of(context)!.previousYear,
                             onPressed: () {
                               // Extract the year from the period name
                               String currentPeriodName =
