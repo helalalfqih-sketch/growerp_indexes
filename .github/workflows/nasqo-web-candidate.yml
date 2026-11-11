@@ -1,0 +1,53 @@
+name: NASQO web release candidate
+on:
+  push:
+    branches: [codex/nasqo-accounting-ui]
+    paths: ['flutter/**', '.github/workflows/nasqo-web-candidate.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  web:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      FLUTTER_SUPPRESS_ANALYTICS: 'true'
+      DART_SUPPRESS_ANALYTICS: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - uses: ./.github/actions/bootstrap
+      - name: Test shared accounting UI
+        working-directory: flutter/packages/growerp_core
+        run: flutter test --no-pub test/styled_data_table_rtl_test.dart test/popup_layout_test.dart
+      - name: Test Nasqo theme and existing navigation
+        working-directory: flutter/packages/admin
+        run: flutter test --no-pub test/nasqo_theme_test.dart test/nasqo_quick_access_test.dart
+      - name: Build production web
+        working-directory: flutter/packages/admin
+        run: flutter build web --release --no-pub --pwa-strategy=none --dart-define=BACKEND_URL=https://erp.indexesstore.com
+      - name: Package web with source identity
+        run: |
+          python3 - <<'PY'
+          import json, os
+          from pathlib import Path
+          web = Path('flutter/packages/admin/build/web')
+          cfg = json.loads((web / 'assets/assets/cfg/app_settings.json').read_text())
+          assert cfg['databaseUrl'] == 'https://erp.indexesstore.com'
+          assert cfg['chatUrl'] == 'wss://erp.indexesstore.com'
+          assert cfg['googleLoginEnabled'] and cfg['googleRegistrationEnabled']
+          (web / 'nasqo-release.json').write_text(json.dumps({'commit': os.environ['GITHUB_SHA'], 'workflow_run': os.environ['GITHUB_RUN_ID']}))
+          PY
+          mkdir -p dist
+          tar -czf dist/nasqo-web.tar.gz -C flutter/packages/admin/build/web .
+          cd dist
+          sha256sum nasqo-web.tar.gz > SHA256SUMS
+      - uses: actions/upload-artifact@v4
+        with:
+          name: nasqo-web-candidate
+          path: dist/
+          retention-days: 7

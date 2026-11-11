@@ -75,19 +75,26 @@ Widget appBarTitle(BuildContext context, String title, bool isPhone) {
         ),
       ),
       const SizedBox(width: 5),
-      Column(
-        children: [
-          Text(
-            isPhone ? title : title.replaceAll('\n', ' '),
-            style: const TextStyle(fontSize: 15),
-            key: const Key('appBarTitle'),
-          ),
-          Text(
-            auth?.company?.name ?? '',
-            key: const Key('appBarCompanyName'),
-            style: const TextStyle(fontSize: 10),
-          ),
-        ],
+      Flexible(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              isPhone ? title : title.replaceAll('\n', ' '),
+              style: const TextStyle(fontSize: 15),
+              key: const Key('appBarTitle'),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+            Text(
+              auth?.company?.name ?? '',
+              key: const Key('appBarCompanyName'),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: const TextStyle(fontSize: 10),
+            ),
+          ],
+        ),
       ),
     ],
   );

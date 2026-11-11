@@ -57,7 +57,8 @@ class LocationDialogState extends State<LocationDialog> {
     return Dialog(
       key: const Key('LocationDialog'),
       insetPadding: const EdgeInsets.all(10),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: Theme.of(context).dialogTheme.shape,
+      clipBehavior: Clip.antiAlias,
       child: BlocListener<LocationBloc, LocationState>(
         listener: (context, state) async {
           switch (state.status) {

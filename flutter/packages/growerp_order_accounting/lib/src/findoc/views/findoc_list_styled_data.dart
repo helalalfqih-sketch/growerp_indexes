@@ -19,6 +19,7 @@ import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 
 import '../blocs/fin_doc_bloc.dart';
+
 import 'package:growerp_order_accounting/l10n/generated/order_accounting_localizations.dart';
 
 /// Returns column definitions for FinDoc list based on device type and docType
@@ -148,10 +149,11 @@ List<Widget> getFinDocListRow({
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
             children: [
               Text(finDoc.pseudoId ?? '', key: Key('id$index')),
-              const SizedBox(width: 8),
               Text(
                 getDateString(),
                 style: TextStyle(
@@ -163,13 +165,13 @@ List<Widget> getFinDocListRow({
             ],
           ),
           Text(
-            finDoc.otherCompany?.name.truncate(25) ??
-                finDoc.otherUser?.getName().truncate(25) ??
-                '',
+            finDoc.otherCompany?.name ?? finDoc.otherUser?.getName() ?? '',
             key: Key("otherUser$index"),
             style: const TextStyle(fontWeight: FontWeight.w500),
           ),
-          Row(
+          Wrap(
+            spacing: 8,
+            runSpacing: 4,
             children: [
               StatusChip(
                 label: getStatusString(),
@@ -177,7 +179,6 @@ List<Widget> getFinDocListRow({
                 size: StatusChipSize.small,
                 key: Key("status$index"),
               ),
-              const SizedBox(width: 8),
               if (finDoc.docType != FinDocType.shipment &&
                   finDoc.docType != FinDocType.request)
                 Text(

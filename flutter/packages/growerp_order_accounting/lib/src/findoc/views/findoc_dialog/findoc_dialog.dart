@@ -18,6 +18,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:growerp_order_accounting/growerp_order_accounting.dart';
+
 import 'findoc_item_list_styled_data.dart';
 
 import 'add_another_item_dialog.dart';
@@ -279,7 +280,8 @@ class MyFinDocState extends State<FinDocPage> {
         "FinDocDialog${finDoc.sales == true ? 'Sales' : 'Purchase'}"
         "${finDoc.docType}",
       ),
-      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+      shape: Theme.of(context).dialogTheme.shape,
+      clipBehavior: Clip.antiAlias,
       insetPadding: const EdgeInsets.all(10),
       child: SingleChildScrollView(
         key: const Key('listView'),
@@ -508,7 +510,8 @@ class MyFinDocState extends State<FinDocPage> {
                       (label) => DropdownMenuItem<FinDocStatusVal>(
                         value: label,
                         child: Text(
-                          applicationId == 'AppHotel' || applicationId == 'AppRental'
+                          applicationId == 'AppHotel' ||
+                                  applicationId == 'AppRental'
                               ? label.hotel
                               : label.name,
                         ),

@@ -14,7 +14,7 @@
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart';
+import 'package:intl/intl.dart' show NumberFormat;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:growerp_models/growerp_models.dart';
@@ -23,6 +23,7 @@ import '../../common/common.dart';
 import '../company.dart';
 import 'rest_request_stats_dialog.dart';
 import 'token_limit_dialog.dart';
+
 import 'package:growerp_user_company/l10n/generated/user_company_localizations.dart';
 
 /// Returns column definitions for company list based on device type
@@ -100,8 +101,14 @@ List<Widget> getCompanyListRow({
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(company.name.truncate(20), key: Key('name$index')),
-          Text(company.email.truncate(20), key: const Key("companyEmail")),
+          Text(company.name ?? '', key: Key('name$index')),
+          if (company.telephoneNr?.isNotEmpty ?? false)
+            Text(
+              company.telephoneNr!,
+              textDirection: TextDirection.ltr,
+              key: Key('telephone$index'),
+            ),
+          Text(company.email ?? '', key: const Key("companyEmail")),
         ],
       ),
     );
@@ -167,7 +174,8 @@ List<Widget> getCompanyListRow({
               builder: (BuildContext context) =>
                   TokenLimitDialog(company: company),
             );
-            if (changed == true) bloc.add(const CompanyFetch(mainOnly: true, refresh: true));
+            if (changed == true)
+              bloc.add(const CompanyFetch(mainOnly: true, refresh: true));
           },
           child: Text(
             used == null

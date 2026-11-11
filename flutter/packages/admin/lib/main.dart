@@ -36,9 +36,13 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:go_router/go_router.dart';
+
 import 'views/admin_dashboard_content.dart';
+import 'theme/nasqo_theme.dart';
 import 'views/accounting_form.dart';
+
 import 'package:package_info_plus/package_info_plus.dart';
+
 import 'l10n/generated/admin_localizations.dart';
 
 Future main(List<String> args) async {
@@ -212,6 +216,7 @@ class _AdminAppState extends State<AdminApp> {
             chatClient: widget.chatClient,
             notificationClient: widget.notificationClient,
             title: 'NASQO ERP',
+            themeBuilder: buildNasqoTheme,
             router: router,
             extraDelegates: widget.extraDelegates,
             extraBlocProviders: getAdminBlocProviders(

@@ -19,6 +19,7 @@ import 'package:global_configuration/global_configuration.dart';
 import 'package:go_router/go_router.dart';
 import 'package:growerp_models/growerp_models.dart';
 import 'package:universal_io/io.dart';
+
 import '../../growerp_core.dart';
 
 /// Lazily builds its child only when the tab at [index] is first activated.
@@ -623,7 +624,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     final scaffold = Scaffold(
       key: Key(currentRoute),
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor:
+            Theme.of(context).appBarTheme.backgroundColor ??
+            Theme.of(context).colorScheme.primaryContainer,
         key: Key('appBar_$currentRoute'),
         automaticallyImplyLeading: isPhone,
         leading: leadAction,
@@ -654,7 +657,9 @@ class DisplayMenuItemState extends State<DisplayMenuItem>
     final scaffold = Scaffold(
       key: Key(currentRoute),
       appBar: AppBar(
-        backgroundColor: Theme.of(context).colorScheme.primaryContainer,
+        backgroundColor:
+            Theme.of(context).appBarTheme.backgroundColor ??
+            Theme.of(context).colorScheme.primaryContainer,
         automaticallyImplyLeading: isPhone,
         bottom: isPhone
             ? null

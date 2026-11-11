@@ -214,6 +214,7 @@ class FinDocListState extends State<FinDocList> {
       }).toList();
 
       return StyledDataTable(
+        cardRows: isPhone,
         columns: getFinDocListColumns(
           context,
           docType: widget.docType,

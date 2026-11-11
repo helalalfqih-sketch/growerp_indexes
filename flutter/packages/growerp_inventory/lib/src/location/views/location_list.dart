@@ -74,6 +74,7 @@ class LocationListState extends State<LocationList> {
       }).toList();
 
       return StyledDataTable(
+        cardRows: isPhone,
         columns: getLocationListColumns(context),
         rows: rows,
         isLoading: _isLoading && locations.isEmpty,

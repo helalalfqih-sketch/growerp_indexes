@@ -14,6 +14,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:growerp_core/l10n/generated/core_localizations.dart';
+
 import 'skeleton_loader.dart';
 
 /// A styled data table following the Stitch Orders Management design pattern.
@@ -37,6 +38,9 @@ class StyledDataTable extends StatelessWidget {
   /// Height of each data row
   final double rowHeight;
 
+  /// Card rows reuse the same cells and callbacks on compact domain lists.
+  final bool cardRows;
+
   /// Optional scroll controller
   final ScrollController? scrollController;
 
@@ -52,6 +56,7 @@ class StyledDataTable extends StatelessWidget {
     required this.rows,
     this.onRowTap,
     this.rowHeight = 56,
+    this.cardRows = false,
     this.scrollController,
     this.isLoading = false,
     this.skeletonRowCount = 8,
@@ -96,6 +101,7 @@ class StyledDataTable extends StatelessWidget {
         Expanded(
           child: ListView.builder(
             controller: scrollController,
+            padding: cardRows ? const EdgeInsets.only(bottom: 96) : null,
             itemCount: rows.length,
             itemBuilder: (context, index) =>
                 _buildDataRow(context, colorScheme, index),
@@ -110,7 +116,9 @@ class StyledDataTable extends StatelessWidget {
       height: 48,
       padding: const EdgeInsets.symmetric(horizontal: 16),
       decoration: BoxDecoration(
-        color: colorScheme.surfaceContainerHighest,
+        color:
+            Theme.of(context).dataTableTheme.headingRowColor?.resolve({}) ??
+            colorScheme.surfaceContainerHighest,
         border: Border(
           bottom: BorderSide(color: colorScheme.outlineVariant, width: 1),
         ),
@@ -124,7 +132,9 @@ class StyledDataTable extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: FontWeight.w600,
-                color: colorScheme.onSurfaceVariant,
+                color:
+                    Theme.of(context).dataTableTheme.headingTextStyle?.color ??
+                    colorScheme.onSurfaceVariant,
                 letterSpacing: 0.5,
               ),
               textAlign: column.alignment,
@@ -142,16 +152,33 @@ class StyledDataTable extends StatelessWidget {
   ) {
     final isEven = index.isEven;
     final rowData = rows[index];
+    Widget cell(int column) => Expanded(
+      flex: columns[column].flex,
+      child: Align(
+        alignment: _getAlignment(columns[column].alignment),
+        child: column < rowData.length
+            ? rowData[column]
+            : const SizedBox.shrink(),
+      ),
+    );
 
-    return Material(
-      color: isEven ? colorScheme.surface : colorScheme.surfaceContainerLowest,
+    final row = Material(
+      color: cardRows
+          ? colorScheme.surface
+          : isEven
+          ? colorScheme.surface
+          : colorScheme.surfaceContainerLowest,
       child: InkWell(
         onTap: onRowTap != null ? () => onRowTap!(index) : null,
         hoverColor: colorScheme.primary.withValues(alpha: 0.08),
         splashColor: colorScheme.primary.withValues(alpha: 0.12),
         child: Container(
-          height: rowHeight,
-          padding: const EdgeInsets.symmetric(horizontal: 16),
+          constraints: BoxConstraints(minHeight: rowHeight),
+          height: cardRows ? null : rowHeight,
+          padding: EdgeInsets.symmetric(
+            horizontal: 16,
+            vertical: cardRows ? 16 : 0,
+          ),
           decoration: BoxDecoration(
             border: Border(
               bottom: BorderSide(
@@ -160,22 +187,25 @@ class StyledDataTable extends StatelessWidget {
               ),
             ),
           ),
-          child: Row(
-            children: List.generate(columns.length, (colIndex) {
-              return Expanded(
-                flex: columns[colIndex].flex,
-                child: Align(
-                  alignment: _getAlignment(columns[colIndex].alignment),
-                  child: colIndex < rowData.length
-                      ? rowData[colIndex]
-                      : const SizedBox.shrink(),
-                ),
-              );
-            }),
-          ),
+          child: cardRows && columns.length > 1
+              ? Column(
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    Row(children: List.generate(columns.length - 1, cell)),
+                    const SizedBox(height: 12),
+                    Align(
+                      alignment: AlignmentDirectional.centerEnd,
+                      child: rowData.length >= columns.length
+                          ? rowData[columns.length - 1]
+                          : const SizedBox.shrink(),
+                    ),
+                  ],
+                )
+              : Row(children: List.generate(columns.length, cell)),
         ),
       ),
     );
+    return cardRows ? Card(clipBehavior: Clip.antiAlias, child: row) : row;
   }
 
   AlignmentGeometry _getAlignment(TextAlign textAlign) {
