@@ -113,3 +113,21 @@ Checked exact pdf 3.12.0 package archive against flutter/pubspec.lock:
 - Visual review still required for Brother XL-2026 mixed-script names, +967
   phone numbers, Arabic combining marks/diacritics, and YER currency placement.
 - No Flutter SDK installed on server; tests have NOT been executed.
+
+## Fail-closed CI evidence gate (2026-11-11)
+
+The isolated runner writes `ci-gate-report.json` even if Flutter is missing,
+analysis fails, tests fail, or PDF inspection cannot run. It records the last
+stage, exit code, source-skipped tests and reasons, machine-reported executed,
+passed, failed and skipped tests, and passing runtime evidence for each
+INV-01 through INV-12. Any source-level `skip:`, runtime skip, missing
+INV ID or missing machine log fails the CI gate. A green CI gate is **not**
+production approval; visual Arabic rendering, verified backend accounting
+fields and database restore are separate release gates.
+
+Run the gate's self-tests without Flutter:
+
+`python3 test/findoc/print/test_invoice_ci_gate.py`
+
+The report and machine log are uploaded as GitHub Actions artifacts on both
+success and failure. No production services are contacted.

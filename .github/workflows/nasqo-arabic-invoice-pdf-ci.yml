@@ -43,6 +43,8 @@ jobs:
           python3 -m venv "$RUNNER_TEMP/nasqo-pdf-audit-venv"
           "$RUNNER_TEMP/nasqo-pdf-audit-venv/bin/python" -m pip install --disable-pip-version-check pymupdf
           echo "$RUNNER_TEMP/nasqo-pdf-audit-venv/bin" >> "$GITHUB_PATH"
+      - name: Verify fail-closed CI gate itself
+        run: python3 flutter/packages/growerp_order_accounting/test/findoc/print/test_invoice_ci_gate.py
       - name: Run fail-closed analysis, tests, and PDF inspection
         working-directory: flutter/packages/growerp_order_accounting
         run: bash test/findoc/print/run_isolated_pdf_tests.sh
