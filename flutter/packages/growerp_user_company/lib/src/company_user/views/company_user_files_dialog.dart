@@ -83,7 +83,7 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
                         if (!mounted) return;
                         companyUserBloc.add(CompanyUserUpload(fileString));
                         Future.delayed(const Duration(milliseconds: 1000), () {
-                          if (!mounted) return;
+                          if (companyUserBloc.isClosed) return;
                           companyUserBloc.add(
                             const CompanyUserFetch(refresh: true),
                           );
