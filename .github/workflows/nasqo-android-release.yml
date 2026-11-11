@@ -85,7 +85,7 @@ jobs:
                   cfg=json.loads(z.read('assets/flutter_assets/assets/cfg/app_settings.json'))
                   assert cfg['databaseUrl']=='https://erp.indexesstore.com'
                   assert cfg['chatUrl']=='wss://erp.indexesstore.com'
-                  assert cfg['googleLoginEnabled'] and cfg['googleRegistrationEnabled']
+                  assert not cfg['googleLoginEnabled'] and not cfg['googleRegistrationEnabled']
                   assert cfg['applicationId']=='AppAdmin'
               assert apk.stat().st_size < 198643505, 'Release must be smaller than the previous universal debug APK'
               print(apk.name, apk.stat().st_size)
