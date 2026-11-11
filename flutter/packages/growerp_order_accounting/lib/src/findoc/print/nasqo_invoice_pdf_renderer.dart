@@ -1,5 +1,6 @@
-import 'invoice_print_data.dart';
 import 'dart:typed_data';
+
+import 'invoice_print_data.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:growerp_models/growerp_models.dart';
 import 'package:pdf/pdf.dart';
@@ -30,6 +31,7 @@ class NasqoInvoicePdfRenderer {
     required String currencyId,
     String? verifiedWarehouseName,
     String? returnPolicy,
+    String? verifiedCompanyEnglishName,
   }) async {
     final printData = InvoicePrintData.fromFinDoc(
       document: finDoc,
@@ -39,12 +41,17 @@ class NasqoInvoicePdfRenderer {
     final fontData = await rootBundle.load(
       'packages/growerp_order_accounting/assets/fonts/DejaVuSans.ttf');
     final font = pw.Font.ttf(fontData);
-    final pdf = pw.Document();
+    final pdf = pw.Document(
+      title: printData.title,
+      author: company.name ?? 'NASQO',
+    );
     final theme = pw.ThemeData.withFont(base: font, bold: font);
     final number = printData.invoiceNumber;
     final date = printData.createdAt.toIso8601String().split('T').first;
     final party = finDoc.otherCompany?.name ?? finDoc.otherUser?.name ?? '—';
     final warehouse = printData.warehouseName;
+    // TableHelper.fromTextArray produces a spanning Table; headerCount=1
+    // marks its first row repeatable on every continuation page.
     final rows = printData.lines.asMap().entries.map((e) {
       final item = e.value;
       final total = item.calculatedTotal?.toString() ?? '—';
@@ -73,8 +80,13 @@ class NasqoInvoicePdfRenderer {
           pw.Expanded(child: pw.Column(
             crossAxisAlignment: pw.CrossAxisAlignment.end,
             children: [
-              pw.Text(company.telephoneNr ?? '', textDirection: pw.TextDirection.ltr),
-              pw.Text(company.email ?? '', textDirection: pw.TextDirection.ltr),
+              if (verifiedCompanyEnglishName?.trim().isNotEmpty == true)
+                pw.Text(verifiedCompanyEnglishName!,
+                  textDirection: pw.TextDirection.ltr),
+              if (company.telephoneNr?.isNotEmpty == true)
+                pw.Text(company.telephoneNr!, textDirection: pw.TextDirection.ltr),
+              if (company.email?.isNotEmpty == true)
+                pw.Text(company.email!, textDirection: pw.TextDirection.ltr),
             ],
           )),
         ]),
@@ -86,9 +98,16 @@ class NasqoInvoicePdfRenderer {
               fontWeight: pw.FontWeight.bold)))),
         pw.SizedBox(height: 8),
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
-          pw.Text('التاريخ: $date'),
-          pw.Text('رقم الفاتورة: $number',
-            style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
+          pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
+            pw.Text('التاريخ: '),
+            pw.Text(date, textDirection: pw.TextDirection.ltr),
+          ]),
+          pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
+            pw.Text('رقم الفاتورة: ',
+              style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
+            pw.Text(number, textDirection: pw.TextDirection.ltr,
+              style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
+          ]),
         ]),
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
           pw.Text((finDoc.sales ? 'العميل: ' : 'المورد: ') + party),
@@ -100,12 +119,14 @@ class NasqoInvoicePdfRenderer {
       ]),
       build: (context) => [
         pw.TableHelper.fromTextArray(
+          headerCount: 1, // Repeat blue column headings after automatic page breaks.
           headers: const ['م', 'اسم الصنف', 'ت الانتهاء', 'الوحدة', 'العدد', 'السعر', 'الإجمالي'],
           data: rows,
           headerStyle: pw.TextStyle(color: PdfColors.white,
             fontWeight: pw.FontWeight.bold, fontSize: 9),
           headerDecoration: const pw.BoxDecoration(color: blue),
           cellStyle: const pw.TextStyle(fontSize: 9),
+          cellPadding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 3),
           cellAlignments: {
             0: pw.Alignment.center,
             1: pw.Alignment.centerRight,
@@ -143,6 +164,9 @@ class NasqoInvoicePdfRenderer {
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceAround,
           children: ['البائع', 'المخازن', 'الصندوق', 'المستلم']
             .map((s) => pw.Text(s, style: const pw.TextStyle(fontSize: 9))).toList()),
+        pw.Align(alignment: pw.Alignment.centerLeft,
+          child: pw.Text('صفحة ${context.pageNumber} من ${context.pagesCount}',
+            style: const pw.TextStyle(fontSize: 8))),
       ]),
     ));
     return pdf.save();

@@ -37,3 +37,42 @@ The source branch does not include a Flutter SDK. As of 2026-11-11 these tests h
 5. Source code has not been compiled; run Flutter analyzer/tests in isolated CI before merging.
 6. The source reference template image is not embedded in this repository.
 7. Do not merge or deploy until all INV gates have real assertions and pass, visual PDF review is complete, backups and rollback are verified, and the user gives final deployment approval.
+
+## Arabic A4 visual and multipage verification (2026-11-11)
+
+Renderer now uses a bundled DejaVu Sans Unicode font, explicit RTL page direction,
+LTR invoice number/date/phone spans, a blue seven-column table with headerCount=1,
+and a page-number footer. These are source-level changes, NOT proof of rendered output.
+
+Run in a Flutter-enabled isolated environment:
+
+```sh
+mkdir -p /tmp/nasqo-invoice-artifacts
+NASQO_PDF_ARTIFACT_DIR=/tmp/nasqo-invoice-artifacts \
+  flutter test test/findoc/print/nasqo_invoice_pdf_render_test.dart
+python3 -m venv /tmp/nasqo-pdf-audit-venv
+/tmp/nasqo-pdf-audit-venv/bin/pip install pymupdf
+/tmp/nasqo-pdf-audit-venv/bin/python test/findoc/print/inspect_rendered_pdf.py \
+  /tmp/nasqo-invoice-artifacts/nasqo-45-items-a4.pdf --min-pages 2 \
+  --report /tmp/nasqo-invoice-artifacts/audit.json
+```
+
+The independent PDF inspector verifies A4 geometry, page count, text bounds,
+font registration, reference blue fills, and extractable repeated table headers.
+Arabic shaping, exact visual comparison to the uploaded screenshot, and printer
+clipping require a human-approved visual check of rendered pages.
+
+Visual checklist against the uploaded reference image:
+- Right-to-left seven columns: index, description, expiry, unit, quantity, price, total.
+- Dark blue header (#2953AF), white header labels, red invoice number, pale yellow net total.
+- Company name at right, optional logo in center, optional verified English name at left.
+- No invented expiry, warehouse, sale UOM, or account balance.
+- A4 portrait 210 x 297 mm, no clipped text, page number, repeated table headings.
+- Mixed Arabic/English item, +967 phone and INV-2026-0348 display in correct order.
+
+Not yet implemented: exact reference image pixel matching, Arabic amount-to-words,
+verified invoice-specific currency, full tax/discount/payment reconciliation,
+visual print test on physical printers, and legacy/Arabic toggle integration tests.
+
+Do NOT enable NASQO_AR_INVOICE_PDF or merge/deploy until Flutter compile/test and
+all visual/accounting gates pass. Production remains unchanged.
