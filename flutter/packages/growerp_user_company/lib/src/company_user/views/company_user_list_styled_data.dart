@@ -179,7 +179,9 @@ List<Widget> getCompanyUserListRow({
       Directionality.of(context) == TextDirection.rtl
           ? Icons.chevron_left
           : Icons.chevron_right,
-      semanticLabel: localizations.name,
+      semanticLabel: companyUser.type == PartyType.company
+          ? localizations.companyDetail
+          : localizations.userDetail,
     ),
   );
 
