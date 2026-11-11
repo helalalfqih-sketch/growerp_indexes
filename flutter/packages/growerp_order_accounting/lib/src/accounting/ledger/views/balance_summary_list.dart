@@ -21,6 +21,8 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import 'balance_summary_filter.dart';
+
 class BalanceSummaryList extends StatefulWidget {
   const BalanceSummaryList({super.key});
 
@@ -35,7 +37,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   final _searchFocusNode = FocusNode();
   NumberFormat formatter = NumberFormat("00");
   late LedgerBloc _ledgerBloc;
-  late bool started;
+  String _searchText = '';
+  bool _sortAscending = true;
   late TimePeriod _selectedPeriod;
   late double bottom;
   double? right;
@@ -44,7 +47,6 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   @override
   void initState() {
     super.initState();
-    started = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
@@ -71,7 +73,6 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == LedgerStatus.success) {
-          started = true;
           HelperFunctions.showMessage(
             context,
             translateLedgerBlocMessage(state.message, _localizations),
@@ -83,6 +84,12 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
         switch (state.status) {
           case LedgerStatus.success:
             _selectedPeriod = state.ledgerReport!.period!;
+            final sourceAccounts = state.ledgerReport!.glAccounts;
+            final visibleAccounts = filterBalanceSummaryAccounts(
+              sourceAccounts,
+              query: _searchText,
+              ascending: _sortAscending,
+            );
             return Column(
               children: [
                 Padding(
@@ -97,7 +104,7 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.arrow_back),
-                            tooltip: 'Previous Year',
+                            tooltip: _localizations.previousYear,
                             onPressed: () {
                               // Extract the year from the period name
                               String currentPeriodName =
@@ -280,28 +287,30 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                   ),
                 ),
                 ListFilterBar(
-                  searchHint: OrderAccountingLocalizations.of(
-                    context,
-                  )!.searchHintAccountCodeName,
+                  searchHint: _localizations.searchHintAccountCodeName,
                   searchController: _searchController,
                   focusNode: _searchFocusNode,
+                  // This is a display-only filter. Do not issue accounting
+                  // writes or recompute totals when the query changes.
                   onSearchChanged: (value) {
-                    if (value.isNotEmpty) {
-                      int index = 0;
-                      for (var el in state.ledgerReport!.glAccounts) {
-                        if ((el.accountCode ?? '').contains(value) ||
-                            (el.accountName ?? '').contains(value)) {
-                          break;
-                        }
-                        index++;
-                      }
-                      _itemScrollController.scrollTo(
-                        index: index + 1,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.linear,
-                      );
-                    }
+                    setState(() => _searchText = value);
                   },
+                  actions: [
+                    IconButton(
+                      key: const Key('balanceSortDirection'),
+                      tooltip: _sortAscending
+                          ? _localizations.sortAccountCodeDescending
+                          : _localizations.sortAccountCodeAscending,
+                      onPressed: () {
+                        setState(() => _sortAscending = !_sortAscending);
+                      },
+                      icon: Icon(
+                        _sortAscending
+                            ? Icons.arrow_downward
+                            : Icons.arrow_upward,
+                      ),
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -375,34 +384,44 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         child: ScrollablePositionedList.builder(
                           key: const Key('listView'),
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: state.ledgerReport!.glAccounts.length + 1,
+                          itemCount: visibleAccounts.length + 1,
                           itemScrollController: _itemScrollController,
                           itemPositionsListener: _itemPositionsListener,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
-                              return Column(
-                                children: [
-                                  Visibility(
-                                    visible:
-                                        state.ledgerReport!.glAccounts.isEmpty,
-                                    child: Center(
-                                      heightFactor: 20,
-                                      child: Text(
-                                        started
-                                            ? _localizations
-                                                  .noBalanceSummaryFound
-                                            : '',
-                                        key: const Key('empty'),
-                                        textAlign: TextAlign.center,
-                                      ),
+                              if (visibleAccounts.isNotEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      sourceAccounts.isEmpty
+                                          ? _localizations.noBalanceSummaryFound
+                                          : _localizations.noSearchResults,
+                                      key: const Key('empty'),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  ),
-                                ],
+                                    if (sourceAccounts.isNotEmpty) ...[
+                                      const SizedBox(height: 12),
+                                      OutlinedButton.icon(
+                                        key: const Key('clearBalanceSearch'),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _searchText = '');
+                                        },
+                                        icon: const Icon(Icons.search_off),
+                                        label: Text(_localizations.clearSearchFilter),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               );
                             }
                             index--;
                             return BalanceSummaryListItem(
-                              glAccount: state.ledgerReport!.glAccounts[index],
+                              glAccount: visibleAccounts[index],
                               index: index,
                             );
                           },
