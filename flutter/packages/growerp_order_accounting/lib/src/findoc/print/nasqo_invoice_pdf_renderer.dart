@@ -60,7 +60,7 @@ class NasqoInvoicePdfRenderer {
     final number = printData.invoiceNumber;
     final date = printData.createdAt.toIso8601String().split('T').first;
     final time = printData.createdAt.toIso8601String().split('T').last.split('.').first;
-    final party = finDoc.otherCompany?.name ?? finDoc.otherUser?.name ?? '—';
+    final party = finDoc.otherCompany?.name ?? finDoc.otherUser?.fullName ?? '—';
     final warehouse = printData.warehouseName;
     final companyAddress = [
       company.address?.address1, company.address?.address2,
@@ -136,7 +136,7 @@ class NasqoInvoicePdfRenderer {
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
           pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
             pw.Text('التاريخ: '),
-            pw.Text(date + '  ' + time,
+            pw.Text('$date  $time',
               textDirection: InvoicePdfTextPolicy.directionForDate()),
           ]),
           pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
@@ -152,7 +152,7 @@ class NasqoInvoicePdfRenderer {
           if (warehouse != null) pw.Text('المخزن: $warehouse'),
         ]),
         if (finDoc.description?.isNotEmpty == true)
-          pw.Text('ملاحظات: ' + finDoc.description!),
+          pw.Text('ملاحظات: ${finDoc.description!}'),
         pw.Divider(color: borderColor, thickness: 0.6),
         pw.SizedBox(height: 5),
       ]),
@@ -207,7 +207,7 @@ class NasqoInvoicePdfRenderer {
           child: pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text('صافي الفاتورة'),
-              pw.Text(printData.authoritativeTotal.toString() + ' ' + printData.currencyId,
+              pw.Text('${printData.authoritativeTotal} ${printData.currencyId}',
                 textDirection: InvoicePdfTextPolicy.directionForMoney(),
                 style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
             ])),
@@ -216,13 +216,13 @@ class NasqoInvoicePdfRenderer {
           pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text('المدفوع'),
-              pw.Text(printData.paidTotal.toString() + ' ' + printData.currencyId,
+              pw.Text('${printData.paidTotal} ${printData.currencyId}',
                 textDirection: InvoicePdfTextPolicy.directionForMoney()),
             ]),
           pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
             children: [
               pw.Text('المتبقي'),
-              pw.Text(printData.remainingTotal.toString() + ' ' + printData.currencyId,
+              pw.Text('${printData.remainingTotal} ${printData.currencyId}',
                 textDirection: InvoicePdfTextPolicy.directionForMoney()),
             ]),
         ],
