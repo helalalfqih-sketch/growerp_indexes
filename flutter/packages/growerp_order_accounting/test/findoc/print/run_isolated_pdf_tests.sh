@@ -45,6 +45,15 @@ cd "$PACKAGE_DIR"
 flutter --version
 CURRENT_STAGE=dependencies
 flutter pub get
+# Clean checkouts intentionally omit Freezed/JSON/Retrofit generated sources.
+# pub get alone does not create their getters or copyWith implementations.
+# Use the workspace's existing generation recipes before analyzing consumers.
+CURRENT_STAGE=code-generation
+(
+  cd "$PACKAGE_DIR/../.."
+  dart run melos l10n --no-select
+  dart run melos build --no-select
+)
 CURRENT_STAGE=analysis
 flutter analyze lib/src/findoc/print/ lib/src/findoc/views/pdf_formats.dart test/findoc/print/
 CURRENT_STAGE=flutter-tests
