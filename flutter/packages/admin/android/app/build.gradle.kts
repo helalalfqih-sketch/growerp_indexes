@@ -7,6 +7,8 @@ plugins {
     id("dev.flutter.flutter-gradle-plugin")
 }
 
+// CI emits unsigned release artifacts; the private NASQO key stays on the VPS.
+val nasqoUnsignedRelease = providers.environmentVariable("NASQO_BUILD_UNSIGNED").orNull == "true"
 val keystoreProperties = Properties()
 val keystorePropertiesFile = rootProject.file("key.properties")
 if (keystorePropertiesFile.exists()) {
@@ -24,7 +26,7 @@ android {
     }
 
     defaultConfig {
-        applicationId = "org.growerp.admin"
+        applicationId = "com.indexesstore.nasqo"
         minSdk = flutter.minSdkVersion
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -42,7 +44,7 @@ android {
 
     buildTypes {
         release {
-            signingConfig = signingConfigs.getByName("release")
+            signingConfig = if (nasqoUnsignedRelease) null else signingConfigs.getByName("release")
             isMinifyEnabled = true
             isShrinkResources = true
             proguardFiles(
