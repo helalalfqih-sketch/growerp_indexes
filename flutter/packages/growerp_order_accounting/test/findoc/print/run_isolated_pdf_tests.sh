@@ -51,7 +51,8 @@ flutter pub get
 CURRENT_STAGE=code-generation
 (
   cd "$PACKAGE_DIR/../.."
-  dart run melos l10n --no-select
+  dart run melos exec --concurrency 1 --file-exists "l10n.yaml" -- \
+    "flutter gen-l10n --suppress-analytics"
   dart run melos build --no-select
 )
 CURRENT_STAGE=analysis
