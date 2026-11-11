@@ -8,6 +8,8 @@ on:
       - 'flutter/packages/growerp_core/lib/**'
       - 'flutter/packages/growerp_order_accounting/lib/**'
       - 'flutter/packages/growerp_user_company/lib/**'
+      - 'flutter/packages/growerp_user_company/l10n/**'
+      - 'flutter/packages/growerp_user_company/test/company_user/**'
       - 'flutter/packages/growerp_core/test/get_dio_error_test.dart'
       - 'flutter/packages/growerp_core/test/blocs/auth_bloc_test.dart'
   workflow_dispatch:
@@ -28,6 +30,11 @@ jobs:
           channel: stable
           cache: true
       - uses: ./.github/actions/bootstrap
+      - name: Test customer CSV parsing, Arabic UTF-8 and import safety
+        working-directory: flutter/packages/growerp_user_company
+        run: |
+          flutter test test/company_user/company_user_bloc_test.dart
+          flutter test test/company_user/company_user_csv_encoding_test.dart
       - name: Build the admin web entrypoint (no production deployment)
         working-directory: flutter/packages/admin
         run: flutter build web --release --no-pub --no-tree-shake-icons
