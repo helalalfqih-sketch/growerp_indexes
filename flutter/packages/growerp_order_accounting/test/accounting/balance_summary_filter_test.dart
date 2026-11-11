@@ -58,4 +58,18 @@ void main() {
     expect(accounts, orderedEquals(source));
     expect(identical(accounts, filtered), isFalse);
   });
+  test('fiscal-year navigation handles annual, quarterly and monthly labels', () {
+    expect(fiscalYearFromBalancePeriod('Y2025'), 2025);
+    expect(fiscalYearFromBalancePeriod('Y2025q1'), 2025);
+    expect(fiscalYearFromBalancePeriod('Y2025q4'), 2025);
+    expect(fiscalYearFromBalancePeriod('Y2025m01'), 2025);
+    expect(fiscalYearFromBalancePeriod('Y2025m12'), 2025);
+  });
+
+  test('invalid accounting period names never fall back to today', () {
+    expect(fiscalYearFromBalancePeriod('Y2025q9'), isNull);
+    expect(fiscalYearFromBalancePeriod('Y2025m13'), isNull);
+    expect(fiscalYearFromBalancePeriod('bad'), isNull);
+  });
+
 }
