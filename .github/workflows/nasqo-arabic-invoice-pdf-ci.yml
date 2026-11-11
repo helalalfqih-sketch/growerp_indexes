@@ -1,0 +1,58 @@
+name: NASQO Arabic Invoice PDF - isolated checks
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - feature/nasqo-arabic-invoice-pdf
+    paths:
+      - '.github/workflows/nasqo-arabic-invoice-pdf-ci.yml'
+      - 'flutter/packages/growerp_order_accounting/**'
+      - 'flutter/packages/growerp_models/**'
+      - 'flutter/pubspec.*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nasqo-arabic-pdf-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  isolated-pdf:
+    if: github.ref == 'refs/heads/feature/nasqo-arabic-invoice-pdf'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 45
+    env:
+      PUB_CACHE: ${{ runner.temp }}/nasqo-pub-cache
+      NASQO_PDF_ARTIFACT_DIR: ${{ runner.temp }}/nasqo-pdf-artifacts
+    steps:
+      - name: Checkout development branch only
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          fetch-depth: 1
+      - name: Install Flutter in isolated runner
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: false
+      - name: Install isolated PDF inspector
+        run: |
+          python3 -m venv "$RUNNER_TEMP/nasqo-pdf-audit-venv"
+          "$RUNNER_TEMP/nasqo-pdf-audit-venv/bin/python" -m pip install --disable-pip-version-check pymupdf
+          echo "$RUNNER_TEMP/nasqo-pdf-audit-venv/bin" >> "$GITHUB_PATH"
+      - name: Run fail-closed analysis, tests, and PDF inspection
+        working-directory: flutter/packages/growerp_order_accounting
+        run: bash test/findoc/print/run_isolated_pdf_tests.sh
+      - name: Save PDF and inspection report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nasqo-arabic-pdf-evidence
+          path: ${{ env.NASQO_PDF_ARTIFACT_DIR }}
+          if-no-files-found: warn
+          retention-days: 7
+
+# No secrets, production hosts, databases, docker builds, deploy or merge steps.
