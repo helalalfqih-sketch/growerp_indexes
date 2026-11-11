@@ -76,3 +76,13 @@ visual print test on physical printers, and legacy/Arabic toggle integration tes
 
 Do NOT enable NASQO_AR_INVOICE_PDF or merge/deploy until Flutter compile/test and
 all visual/accounting gates pass. Production remains unchanged.
+
+## Safe test runner
+
+`bash test/findoc/print/run_isolated_pdf_tests.sh` enforces the feature branch,
+requires Flutter to be installed, checks for >=4GB free disk, runs analyzer/tests,
+then requires an actual generated PDF and PyMuPDF audit. It fails closed if any
+prerequisite is missing. On waha-shopify-test the runner currently exits 2
+because Flutter is absent and only ~2.3GB of disk is free. Run it on an isolated
+CI worker with >=10GB available instead; do not install the 1.58GB compressed
+Flutter archive on the production disk. This test runner does not deploy.
