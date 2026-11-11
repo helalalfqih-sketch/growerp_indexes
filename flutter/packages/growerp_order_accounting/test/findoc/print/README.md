@@ -99,3 +99,17 @@ Checked exact pdf 3.12.0 package archive against flutter/pubspec.lock:
 - PdfColor.fromInt is a const constructor and Context.pagesCount exists.
 - This is an API/source audit only: Flutter analyzer and rendering tests still
   require a separate runner; no runtime success is claimed.
+
+## Arabic Bidi and font coverage review (2026-11-11)
+
+- Verified bundled DejaVu Sans using fc-query; it declares Arabic glyph coverage.
+  Glyph coverage is not proof of Arabic shaping or correct ligatures in generated PDF.
+- Verified pdf 3.12.0 text.dart uses the Bidi algorithm when RTL, with
+  use_bidi defaulting to true. Avoid manually reversing Arabic or Latin strings.
+- Added InvoicePdfTextPolicy: RTL for Arabic labels, descriptions and UOM;
+  LTR for invoice IDs, phone, dates, expiry, quantities, prices and totals.
+- TableHelper.fromTextArray now uses cellBuilder to apply per-column direction.
+- Added invoice_pdf_text_policy_test.dart (unit checks only; not visual proof).
+- Visual review still required for Brother XL-2026 mixed-script names, +967
+  phone numbers, Arabic combining marks/diacritics, and YER currency placement.
+- No Flutter SDK installed on server; tests have NOT been executed.

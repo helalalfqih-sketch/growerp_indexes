@@ -5,6 +5,7 @@ import 'package:growerp_models/growerp_models.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
 
+import 'invoice_pdf_text_policy.dart';
 import 'invoice_print_data.dart';
 
 /// Opt-in Arabic A4 invoice renderer. No accounting writes.
@@ -42,6 +43,7 @@ class NasqoInvoicePdfRenderer {
     final fontData = await rootBundle.load(
       'packages/growerp_order_accounting/assets/fonts/DejaVuSans.ttf');
     final font = pw.Font.ttf(fontData);
+    // Unicode font + pdf's Bidi shaping; no manual string reversal.
     final pdf = pw.Document(
       title: printData.title,
       author: company.name ?? 'NASQO',
@@ -85,7 +87,8 @@ class NasqoInvoicePdfRenderer {
                 pw.Text(verifiedCompanyEnglishName!,
                   textDirection: pw.TextDirection.ltr),
               if (company.telephoneNr?.isNotEmpty == true)
-                pw.Text(company.telephoneNr!, textDirection: pw.TextDirection.ltr),
+                pw.Text(company.telephoneNr!,
+                  textDirection: InvoicePdfTextPolicy.directionForPhone()),
               if (company.email?.isNotEmpty == true)
                 pw.Text(company.email!, textDirection: pw.TextDirection.ltr),
             ],
@@ -101,12 +104,13 @@ class NasqoInvoicePdfRenderer {
         pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween, children: [
           pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
             pw.Text('التاريخ: '),
-            pw.Text(date, textDirection: pw.TextDirection.ltr),
+            pw.Text(date, textDirection: InvoicePdfTextPolicy.directionForDate()),
           ]),
           pw.Row(mainAxisSize: pw.MainAxisSize.min, children: [
             pw.Text('رقم الفاتورة: ',
               style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
-            pw.Text(number, textDirection: pw.TextDirection.ltr,
+            pw.Text(number,
+              textDirection: InvoicePdfTextPolicy.directionForDocumentId(),
               style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
           ]),
         ]),
@@ -131,6 +135,12 @@ class NasqoInvoicePdfRenderer {
           headerDecoration: const pw.BoxDecoration(color: blue),
           cellStyle: const pw.TextStyle(fontSize: 9),
           cellPadding: const pw.EdgeInsets.symmetric(vertical: 5, horizontal: 3),
+          // Bidi Arabic descriptions stay RTL; IDs/dates/quantities/prices LTR.
+          cellBuilder: (index, value, row) => pw.Text(
+            value.toString(),
+            textDirection: InvoicePdfTextPolicy.columnDirection(index),
+            style: const pw.TextStyle(fontSize: 9),
+          ),
           cellAlignments: {
             0: pw.Alignment.center,
             1: pw.Alignment.centerRight,
@@ -156,7 +166,7 @@ class NasqoInvoicePdfRenderer {
             children: [
               pw.Text('صافي الفاتورة'),
               pw.Text(printData.authoritativeTotal.toString() + ' ' + printData.currencyId,
-                textDirection: pw.TextDirection.ltr,
+                textDirection: InvoicePdfTextPolicy.directionForMoney(),
                 style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
             ])),
         if (returnPolicy?.trim().isNotEmpty == true) ...[
