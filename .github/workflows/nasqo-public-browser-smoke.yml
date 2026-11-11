@@ -1,0 +1,38 @@
+name: NASQO public browser smoke (no login)
+
+on:
+  push:
+    branches: [qa/nasqo-public-browser-20261111]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  public-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright and Chromium on isolated runner
+        run: |
+          mkdir -p /tmp/nasqo-public-browser
+          cd /tmp/nasqo-public-browser
+          npm init -y
+          npm install --no-audit --no-fund playwright@1.58.2
+          npx playwright install --with-deps chromium
+      - name: Test public page in Arabic and English browser locales
+        env:
+          NODE_PATH: /tmp/nasqo-public-browser/node_modules
+        run: node qa/nasqo/public_browser_smoke.cjs
+      - name: Preserve screenshots and diagnostics
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nasqo-public-browser-screenshots
+          path: qa-artifacts/
+          if-no-files-found: warn
+          retention-days: 7
