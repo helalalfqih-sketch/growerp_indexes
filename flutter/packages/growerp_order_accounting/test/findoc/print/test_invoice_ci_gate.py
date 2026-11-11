@@ -37,6 +37,12 @@ class GateTests(unittest.TestCase):
             process = subprocess.run(command, capture_output=True, text=True)
             return process.returncode, json.loads(report.read_text())
 
+    def test_flutter_process_metadata_does_not_count_as_test_evidence(self):
+        prefix = json.dumps([{"event": "test.startedProcess", "params": {"vmServiceUri": None}}]) + "\n"
+        code, report = self.run_gate(prefix=prefix)
+        self.assertEqual(code, 0)
+        self.assertEqual(report["flutter_test_counts"]["passed"], 12)
+
     def test_non_object_json_reports_failure_without_crashing(self):
         for value in ([], [1], None, "noise", 42):
             with self.subTest(value=value):
