@@ -1,0 +1,22 @@
+name: Shopify GrowERP read-only preview
+
+on:
+  pull_request:
+    paths:
+      - 'integrations/shopify_growerp/**'
+      - '.github/workflows/shopify-growerp-preview.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  preview-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - name: Compile integration source
+        run: python3 -m compileall -q integrations/shopify_growerp
+      - name: Run offline safety and direction tests
+        run: python3 -m unittest discover -s integrations/shopify_growerp -p 'test_*.py' -v
