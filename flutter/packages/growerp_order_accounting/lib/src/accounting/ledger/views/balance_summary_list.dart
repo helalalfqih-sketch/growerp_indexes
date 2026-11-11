@@ -21,6 +21,8 @@ import 'package:growerp_order_accounting/growerp_order_accounting.dart';
 import 'package:intl/intl.dart';
 import 'package:scrollable_positioned_list/scrollable_positioned_list.dart';
 
+import 'balance_summary_filter.dart';
+
 class BalanceSummaryList extends StatefulWidget {
   const BalanceSummaryList({super.key});
 
@@ -35,7 +37,8 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   final _searchFocusNode = FocusNode();
   NumberFormat formatter = NumberFormat("00");
   late LedgerBloc _ledgerBloc;
-  late bool started;
+  String _searchText = '';
+  bool _sortAscending = true;
   late TimePeriod _selectedPeriod;
   late double bottom;
   double? right;
@@ -44,7 +47,6 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
   @override
   void initState() {
     super.initState();
-    started = false;
     WidgetsBinding.instance.addPostFrameCallback((_) {
       _searchFocusNode.requestFocus();
     });
@@ -71,7 +73,6 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
           HelperFunctions.showMessage(context, '${state.message}', Colors.red);
         }
         if (state.status == LedgerStatus.success) {
-          started = true;
           HelperFunctions.showMessage(
             context,
             translateLedgerBlocMessage(state.message, _localizations),
@@ -83,6 +84,12 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
         switch (state.status) {
           case LedgerStatus.success:
             _selectedPeriod = state.ledgerReport!.period!;
+            final sourceAccounts = state.ledgerReport!.glAccounts;
+            final visibleAccounts = filterBalanceSummaryAccounts(
+              sourceAccounts,
+              query: _searchText,
+              ascending: _sortAscending,
+            );
             return Column(
               children: [
                 Padding(
@@ -97,32 +104,21 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         children: [
                           IconButton(
                             icon: const Icon(Icons.arrow_back),
-                            tooltip: OrderAccountingLocalizations.of(context)!.previousYear,
+                            tooltip: _localizations.previousYear,
                             onPressed: () {
-                              // Extract the year from the period name
-                              String currentPeriodName =
+                              // Periods Y2025, Y2025q1 and Y2025m01 all
+                              // navigate relative to their actual fiscal year.
+                              final currentPeriodName =
                                   _selectedPeriod.periodName;
-                              String yearStr = '';
-                              int year = 0;
-
-                              if (currentPeriodName.startsWith('Y')) {
-                                // Format: Y2025
-                                yearStr = currentPeriodName.substring(1);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('q')) {
-                                // Format: Y2025q1
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('m')) {
-                                // Format: Y2025m01
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
+                              final year =
+                                  fiscalYearFromBalancePeriod(currentPeriodName);
+                              if (year == null) {
+                                HelperFunctions.showMessage(
+                                  context,
+                                  '${_localizations.noDataForPeriod}$currentPeriodName',
+                                  Colors.orange,
+                                );
+                                return;
                               }
 
                               // Go to previous year
@@ -185,30 +181,19 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                             icon: const Icon(Icons.arrow_forward),
                             tooltip: _localizations.nextYear,
                             onPressed: () {
-                              // Extract the year from the period name
-                              String currentPeriodName =
+                              // Periods Y2025, Y2025q1 and Y2025m01 all
+                              // navigate relative to their actual fiscal year.
+                              final currentPeriodName =
                                   _selectedPeriod.periodName;
-                              String yearStr = '';
-                              int year = 0;
-
-                              if (currentPeriodName.startsWith('Y')) {
-                                // Format: Y2025
-                                yearStr = currentPeriodName.substring(1);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('q')) {
-                                // Format: Y2025q1
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('m')) {
-                                // Format: Y2025m01
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
+                              final year =
+                                  fiscalYearFromBalancePeriod(currentPeriodName);
+                              if (year == null) {
+                                HelperFunctions.showMessage(
+                                  context,
+                                  '${_localizations.noDataForPeriod}$currentPeriodName',
+                                  Colors.orange,
+                                );
+                                return;
                               }
 
                               // Go to next year (but don't exceed current year)
@@ -280,28 +265,30 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                   ),
                 ),
                 ListFilterBar(
-                  searchHint: OrderAccountingLocalizations.of(
-                    context,
-                  )!.searchHintAccountCodeName,
+                  searchHint: _localizations.searchHintAccountCodeName,
                   searchController: _searchController,
                   focusNode: _searchFocusNode,
+                  // This is a display-only filter. Do not issue accounting
+                  // writes or recompute totals when the query changes.
                   onSearchChanged: (value) {
-                    if (value.isNotEmpty) {
-                      int index = 0;
-                      for (var el in state.ledgerReport!.glAccounts) {
-                        if ((el.accountCode ?? '').contains(value) ||
-                            (el.accountName ?? '').contains(value)) {
-                          break;
-                        }
-                        index++;
-                      }
-                      _itemScrollController.scrollTo(
-                        index: index + 1,
-                        duration: const Duration(seconds: 1),
-                        curve: Curves.linear,
-                      );
-                    }
+                    setState(() => _searchText = value);
                   },
+                  actions: [
+                    IconButton(
+                      key: const Key('balanceSortDirection'),
+                      tooltip: _sortAscending
+                          ? _localizations.sortAccountCodeDescending
+                          : _localizations.sortAccountCodeAscending,
+                      onPressed: () {
+                        setState(() => _sortAscending = !_sortAscending);
+                      },
+                      icon: Icon(
+                        _sortAscending
+                            ? Icons.arrow_downward
+                            : Icons.arrow_upward,
+                      ),
+                    ),
+                  ],
                 ),
                 Padding(
                   padding: const EdgeInsets.symmetric(
@@ -375,34 +362,44 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                         child: ScrollablePositionedList.builder(
                           key: const Key('listView'),
                           physics: const AlwaysScrollableScrollPhysics(),
-                          itemCount: state.ledgerReport!.glAccounts.length + 1,
+                          itemCount: visibleAccounts.length + 1,
                           itemScrollController: _itemScrollController,
                           itemPositionsListener: _itemPositionsListener,
                           itemBuilder: (BuildContext context, int index) {
                             if (index == 0) {
-                              return Column(
-                                children: [
-                                  Visibility(
-                                    visible:
-                                        state.ledgerReport!.glAccounts.isEmpty,
-                                    child: Center(
-                                      heightFactor: 20,
-                                      child: Text(
-                                        started
-                                            ? _localizations
-                                                  .noBalanceSummaryFound
-                                            : '',
-                                        key: const Key('empty'),
-                                        textAlign: TextAlign.center,
-                                      ),
+                              if (visibleAccounts.isNotEmpty) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.all(24),
+                                child: Column(
+                                  children: [
+                                    Text(
+                                      sourceAccounts.isEmpty
+                                          ? _localizations.noBalanceSummaryFound
+                                          : _localizations.noSearchResults,
+                                      key: const Key('empty'),
+                                      textAlign: TextAlign.center,
                                     ),
-                                  ),
-                                ],
+                                    if (sourceAccounts.isNotEmpty) ...[
+                                      const SizedBox(height: 12),
+                                      OutlinedButton.icon(
+                                        key: const Key('clearBalanceSearch'),
+                                        onPressed: () {
+                                          _searchController.clear();
+                                          setState(() => _searchText = '');
+                                        },
+                                        icon: const Icon(Icons.search_off),
+                                        label: Text(_localizations.clearSearchFilter),
+                                      ),
+                                    ],
+                                  ],
+                                ),
                               );
                             }
                             index--;
                             return BalanceSummaryListItem(
-                              glAccount: state.ledgerReport!.glAccounts[index],
+                              glAccount: visibleAccounts[index],
                               index: index,
                             );
                           },
@@ -518,19 +515,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
     );
   }
 
-  // Helper method to extract year from period name
-  String _getYearFromPeriod(String periodName) {
-    if (periodName.startsWith('Y')) {
-      if (periodName.contains('q') || periodName.contains('m')) {
-        // Format: Y2025q1 or Y2025m01
-        return periodName.substring(1, 5);
-      } else {
-        // Format: Y2025
-        return periodName.substring(1);
-      }
-    }
-    return DateTime.now().year.toString();
-  }
+  // Show the selected fiscal year; never silently substitute today's year.
+  String _getYearFromPeriod(String periodName) =>
+      fiscalYearFromBalancePeriod(periodName)?.toString() ?? periodName;
 
   // Helper method to check if a year exists in the available time periods
   bool _checkYearExists(int year, List<TimePeriod> timePeriods) {

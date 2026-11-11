@@ -72,6 +72,12 @@ jobs:
             (cd "packages/$package" && flutter test --no-pub --reporter expanded)
           done
 
+      - name: Verify ledger filters and RTL empty states explicitly
+        working-directory: flutter
+        run: |
+          (cd packages/growerp_core && flutter test --no-pub test/styled_data_table_rtl_test.dart)
+          (cd packages/growerp_order_accounting && flutter test --no-pub test/accounting/balance_summary_filter_test.dart)
+
       - name: Build NASQO admin Web release
         working-directory: flutter/packages/admin
         run: flutter build web --release --pwa-strategy=none
