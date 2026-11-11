@@ -883,7 +883,7 @@
   "@asCompany": {
     "description": "Message indicating that a user is now displayed as a company"
   },
-  "compUserUploadSuccess": "Companies/Users upload ended successfully",
+  "compUserUploadSuccess": "CSV import submitted. Refresh the list after processing completes.",
   "@compUserUploadSuccess": {
     "description": "Success message for company/user upload"
   },
@@ -985,6 +985,10 @@
   "@companyFetchFailure": {
     "description": "BLoC message: Failure when fetching companies"
   },
+  "csvUtf8Error": "Could not read this CSV as UTF-8. Save the file as UTF-8 CSV and try again.",
+  "@csvUtf8Error": {
+    "description": "Shown when the customer CSV file contains invalid UTF-8 bytes"
+  },
   "compUserUploadFailure": "Failed to upload companies/users",
   "@compUserUploadFailure": {
     "description": "BLoC message: Failure when uploading company/user data"
@@ -1025,7 +1029,7 @@
   "@downloadFirstToObtainTheFormat": {
     "description": "Download first to obtain the format"
   },
-  "aDataFileWillBeSendByEmail": "A data file will be send by email",
+  "aDataFileWillBeSendByEmail": "The file will be emailed if a mail server is configured.",
   "@aDataFileWillBeSendByEmail": {
     "description": "A data file will be send by email"
   },
