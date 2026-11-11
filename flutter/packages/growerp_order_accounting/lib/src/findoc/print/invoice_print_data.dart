@@ -1,3 +1,4 @@
+import 'invoice_print_enrichment.dart';
 import 'package:decimal/decimal.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -31,6 +32,7 @@ class InvoicePrintData {
     String? verifiedWarehouseName,
     Decimal? verifiedPaidTotal,
     Decimal? verifiedRemainingTotal,
+    InvoicePrintEnrichment? enrichment,
   }) {
     if (document.docType != FinDocType.invoice) {
       throw ArgumentError('Document must be an invoice');
@@ -48,11 +50,48 @@ class InvoicePrintData {
     if (verifiedCurrencyId.trim().isEmpty) {
       throw StateError('Verified currency is missing');
     }
-    if ((verifiedPaidTotal == null) != (verifiedRemainingTotal == null)) {
+    if (enrichment != null) {
+      if (verifiedWarehouseName?.trim().isNotEmpty == true) {
+        throw StateError('Use one verified warehouse source only');
+      }
+      if (document.invoiceId == null || document.invoiceId != enrichment.invoiceId) {
+        throw StateError('Enrichment invoiceId does not match backend invoice');
+      }
+      if (enrichment.warehouseName?.trim().isNotEmpty == true &&
+          enrichment.facilityId?.trim().isNotEmpty != true) {
+        throw StateError('Warehouse name requires verified facilityId');
+      }
+      if (enrichment.paidTotal != null || enrichment.remainingTotal != null) {
+        if (verifiedPaidTotal != null || verifiedRemainingTotal != null) {
+          throw StateError('Conflicting payment totals');
+        }
+        if (enrichment.paymentEvidenceId?.trim().isNotEmpty != true) {
+          throw StateError('Payment totals require application evidence');
+        }
+      }
+      final itemIds = document.items.map((item) => item.itemSeqId).toSet();
+      for (final entry in enrichment.linesByItemSeqId.entries) {
+        if (!itemIds.contains(entry.key) || entry.key.trim().isEmpty) {
+          throw StateError('Unmatched invoice line in enrichment');
+        }
+        final extra = entry.value;
+        if ((extra.saleUnitName?.trim().isNotEmpty == true) !=
+            (extra.saleUomId?.trim().isNotEmpty == true)) {
+          throw StateError('Sale UOM requires both ID and name');
+        }
+        if (extra.expiryDate != null &&
+            extra.verifiedLotAssetId?.trim().isNotEmpty != true) {
+          throw StateError('Expiry requires verified allocated lot/asset');
+        }
+      }
+    }
+    final paid = enrichment?.paidTotal ?? verifiedPaidTotal;
+    final remaining = enrichment?.remainingTotal ?? verifiedRemainingTotal;
+    if ((paid == null) != (remaining == null)) {
       throw StateError('Paid and remaining totals must be supplied together');
     }
-    if (verifiedPaidTotal != null &&
-        verifiedPaidTotal + verifiedRemainingTotal! != document.grandTotal!) {
+    if (paid != null &&
+        paid + remaining! != document.grandTotal!) {
       throw StateError('Payment reconciliation does not match invoice total');
     }
     return InvoicePrintData(
@@ -61,18 +100,23 @@ class InvoicePrintData {
       title: _title(document),
       currencyId: verifiedCurrencyId,
       authoritativeTotal: document.grandTotal!,
-      warehouseName: verifiedWarehouseName?.trim().isNotEmpty == true
-          ? verifiedWarehouseName!.trim() : null,
-      paidTotal: verifiedPaidTotal,
-      remainingTotal: verifiedRemainingTotal,
-      lines: List.unmodifiable(document.items.map((item) => InvoicePrintLine(
-        description: item.description ?? item.product?.productName ?? '',
-        quantity: item.quantity,
-        price: item.price,
-        // Do not infer sale UOM from product.amountUom.
-        unitName: null,
-        expiryDate: null,
-      ))),
+      warehouseName: enrichment?.warehouseName?.trim().isNotEmpty == true
+          ? enrichment!.warehouseName!.trim()
+          : verifiedWarehouseName?.trim().isNotEmpty == true
+              ? verifiedWarehouseName!.trim() : null,
+      paidTotal: paid,
+      remainingTotal: remaining,
+      lines: List.unmodifiable(document.items.map((item) {
+        final extra = enrichment?.linesByItemSeqId[item.itemSeqId];
+        return InvoicePrintLine(
+          description: item.description ?? item.product?.productName ?? '',
+          quantity: item.quantity,
+          price: item.price,
+          // Only exact invoice-line verified sale UOM and allocated lot expiry.
+          unitName: extra?.saleUnitName,
+          expiryDate: extra?.expiryDate,
+        );
+      })),
     );
   }
 

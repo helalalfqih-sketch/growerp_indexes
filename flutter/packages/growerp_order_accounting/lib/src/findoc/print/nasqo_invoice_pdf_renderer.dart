@@ -7,6 +7,7 @@ import 'package:pdf/widgets.dart' as pw;
 
 import 'invoice_pdf_text_policy.dart';
 import 'invoice_print_data.dart';
+import 'invoice_print_enrichment.dart';
 
 /// Opt-in Arabic A4 invoice renderer. No accounting writes.
 class NasqoInvoicePdfRenderer {
@@ -36,11 +37,13 @@ class NasqoInvoicePdfRenderer {
     String? returnPolicy,
     String? verifiedCompanyEnglishName,
     String? verifiedAmountInWords,
+    InvoicePrintEnrichment? enrichment,
   }) async {
     final printData = InvoicePrintData.fromFinDoc(
       document: finDoc,
       verifiedCurrencyId: currencyId,
       verifiedWarehouseName: verifiedWarehouseName,
+      enrichment: enrichment,
     );
     final fontData = await rootBundle.load(
       'packages/growerp_order_accounting/assets/fonts/DejaVuSans.ttf');
@@ -205,6 +208,21 @@ class NasqoInvoicePdfRenderer {
                 textDirection: InvoicePdfTextPolicy.directionForMoney(),
                 style: pw.TextStyle(color: red, fontWeight: pw.FontWeight.bold)),
             ])),
+        if (printData.paidTotal != null && printData.remainingTotal != null) ...[
+          pw.SizedBox(height: 5),
+          pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('المدفوع'),
+              pw.Text(printData.paidTotal.toString() + ' ' + printData.currencyId,
+                textDirection: InvoicePdfTextPolicy.directionForMoney()),
+            ]),
+          pw.Row(mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+            children: [
+              pw.Text('المتبقي'),
+              pw.Text(printData.remainingTotal.toString() + ' ' + printData.currencyId,
+                textDirection: InvoicePdfTextPolicy.directionForMoney()),
+            ]),
+        ],
         if (verifiedAmountInWords?.trim().isNotEmpty == true) ...[
           pw.SizedBox(height: 6),
           pw.Text(verifiedAmountInWords!,
