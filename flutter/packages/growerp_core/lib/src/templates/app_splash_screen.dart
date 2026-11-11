@@ -154,6 +154,8 @@ class _AppSplashScreenState extends State<AppSplashScreen> {
   }
 
   Widget _buildLoadingState(BuildContext context) {
-    return const AppLoadingScreen(message: 'Loading Menu Configuration...');
+    return AppLoadingScreen(
+      message: CoreLocalizations.of(context)!.loadingMenuConfiguration,
+    );
   }
 }
