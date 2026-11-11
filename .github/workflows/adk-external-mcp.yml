@@ -1,0 +1,105 @@
+name: ADK external MCP transport
+
+on:
+  pull_request:
+    paths:
+      - 'moqui-adk/**'
+      - 'flutter/packages/growerp_adk/**'
+      - '.github/workflows/adk-external-mcp.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: adk-external-mcp-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend-compile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize backend submodules
+        run: |
+          git config --global url."https://github.com/".insteadOf "git@github.com:"
+          git submodule update --init --recursive
+          bash setup-backend.sh
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+
+      - name: Compile and test ADK against actual Google ADK and MCP SDK
+        working-directory: moqui
+        run: |
+          set -euo pipefail
+          sed -i 's/^networkTimeout=.*/networkTimeout=60000/' gradle/wrapper/gradle-wrapper.properties
+          ./gradlew --no-daemon --console=plain \
+            -Dorg.gradle.jvmargs=-Xmx3g \
+            -I ../ci/gradle-plugin-repos.init.gradle \
+            -I ../ci/groovy-compile-heap.init.gradle \
+            :runtime:component:moqui-adk:test
+
+      - name: Validate ADK service XML and JUnit report
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import xml.etree.ElementTree as ET
+
+          ET.parse('moqui-adk/service/AdkServices100.xml')
+          directory = Path('moqui-adk/build/test-results/test')
+          reports = list(directory.glob('TEST-*.xml'))
+          assert reports, f'No JUnit reports found in {directory}'
+          tests = failures = errors = skipped = 0
+          for report in reports:
+              root = ET.parse(report).getroot()
+              tests += int(root.get('tests', 0))
+              failures += int(root.get('failures', 0))
+              errors += int(root.get('errors', 0))
+              skipped += int(root.get('skipped', 0))
+          print(f'ADK JUnit: {tests} tests, {failures} failures, {errors} errors, {skipped} skipped')
+          assert tests >= 5, 'The external-MCP regression suite was not discovered'
+          assert failures == errors == skipped == 0, 'ADK tests are not all passing'
+          PY
+
+      - name: Upload ADK test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: adk-external-mcp-junit
+          path: moqui-adk/build/test-results/test/TEST-*.xml
+          if-no-files-found: ignore
+          retention-days: 14
+
+  flutter-validation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+
+      - uses: ./.github/actions/bootstrap
+
+      - name: Analyze external MCP dialog and tests
+        working-directory: flutter
+        run: |
+          dart format --output=none \
+            packages/growerp_adk/lib/src/adk_mcp_server_dialog.dart \
+            packages/growerp_adk/test/adk_mcp_server_url_test.dart
+          flutter analyze --no-pub \
+            packages/growerp_adk/lib/src/adk_mcp_server_dialog.dart \
+            packages/growerp_adk/test/adk_mcp_server_url_test.dart
+
+      - name: Test external MCP URL validation
+        working-directory: flutter/packages/growerp_adk
+        run: flutter test --no-pub test/adk_mcp_server_url_test.dart
