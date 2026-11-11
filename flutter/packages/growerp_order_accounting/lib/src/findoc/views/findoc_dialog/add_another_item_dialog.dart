@@ -41,7 +41,7 @@ Future addAnotherItemDialog(
         child: popUp(
           context: context,
           height: 520,
-          title: 'Add another Item',
+          title: OrderAccountingLocalizations.of(context)!.addOtherItem,
           child: SizedBox(
             child: Form(
               key: addOtherFormKey,
@@ -51,11 +51,15 @@ Future addAnotherItemDialog(
                   children: <Widget>[
                     DropdownButtonFormField<ItemType>(
                       key: const Key('itemType'),
-                      decoration: const InputDecoration(labelText: 'Item Type'),
+                      decoration: InputDecoration(
+                        labelText: OrderAccountingLocalizations.of(context)!.tableHdrItemType,
+                      ),
                       hint: Text(OrderAccountingLocalizations.of(context)!.itemtype),
                       initialValue: selectedItemType,
                       validator: (value) =>
-                          value == null ? 'field required' : null,
+                          value == null
+                              ? OrderAccountingLocalizations.of(context)!.fieldRequired
+                              : null,
                       items: state.itemTypes.map((item) {
                         return DropdownMenuItem<ItemType>(
                           value: item,
@@ -72,26 +76,28 @@ Future addAnotherItemDialog(
                     const SizedBox(height: 20),
                     TextFormField(
                       key: const Key('itemDescription'),
-                      decoration: const InputDecoration(
-                        labelText: 'Item Description',
+                      decoration: InputDecoration(
+                        labelText: OrderAccountingLocalizations.of(context)!.description,
                       ),
                       controller: itemDescriptionController,
                       validator: (value) {
-                        if (value!.isEmpty) return 'Item description?';
+                        if (value!.isEmpty) {
+                          return OrderAccountingLocalizations.of(context)!.fieldRequired;
+                        }
                         return null;
                       },
                     ),
                     const SizedBox(height: 20),
                     TextFormField(
                       key: const Key('price'),
-                      decoration: const InputDecoration(
-                        labelText: 'Price/Amount',
+                      decoration: InputDecoration(
+                        labelText: OrderAccountingLocalizations.of(context)!.priceAmount,
                       ),
                       controller: priceController,
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value!.isEmpty) {
-                          return 'Enter Price or Amount?';
+                          return OrderAccountingLocalizations.of(context)!.enterPriceAmount;
                         }
                         return null;
                       },
@@ -99,7 +105,9 @@ Future addAnotherItemDialog(
                     const SizedBox(height: 20),
                     TextFormField(
                       key: const Key('quantity'),
-                      decoration: const InputDecoration(labelText: 'Quantity'),
+                      decoration: InputDecoration(
+                        labelText: OrderAccountingLocalizations.of(context)!.tableHdrQuantity,
+                      ),
                       controller: quantityController,
                       keyboardType: TextInputType.number,
                     ),
