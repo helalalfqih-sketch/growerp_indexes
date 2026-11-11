@@ -184,7 +184,7 @@ void main() {
       act: (bloc) => bloc.add(AuthLoad()),
       expect: () => [
         authState(AuthStatus.loading),
-        authState(AuthStatus.failure, message: 'Connection error'),
+        authState(AuthStatus.failure, message: 'networkConnectionError'),
       ],
       verify: (_) async =>
           expect((await PersistFunctions.getAuthenticate())?.apiKey, 'key1'),
