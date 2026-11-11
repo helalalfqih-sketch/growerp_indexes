@@ -37,6 +37,13 @@ def collect(root: Path, machine_log: Path | None):
             except json.JSONDecodeError:
                 # Flutter may print non-JSON tool output; keep explicit evidence.
                 continue
+            # Flutter also emits daemon process metadata as a JSON array.
+            # This carries no test result and must never count as a pass.
+            if (isinstance(event, list) and event and
+                    all(isinstance(item, dict) and
+                        item.get("event") == "test.startedProcess" and
+                        isinstance(item.get("params"), dict) for item in event)):
+                continue
             if not isinstance(event, dict):
                 errors.append({"line": number,
                                "error": "Non-object JSON in machine log"})
