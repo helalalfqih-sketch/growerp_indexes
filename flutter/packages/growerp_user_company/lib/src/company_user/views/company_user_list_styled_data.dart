@@ -28,10 +28,8 @@ List<StyledColumn> getCompanyUserListColumns(BuildContext context) {
   if (isPhone) {
     return [
       StyledColumn(header: '', flex: 1), // Avatar
-      StyledColumn(header: localizations.id, flex: 1),
-      StyledColumn(header: localizations.tableHdrT, flex: 1), // Type
-      StyledColumn(header: localizations.tableHdrInfo, flex: 5),
-      StyledColumn(header: '', flex: 1), // Actions
+      StyledColumn(header: localizations.tableHdrInfo, flex: 6),
+      StyledColumn(header: '', flex: 1), // Open details
     ];
   }
 
@@ -54,47 +52,65 @@ List<Widget> getCompanyUserListRow({
   required int index,
   required Bloc bloc,
 }) {
-  bool isPhone = isAPhone(context);
+  final isPhone = isAPhone(context);
+  final localizations = UserCompanyLocalizations.of(context)!;
+  final name = (companyUser.name ?? '').trim();
+  final phone = (companyUser.telephoneNr ?? '').trim();
+  final contact = phone.isNotEmpty ? phone : (companyUser.email ?? '').trim();
+  final typeLabel = companyUser.type == PartyType.company
+      ? localizations.company
+      : localizations.person;
   List<Widget> cells = [];
 
   if (isPhone) {
-    // Avatar
+    // Focus on the name and contact rather than consuming mobile width with
+    // source IDs and O/P codes. Details still show the full identifier.
     cells.add(
-      CircleAvatar(
-        child: companyUser.image != null
-            ? Image.memory(companyUser.image!)
-            : Text(
-                companyUser.pseudoId == null
-                    ? ''
-                    : companyUser.pseudoId!.lastChar(3),
-              ),
+      Tooltip(
+        message: typeLabel,
+        child: CircleAvatar(
+          child: companyUser.image != null
+              ? Image.memory(companyUser.image!)
+              : Text(name.isEmpty ? '?' : name.substring(0, 1)),
+        ),
       ),
     );
 
-    // ID
-    cells.add(Text(companyUser.pseudoId ?? '', key: Key('id$index')));
-
-    // Type indicator
-    cells.add(
-      Text(
-        companyUser.type == PartyType.company
-            ? 'O'
-            : companyUser.type == PartyType.user
-            ? 'P'
-            : '?',
-        key: Key('type$index'),
-      ),
-    );
-
-    // Combined info cell
     cells.add(
       Column(
         key: Key('item$index'),
         crossAxisAlignment: CrossAxisAlignment.start,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(companyUser.name.truncate(20), key: Key('name$index')),
-          Text(companyUser.email.truncate(20), key: const Key("companyEmail")),
+          Text(
+            name,
+            key: Key('name$index'),
+            maxLines: 1,
+            overflow: TextOverflow.ellipsis,
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          Row(
+            children: [
+              Text(
+                typeLabel,
+                style: Theme.of(context).textTheme.bodySmall,
+              ),
+              if (contact.isNotEmpty) ...[
+                const SizedBox(width: 6),
+                Flexible(
+                  child: Text(
+                    contact,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    textDirection: TextDirection.ltr,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ),
+              ],
+            ],
+          ),
         ],
       ),
     );
@@ -103,7 +119,11 @@ List<Widget> getCompanyUserListRow({
     cells.add(
       SizedBox(
         key: Key('item$index'),
-        child: Text(companyUser.pseudoId ?? '', key: Key('id$index')),
+        child: Text(
+          companyUser.pseudoId ?? '',
+          key: Key('id$index'),
+          textDirection: TextDirection.ltr,
+        ),
       ),
     );
 
@@ -134,7 +154,13 @@ List<Widget> getCompanyUserListRow({
     cells.add(Text(companyUser.email ?? '', key: Key('email$index')));
 
     // Phone
-    cells.add(Text(companyUser.telephoneNr ?? '', key: Key('telephone$index')));
+    cells.add(
+      Text(
+        companyUser.telephoneNr ?? '',
+        key: Key('telephone$index'),
+        textDirection: TextDirection.ltr,
+      ),
+    );
 
     // Location
     cells.add(
@@ -145,16 +171,17 @@ List<Widget> getCompanyUserListRow({
     );
   }
 
-  // Delete action (both phone and desktop)
+  // The former list-level delete button dispatched CompanyUserDelete()
+  // without a user, which can crash. Open the detail dialog via row tap;
+  // destructive user actions are confirmed there instead.
   cells.add(
-    IconButton(
-      key: Key("delete$index"),
-      icon: const Icon(Icons.delete_forever),
-      padding: EdgeInsets.zero,
-      constraints: const BoxConstraints(),
-      onPressed: () {
-        bloc.add(const CompanyUserDelete());
-      },
+    Icon(
+      Directionality.of(context) == TextDirection.rtl
+          ? Icons.chevron_left
+          : Icons.chevron_right,
+      semanticLabel: companyUser.type == PartyType.company
+          ? localizations.companyDetail
+          : localizations.userDetail,
     ),
   );
 

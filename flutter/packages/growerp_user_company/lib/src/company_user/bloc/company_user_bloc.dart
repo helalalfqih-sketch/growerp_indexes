@@ -287,11 +287,24 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
       emit(state.copyWith(status: CompanyUserStatus.filesLoading));
       List<CompanyUser> companyUsers = [];
       final result = fast_csv.parse(event.file);
-      int line = 0;
-      // import csv into companyUsers
+      // NASQO exports one header row, not two. Never silently drop the
+      // first customer, or send a partial batch when a row is malformed.
+      var hasHeader = false;
+      var line = 0;
       for (final row in result) {
-        // columns as written by get#ExportCompanyUsers
-        if (line++ < 2 || row.length < 16) continue;
+        line++;
+        if (row.isEmpty || row.every((cell) => cell.trim().isEmpty)) continue;
+        if (row.length >= 3 &&
+            row[0].trim().toLowerCase() == 'id' &&
+            row[1].trim().toLowerCase() == 'type' &&
+            row[2].trim().toLowerCase() == 'name') {
+          if (hasHeader) throw FormatException('Duplicate CSV header', event.file, line);
+          hasHeader = true;
+          continue;
+        }
+        if (!hasHeader || row.length != 16 || row[2].trim().isEmpty) {
+          throw FormatException('Invalid customer CSV row $line');
+        }
         companyUsers.add(
           CompanyUser(
             pseudoId: row[0],
@@ -314,12 +327,23 @@ class CompanyUserBloc extends Bloc<CompanyUserEvent, CompanyUserState>
           ),
         );
       }
+      if (!hasHeader || companyUsers.isEmpty) {
+        throw const FormatException('CSV has no valid customer rows');
+      }
       await restClient.importCompanyUsers(companyUsers);
       return emit(
         state.copyWith(
           status: CompanyUserStatus.success,
           companiesUsers: state.companiesUsers,
           message: 'compUserUploadSuccess',
+        ),
+      );
+    } on FormatException {
+      emit(
+        state.copyWith(
+          status: CompanyUserStatus.failure,
+          companiesUsers: state.companiesUsers,
+          message: 'compUserUploadFailure',
         ),
       );
     } on DioException catch (e) {

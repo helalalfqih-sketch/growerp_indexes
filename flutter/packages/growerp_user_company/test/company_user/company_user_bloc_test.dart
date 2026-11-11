@@ -390,18 +390,21 @@ void main() {
   });
 
   group('CompanyUserUpload', () {
+    // Exact 16-column format exported by get#ExportCompanyUsers: one header.
+    const exportHeader =
+        'Id,type,name,role,email,URL,telephone number,address1,address2,'
+        'postalCode,city,province/state,country,countryId,companyId,companyName\n';
+
     blocTest<CompanyUserBloc, CompanyUserState>(
-      'CompanyUserUpload_csv_importsDataRows',
+      'CompanyUserUpload_oneHeader_importsFirstDataRow',
       setUp: () => when(
         () => restClient.importCompanyUsers(any()),
       ).thenAnswer((_) async => ''),
       build: build,
       act: (bloc) => bloc.add(
         const CompanyUserUpload(
-          'title\n'
-          'id,type,name,role,email,url,tel,a1,a2,zip,city,prov,country,cid,compId,comp\n'
-          'p1,company,Acme,customer,a@b.c,,,Main 1,,1000,Town,,Thailand,THA,,Acme\n'
-          'too,short\n',
+          '$exportHeader'
+          'p1,company,Acme,customer,a@b.c,,,Main 1,,1000,Town,,Thailand,THA,,Acme\n',
         ),
       ),
       expect: () => [
@@ -423,11 +426,34 @@ void main() {
       },
     );
 
-    // https://github.com/growerp/growerp/issues/36
-    // columns as written by get#ExportCompanyUsers
-    const exportHeader =
-        'Id,type,name,role,email,URL,telephone number,address1,address2,'
-        'postalCode,city,province/state,country,countryId,companyId,companyName\n';
+    blocTest<CompanyUserBloc, CompanyUserState>(
+      'CompanyUserUpload_twoArabicRows_preservesBothNamesAndOrder',
+      setUp: () => when(
+        () => restClient.importCompanyUsers(any()),
+      ).thenAnswer((_) async => ''),
+      build: build,
+      act: (bloc) => bloc.add(
+        const CompanyUserUpload(
+          '$exportHeader'
+          'NSQCUST100001000007,Company,ماكسوم,Customer,,,,,,,,,,,,\n'
+          'NSQCUST100001000052,Company,ابو همام الفقيه,Customer,,,,,,,,,,,,\n',
+        ),
+      ),
+      verify: (_) {
+        final imported =
+            verify(
+                  () => restClient.importCompanyUsers(captureAny()),
+                ).captured.single
+                as List<CompanyUser>;
+        expect(imported, hasLength(2));
+        expect(imported.map((row) => row.name).toList(), [
+          'ماكسوم',
+          'ابو همام الفقيه',
+        ]);
+        expect(imported.first.pseudoId, 'NSQCUST100001000007');
+        expect(imported.last.pseudoId, 'NSQCUST100001000052');
+      },
+    );
 
     blocTest<CompanyUserBloc, CompanyUserState>(
       'CompanyUserUpload_exportLayout_takesCompanyFromItsColumns',
@@ -437,7 +463,6 @@ void main() {
       build: build,
       act: (bloc) => bloc.add(
         const CompanyUserUpload(
-          'title\n'
           '$exportHeader'
           'p2,person,John Doe,customer,j@d.c,,,Main 1,,1000,Town,,Thailand,THA,C1,Acme\n',
         ),
@@ -455,14 +480,10 @@ void main() {
     );
 
     blocTest<CompanyUserBloc, CompanyUserState>(
-      'CompanyUserUpload_shortRow_isSkipped',
-      setUp: () => when(
-        () => restClient.importCompanyUsers(any()),
-      ).thenAnswer((_) async => ''),
+      'CompanyUserUpload_shortRow_rejectedBeforeNetworkCall',
       build: build,
       act: (bloc) => bloc.add(
         const CompanyUserUpload(
-          'title\n'
           '$exportHeader'
           'p3,person,Jane,customer,j@e.c,,,Main 2,,1000,Town,,Thailand\n',
         ),
@@ -470,12 +491,45 @@ void main() {
       expect: () => [
         companyUserState(CompanyUserStatus.filesLoading),
         companyUserState(
-          CompanyUserStatus.success,
-          message: 'compUserUploadSuccess',
+          CompanyUserStatus.failure,
+          message: 'compUserUploadFailure',
         ),
       ],
-      verify: (_) =>
-          verify(() => restClient.importCompanyUsers(const [])).called(1),
+      verify: (_) => verifyNever(() => restClient.importCompanyUsers(any())),
+    );
+
+    blocTest<CompanyUserBloc, CompanyUserState>(
+      'CompanyUserUpload_validAndShortRow_rejectsEntireBatch',
+      build: build,
+      act: (bloc) => bloc.add(
+        const CompanyUserUpload(
+          '$exportHeader'
+          'p1,company,Acme,customer,a@b.c,,,Main 1,,1000,Town,,Thailand,THA,,Acme\n'
+          'bad,short\n',
+        ),
+      ),
+      expect: () => [
+        companyUserState(CompanyUserStatus.filesLoading),
+        companyUserState(
+          CompanyUserStatus.failure,
+          message: 'compUserUploadFailure',
+        ),
+      ],
+      verify: (_) => verifyNever(() => restClient.importCompanyUsers(any())),
+    );
+
+    blocTest<CompanyUserBloc, CompanyUserState>(
+      'CompanyUserUpload_headerOnly_rejectedWithoutImport',
+      build: build,
+      act: (bloc) => bloc.add(const CompanyUserUpload(exportHeader)),
+      expect: () => [
+        companyUserState(CompanyUserStatus.filesLoading),
+        companyUserState(
+          CompanyUserStatus.failure,
+          message: 'compUserUploadFailure',
+        ),
+      ],
+      verify: (_) => verifyNever(() => restClient.importCompanyUsers(any())),
     );
   });
 
