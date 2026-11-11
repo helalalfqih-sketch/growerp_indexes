@@ -382,6 +382,7 @@ class MyFinDocState extends State<FinDocPage> {
                   ),
                   controller: _pseudoIdController,
                   keyboardType: TextInputType.number,
+                  textDirection: TextDirection.ltr,
                 ),
               ),
               const SizedBox(width: 10),
@@ -402,18 +403,17 @@ class MyFinDocState extends State<FinDocPage> {
                           ),
                           initialValue: TextEditingValue(
                             text: _selectedCompanyUser != null
-                                ? "${_selectedCompanyUser!.name}[${_selectedCompanyUser!.pseudoId}]"
+                                ? (_selectedCompanyUser!.name ?? '')
                                 : '',
                           ),
-                          displayStringForOption: (CompanyUser u) =>
-                              "${u.name}[${u.pseudoId}]",
+                          displayStringForOption: (CompanyUser u) => u.name ?? '',
                           optionsBuilder: (TextEditingValue textEditingValue) {
                             final query = textEditingValue.text
                                 .toLowerCase()
                                 .trim();
                             if (query.isEmpty) return companyUsers;
                             return companyUsers.where((cu) {
-                              final display = "${cu.name}[${cu.pseudoId}]"
+                              final display = "${cu.name ?? ''}[${cu.pseudoId ?? ''}]"
                                   .toLowerCase();
                               return display.contains(query);
                             }).toList();
@@ -448,7 +448,7 @@ class MyFinDocState extends State<FinDocPage> {
                               },
                           optionsViewBuilder: (context, onSelected, options) {
                             return Align(
-                              alignment: Alignment.topLeft,
+                              alignment: AlignmentDirectional.topStart,
                               child: Material(
                                 elevation: 4,
                                 borderRadius: BorderRadius.circular(12),
@@ -466,8 +466,18 @@ class MyFinDocState extends State<FinDocPage> {
                                       return ListTile(
                                         dense: true,
                                         title: Text(
-                                          "${cu.name}[${cu.pseudoId}]",
+                                          cu.name ?? '',
+                                          maxLines: 1,
+                                          overflow: TextOverflow.ellipsis,
                                         ),
+                                        subtitle: cu.pseudoId?.isNotEmpty == true
+                                            ? Text(
+                                                cu.pseudoId!,
+                                                textDirection: TextDirection.ltr,
+                                                maxLines: 1,
+                                                overflow: TextOverflow.ellipsis,
+                                              )
+                                            : null,
                                         onTap: () => onSelected(cu),
                                       );
                                     },
