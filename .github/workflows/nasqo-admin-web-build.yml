@@ -1,0 +1,47 @@
+name: NASQO admin web build (review artifact)
+
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/nasqo-admin-web-build.yml'
+      - 'flutter/packages/admin/**'
+      - 'flutter/packages/growerp_core/lib/**'
+      - 'flutter/packages/growerp_order_accounting/lib/**'
+      - 'flutter/packages/growerp_user_company/lib/**'
+      - 'flutter/packages/growerp_core/test/get_dio_error_test.dart'
+      - 'flutter/packages/growerp_core/test/blocs/auth_bloc_test.dart'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  admin-web:
+    if: github.event_name != 'pull_request' || github.event.pull_request.base.ref == 'release/nasqo-production-foundation'
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: '3.47.9'
+          channel: stable
+          cache: true
+      - uses: ./.github/actions/bootstrap
+      - name: Build the admin web entrypoint (no production deployment)
+        working-directory: flutter/packages/admin
+        run: flutter build web --release --no-pub --no-tree-shake-icons
+      - name: Assert compiled web file and size
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s flutter/packages/admin/build/web/main.dart.js
+          stat -c 'Compiled web JS: %s bytes' flutter/packages/admin/build/web/main.dart.js
+          sha256sum flutter/packages/admin/build/web/main.dart.js
+      - name: Upload review-only compiled main.dart.js
+        uses: actions/upload-artifact@v4
+        with:
+          name: nasqo-admin-web-review
+          path: flutter/packages/admin/build/web/main.dart.js
+          if-no-files-found: error
+          retention-days: 7
