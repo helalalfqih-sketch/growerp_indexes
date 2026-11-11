@@ -71,3 +71,17 @@
 - [ ] User's separate final production approval
 
 No changes to production were made by this audit.
+
+## CI scheduler failure and correction (2026-11-11)
+
+- First GitHub Actions push run: 43044532570, conclusion failure, **zero jobs**.
+- Root cause found in workflow job-level `env`: `${{ runner.temp }}` was used
+  twice. GitHub's context availability rules do not permit `runner` at
+  `jobs.<job_id>.env`, so workflow validation fails before scheduling jobs.
+- Correction: use isolated GitHub-hosted Ubuntu `/tmp/nasqo-*` directories
+  in job env, preserving existing `contents: read`, feature branch filter,
+  no secrets, and artifact uploads on failure. This is a CI-only change.
+- Verified corrected YAML with `actionlint v1.7.12` and YAML parser locally.
+- A passing actionlint check is not a substitute for an actual GitHub run.
+- Future editors: do not reintroduce `${{ runner.* }}` in job-level env;
+  runner context is valid only in supported step-level contexts.

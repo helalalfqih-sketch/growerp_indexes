@@ -23,9 +23,12 @@ jobs:
     if: github.ref == 'refs/heads/feature/nasqo-arabic-invoice-pdf'
     runs-on: ubuntu-24.04
     timeout-minutes: 45
+    # runner context is NOT available at jobs.<job_id>.env (GitHub rejects
+    # the workflow before scheduling any jobs). GitHub-hosted Ubuntu runners
+    # have an isolated /tmp per job; do not refer to a production filesystem.
     env:
-      PUB_CACHE: ${{ runner.temp }}/nasqo-pub-cache
-      NASQO_PDF_ARTIFACT_DIR: ${{ runner.temp }}/nasqo-pdf-artifacts
+      PUB_CACHE: /tmp/nasqo-pub-cache
+      NASQO_PDF_ARTIFACT_DIR: /tmp/nasqo-pdf-artifacts
     steps:
       - name: Checkout development branch only
         uses: actions/checkout@v4
