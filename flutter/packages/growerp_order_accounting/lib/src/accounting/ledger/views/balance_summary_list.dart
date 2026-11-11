@@ -106,30 +106,19 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                             icon: const Icon(Icons.arrow_back),
                             tooltip: _localizations.previousYear,
                             onPressed: () {
-                              // Extract the year from the period name
-                              String currentPeriodName =
+                              // Periods Y2025, Y2025q1 and Y2025m01 all
+                              // navigate relative to their actual fiscal year.
+                              final currentPeriodName =
                                   _selectedPeriod.periodName;
-                              String yearStr = '';
-                              int year = 0;
-
-                              if (currentPeriodName.startsWith('Y')) {
-                                // Format: Y2025
-                                yearStr = currentPeriodName.substring(1);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('q')) {
-                                // Format: Y2025q1
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('m')) {
-                                // Format: Y2025m01
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
+                              final year =
+                                  fiscalYearFromBalancePeriod(currentPeriodName);
+                              if (year == null) {
+                                HelperFunctions.showMessage(
+                                  context,
+                                  '${_localizations.noDataForPeriod}$currentPeriodName',
+                                  Colors.orange,
+                                );
+                                return;
                               }
 
                               // Go to previous year
@@ -192,30 +181,19 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
                             icon: const Icon(Icons.arrow_forward),
                             tooltip: _localizations.nextYear,
                             onPressed: () {
-                              // Extract the year from the period name
-                              String currentPeriodName =
+                              // Periods Y2025, Y2025q1 and Y2025m01 all
+                              // navigate relative to their actual fiscal year.
+                              final currentPeriodName =
                                   _selectedPeriod.periodName;
-                              String yearStr = '';
-                              int year = 0;
-
-                              if (currentPeriodName.startsWith('Y')) {
-                                // Format: Y2025
-                                yearStr = currentPeriodName.substring(1);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('q')) {
-                                // Format: Y2025q1
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
-                              } else if (currentPeriodName.contains('m')) {
-                                // Format: Y2025m01
-                                yearStr = currentPeriodName.substring(1, 5);
-                                year =
-                                    int.tryParse(yearStr) ??
-                                    DateTime.now().year;
+                              final year =
+                                  fiscalYearFromBalancePeriod(currentPeriodName);
+                              if (year == null) {
+                                HelperFunctions.showMessage(
+                                  context,
+                                  '${_localizations.noDataForPeriod}$currentPeriodName',
+                                  Colors.orange,
+                                );
+                                return;
                               }
 
                               // Go to next year (but don't exceed current year)
@@ -537,19 +515,9 @@ class BalanceSummaryListState extends State<BalanceSummaryList> {
     );
   }
 
-  // Helper method to extract year from period name
-  String _getYearFromPeriod(String periodName) {
-    if (periodName.startsWith('Y')) {
-      if (periodName.contains('q') || periodName.contains('m')) {
-        // Format: Y2025q1 or Y2025m01
-        return periodName.substring(1, 5);
-      } else {
-        // Format: Y2025
-        return periodName.substring(1);
-      }
-    }
-    return DateTime.now().year.toString();
-  }
+  // Show the selected fiscal year; never silently substitute today's year.
+  String _getYearFromPeriod(String periodName) =>
+      fiscalYearFromBalancePeriod(periodName)?.toString() ?? periodName;
 
   // Helper method to check if a year exists in the available time periods
   bool _checkYearExists(int year, List<TimePeriod> timePeriods) {
