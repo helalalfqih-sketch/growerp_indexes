@@ -222,7 +222,7 @@ class RevenueExpenseChartState extends State<RevenueExpenseForm> {
                           ),
                           IconButton(
                             icon: const Icon(Icons.arrow_forward),
-                            tooltip: 'Next Year',
+                            tooltip: OrderAccountingLocalizations.of(context)!.nextYear,
                             onPressed: () {
                               // Extract the year from the period name
                               String currentPeriodName =
