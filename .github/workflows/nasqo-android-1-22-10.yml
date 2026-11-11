@@ -66,7 +66,14 @@ jobs:
             "$build_tools/aapt2" dump badging "$apk" > "release-test-report/$abi-badging.txt"
             grep -q "name='com.indexesstore.nasqo'" "release-test-report/$abi-badging.txt"
             grep -q "versionName='1.22.10'" "release-test-report/$abi-badging.txt"
-            grep -q "versionCode='147'" "release-test-report/$abi-badging.txt"
+            # Flutter adds an ABI offset to the base build-number 147
+            # for --split-per-abi. Last published 1.22.9 uses 2146/4146.
+            case "$abi" in
+              arm64-v8a) abi_version_code=2147 ;;
+              x86_64) abi_version_code=4147 ;;
+              *) echo "Unexpected ABI: $abi"; exit 1 ;;
+            esac
+            grep -q "versionCode='$abi_version_code'" "release-test-report/$abi-badging.txt"
             grep -q "native-code: '$abi'" "release-test-report/$abi-badging.txt"
             ! grep -q application-debuggable "release-test-report/$abi-badging.txt"
             "$build_tools/zipalign" -c -P 16 4 "$apk"
