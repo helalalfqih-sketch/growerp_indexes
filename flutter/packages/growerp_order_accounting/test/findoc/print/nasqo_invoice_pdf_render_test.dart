@@ -1,5 +1,5 @@
-import 'dart:io';
 import 'dart:convert';
+import 'dart:io';
 
 import 'package:decimal/decimal.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -25,7 +25,7 @@ FinDoc sample({int count = 3}) => FinDoc(
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
 
-  test('INV-08: Arabic PDF bytes are generated with embedded font', () async {
+  test('INV-08: Arabic PDF bytes generated; font embedding audited separately', () async {
     final bytes = await NasqoInvoicePdfRenderer.render(
       format: PdfPageFormat.a4,
       company: Company(name: 'مؤسسة نسقو', telephoneNr: '+967771370740'),

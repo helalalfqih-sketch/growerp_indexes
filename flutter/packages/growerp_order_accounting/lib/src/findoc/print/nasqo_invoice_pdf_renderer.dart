@@ -1,10 +1,11 @@
 import 'dart:typed_data';
 
-import 'invoice_print_data.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:growerp_models/growerp_models.dart';
 import 'package:pdf/pdf.dart';
 import 'package:pdf/widgets.dart' as pw;
+
+import 'invoice_print_data.dart';
 
 /// Opt-in Arabic A4 invoice renderer. No accounting writes.
 class NasqoInvoicePdfRenderer {
@@ -119,6 +120,9 @@ class NasqoInvoicePdfRenderer {
       ]),
       build: (context) => [
         pw.TableHelper.fromTextArray(
+          context: context,
+          tableDirection: pw.TextDirection.rtl,
+          headerDirection: pw.TextDirection.rtl,
           headerCount: 1, // Repeat blue column headings after automatic page breaks.
           headers: const ['م', 'اسم الصنف', 'ت الانتهاء', 'الوحدة', 'العدد', 'السعر', 'الإجمالي'],
           data: rows,

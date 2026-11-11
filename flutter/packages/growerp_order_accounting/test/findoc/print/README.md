@@ -86,3 +86,16 @@ prerequisite is missing. On waha-shopify-test the runner currently exits 2
 because Flutter is absent and only ~2.3GB of disk is free. Run it on an isolated
 CI worker with >=10GB available instead; do not install the 1.58GB compressed
 Flutter archive on the production disk. This test runner does not deploy.
+
+## pdf 3.12.0 API review (2026-11-11)
+
+Checked exact pdf 3.12.0 package archive against flutter/pubspec.lock:
+- MultiPage accepts pageFormat, theme, textDirection and header/footer callbacks.
+- TableHelper.fromTextArray accepts context, tableDirection, headerDirection,
+  headerCount, columnWidths, cellPadding, headerStyle and headerDecoration.
+- TableHelper defaults to LTR when context is absent; fixed by passing
+  the build context and explicit RTL table/header directions.
+- Table header rows are marked repeat=true in the package implementation.
+- PdfColor.fromInt is a const constructor and Context.pagesCount exists.
+- This is an API/source audit only: Flutter analyzer and rendering tests still
+  require a separate runner; no runtime success is claimed.
