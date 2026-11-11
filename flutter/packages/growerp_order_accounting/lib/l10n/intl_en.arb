@@ -1366,6 +1366,14 @@
     "description": "Search field hint"
   },
   "searchHintAccountCodeName": "Search account code or name...",
+  "noSearchResults": "No results match the current search",
+  "@noSearchResults": { "description": "NASQO account and document list filter UI" },
+  "clearSearchFilter": "Clear search",
+  "@clearSearchFilter": { "description": "NASQO account and document list filter UI" },
+  "sortAccountCodeAscending": "Sort account codes ascending",
+  "@sortAccountCodeAscending": { "description": "NASQO account and document list filter UI" },
+  "sortAccountCodeDescending": "Sort account codes descending",
+  "@sortAccountCodeDescending": { "description": "NASQO account and document list filter UI" },
   "@searchHintAccountCodeName": {
     "description": "Search field hint"
   },
