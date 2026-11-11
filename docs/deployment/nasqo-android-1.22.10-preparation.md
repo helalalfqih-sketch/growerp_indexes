@@ -9,8 +9,10 @@
 - Permanent Android package ID: `com.indexesstore.nasqo`.
 - Native launch activity: `org.growerp.admin.MainActivity`.
 - Android versionName: `1.22.10`, versionCode `147`.
-  This is higher than published 1.22.9 (146) and supports in-place upgrades
-  when signed with the same permanent release key.
+  When building with `--split-per-abi`, Flutter encodes ABI offsets:
+  ARM64 APK versionCode is **2147** (previous 2146) and x86_64 is
+  **4147** (previous 4146). This is higher than published 1.22.9 and
+  supports in-place upgrades when signed with the same permanent key.
 - Production API: `https://erp.indexesstore.com`;
   WebSocket: `wss://erp.indexesstore.com`.
 - Arabic app label / NASQO scheme are restored from the previously reviewed
