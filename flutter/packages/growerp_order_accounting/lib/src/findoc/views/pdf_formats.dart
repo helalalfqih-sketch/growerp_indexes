@@ -11,6 +11,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+import '../print/nasqo_invoice_pdf_renderer.dart';
 import 'dart:typed_data';
 import 'package:decimal/decimal.dart';
 import 'package:growerp_core/growerp_core.dart';
@@ -28,6 +29,18 @@ class PdfFormats {
     FinDoc finDoc, {
     String currencyId = 'USD',
   }) async {
+    // Disabled by default; activate only in an isolated, tested build.
+    if (const bool.fromEnvironment('NASQO_AR_INVOICE_PDF', defaultValue: false) &&
+        finDoc.docType == FinDocType.invoice) {
+      final verifiedCurrency = company.currency?.currencyId;
+      if (verifiedCurrency == null || verifiedCurrency.isEmpty) {
+        throw StateError('Cannot print Arabic invoice without verified currency');
+      }
+      return NasqoInvoicePdfRenderer.render(
+        format: format, company: company, finDoc: finDoc,
+        currencyId: verifiedCurrency,
+      );
+    }
     final pdf = pw.Document();
 
     pdf.addPage(
