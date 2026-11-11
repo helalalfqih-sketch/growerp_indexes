@@ -37,6 +37,10 @@ def collect(root: Path, machine_log: Path | None):
             except json.JSONDecodeError:
                 # Flutter may print non-JSON tool output; keep explicit evidence.
                 continue
+            if not isinstance(event, dict):
+                errors.append({"line": number,
+                               "error": "Non-object JSON in machine log"})
+                continue
             kind = event.get("type")
             if kind == "testStart":
                 counts["started"] += 1
