@@ -1,4 +1,5 @@
 import 'invoice_print_enrichment.dart';
+import 'invoice_print_identity.dart';
 import 'package:decimal/decimal.dart';
 import 'package:growerp_models/growerp_models.dart';
 
@@ -33,6 +34,7 @@ class InvoicePrintData {
     Decimal? verifiedPaidTotal,
     Decimal? verifiedRemainingTotal,
     InvoicePrintEnrichment? enrichment,
+    InvoicePrintIdentity? verifiedIdentity,
   }) {
     if (document.docType != FinDocType.invoice) {
       throw ArgumentError('Document must be an invoice');
@@ -49,6 +51,12 @@ class InvoicePrintData {
     }
     if (verifiedCurrencyId.trim().isEmpty) {
       throw StateError('Verified currency is missing');
+    }
+    if (verifiedIdentity != null) {
+      verifiedIdentity.validate(document);
+      if (verifiedCurrencyId != verifiedIdentity.currencyId) {
+        throw StateError('Currency conflicts with verified invoice identity');
+      }
     }
     if (enrichment != null) {
       if (verifiedWarehouseName?.trim().isNotEmpty == true) {
@@ -97,7 +105,7 @@ class InvoicePrintData {
     return InvoicePrintData(
       invoiceNumber: id,
       createdAt: document.creationDate!,
-      title: _title(document),
+      title: verifiedIdentity?.title ?? _title(document),
       currencyId: verifiedCurrencyId,
       authoritativeTotal: document.grandTotal!,
       warehouseName: enrichment?.warehouseName?.trim().isNotEmpty == true

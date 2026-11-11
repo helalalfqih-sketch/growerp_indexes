@@ -11,8 +11,10 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-import '../print/nasqo_invoice_pdf_renderer.dart';
 import 'dart:typed_data';
+
+import '../print/invoice_print_identity.dart';
+import '../print/nasqo_invoice_pdf_renderer.dart';
 import 'package:decimal/decimal.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:pdf/pdf.dart';
@@ -28,17 +30,21 @@ class PdfFormats {
     Company company,
     FinDoc finDoc, {
     String currencyId = 'USD',
+    InvoicePrintIdentity? verifiedInvoiceIdentity,
   }) async {
     // Disabled by default; activate only in an isolated, tested build.
     if (const bool.fromEnvironment('NASQO_AR_INVOICE_PDF', defaultValue: false) &&
         finDoc.docType == FinDocType.invoice) {
-      final verifiedCurrency = company.currency?.currencyId;
-      if (verifiedCurrency == null || verifiedCurrency.isEmpty) {
-        throw StateError('Cannot print Arabic invoice without verified currency');
+      // Fail closed: company.currency, originalCurrency and docSubType do NOT
+      // prove invoice transaction currency or cash/credit/return classification.
+      if (verifiedInvoiceIdentity == null) {
+        throw StateError('Arabic PDF requires verified invoice currency and kind');
       }
+      verifiedInvoiceIdentity.validate(finDoc);
       return NasqoInvoicePdfRenderer.render(
         format: format, company: company, finDoc: finDoc,
-        currencyId: verifiedCurrency,
+        currencyId: verifiedInvoiceIdentity.currencyId,
+        verifiedIdentity: verifiedInvoiceIdentity,
       );
     }
     final pdf = pw.Document();

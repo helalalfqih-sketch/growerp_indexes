@@ -73,3 +73,26 @@ not a new REST endpoint or any database migration.
    multi-lot invoice lines, FX, partial payments, void/refund and duplication.
 4. Run Flutter analyzer/tests in isolated CI. This host has no Flutter SDK.
 5. Keep Arabic PDF feature flag disabled until end-to-end evidence is verified.
+
+## P0 invoice currency and classification contract (2026-11-11)
+
+Read-only source inspection: FinDocServices100.get#FinDoc invoice mapping around
+lines 865-915 returns grandTotal and sales but does not populate docSubType,
+originalCurrency, or invoice currency in the invoice response. Therefore:
+
+- **Never** treat Company.currency, Product.currency, FinDoc.originalCurrency,
+  a default USD argument, or invoice docSubType as verified invoice identity.
+- The Arabic renderer now requires InvoicePrintIdentity, bound to backend
+  invoiceId, verified ISO currency, source evidence IDs, and an explicit
+  six-way classification. It rejects absent or conflicting evidence.
+- Current get#FinDoc cannot construct that trusted identity. The Arabic
+  feature remains disabled by default; forcing it on without verified identity
+  intentionally throws rather than printing a misleading financial document.
+- The future backend read-only identity service must establish invoice currency
+  in the same monetary basis as grandTotal (or explicitly reconcile FX) and
+  classify cash/credit/return using authoritative transaction/payment/return
+  records, not a UI label. Evidence identifiers alone are not proof: server
+  authorization and reconciliation must precede DTO construction.
+- Legacy printing path is unchanged. Tests in invoice_print_identity_test.dart
+  cover mismatched currency, provenance, invoice ID, sales direction and types.
+- No backend changes or database writes were made.

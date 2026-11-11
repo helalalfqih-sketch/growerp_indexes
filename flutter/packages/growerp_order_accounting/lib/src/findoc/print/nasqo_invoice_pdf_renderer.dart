@@ -8,6 +8,7 @@ import 'package:pdf/widgets.dart' as pw;
 import 'invoice_pdf_text_policy.dart';
 import 'invoice_print_data.dart';
 import 'invoice_print_enrichment.dart';
+import 'invoice_print_identity.dart';
 
 /// Opt-in Arabic A4 invoice renderer. No accounting writes.
 class NasqoInvoicePdfRenderer {
@@ -38,12 +39,14 @@ class NasqoInvoicePdfRenderer {
     String? verifiedCompanyEnglishName,
     String? verifiedAmountInWords,
     InvoicePrintEnrichment? enrichment,
+    required InvoicePrintIdentity verifiedIdentity,
   }) async {
     final printData = InvoicePrintData.fromFinDoc(
       document: finDoc,
       verifiedCurrencyId: currencyId,
       verifiedWarehouseName: verifiedWarehouseName,
       enrichment: enrichment,
+      verifiedIdentity: verifiedIdentity,
     );
     final fontData = await rootBundle.load(
       'packages/growerp_order_accounting/assets/fonts/DejaVuSans.ttf');
