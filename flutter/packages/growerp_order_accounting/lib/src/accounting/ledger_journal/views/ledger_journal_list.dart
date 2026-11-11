@@ -68,6 +68,18 @@ class LedgerJournalsState extends State<LedgerJournalList> {
       return StyledDataTable(
         columns: getLedgerJournalListColumns(context),
         rows: rows,
+        emptyMessage:
+            searchString.trim().isNotEmpty ? localizations.noSearchResults : null,
+        onClearFilter: searchString.trim().isNotEmpty
+            ? () {
+                _searchController.clear();
+                searchString = '';
+                _ledgerJournalBloc.add(
+                  const LedgerJournalSearchChanged(searchString: ''),
+                );
+              }
+            : null,
+        clearFilterLabel: localizations.clearSearchFilter,
         isLoading: _isLoading && ledgerJournals.isEmpty,
         scrollController: _scrollController,
         rowHeight: isPhone ? 56 : 56,
