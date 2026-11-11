@@ -2099,15 +2099,31 @@ limitations under the License.
 
     <service verb="get" noun="ExportProducts">
         <description>
-            Get Products information into a CSV file attachement
+            Get Products information into a CSV file attachment.
         </description>
+        <in-parameters>
+            <parameter name="applicationId" required="true" />
+        </in-parameters>
         <out-parameters>
             <parameter name="fileText" />
         </out-parameters>
         <actions>
-            <script>ec.logger.warn("getting products")</script>
-            <service-call name="growerp.100.CatalogServices100.get#Product"
+            <!-- Never use get#Product's anonymous/first-tenant fallback for export. -->
+            <if condition="!ec.user?.userAccount?.partyId">
+                <return error="true" message="Sign in to export products." />
+            </if>
+            <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
                 out-map="context" />
+            <if condition="!ownerPartyId || !companyPartyId">
+                <return error="true" message="No authorized company for product export." />
+            </if>
+            <service-call name="growerp.100.CatalogServices100.get#Product"
+                in-map="[applicationId: applicationId, limit: 9999]"
+                out-map="context" />
+            <!-- Fail closed instead of silently exporting only the first page. -->
+            <if condition="products?.size() >= 9999">
+                <return error="true" message="Product export exceeds the supported limit; narrow the export." />
+            </if>
             <set field="fileText" value="" />
             <script><![CDATA[
                 import org.apache.commons.csv.CSVPrinter
@@ -2251,13 +2267,26 @@ limitations under the License.
         </in-parameters>
         <actions>
             <set field="applicationId" from="applicationId ?: classificationId" />
-            <set field="emailAddress" from="ec.user.userAccount.emailAddress" />
+            <set field="emailAddress" from="ec.user?.userAccount?.emailAddress" />
+            <if condition="entityName == 'Product' &amp;&amp; !ec.user?.userAccount?.partyId">
+                <return error="true" message="Sign in to export products." />
+            </if>
+            <if condition="entityName == 'Product' &amp;&amp; !emailAddress">
+                <return error="true" message="No email address is configured for this account." />
+            </if>
             <set field="bodyParameters" from="[applicationId: applicationId]" />
+            <if condition="entityName == 'Product'">
+                <service-call name="growerp.100.GeneralServices100.get#RelatedCompanyAndOwner"
+                    out-map="context" />
+                <if condition="!ownerPartyId || !companyPartyId">
+                    <return error="true" message="No authorized company for product export." />
+                </if>
+            </if>
             <if condition="entityName == 'Category'">
                 <set field="emailTemplateId" value="GrowerpExportCategories" />
                 <set field="exportLabel" value="Categories" />
                 <else-if condition="entityName == 'Product'">
-                    <set field="emailTemplateId" value="GrowerpExportProducts" />
+                    <set field="emailTemplateId" value="NASQOExportProducts" />
                     <set field="exportLabel" value="Products" />
                 </else-if>
                 <else-if condition="entityName == 'GlAccount'">
@@ -2279,8 +2308,11 @@ limitations under the License.
                 in-map="[emailTemplateId: emailTemplateId, toAddresses: emailAddress,
                     bodyParameters: bodyParameters,
                     sendDescription: exportLabel + ' CSV file']" />
+            <if condition="entityName == 'Product' &amp;&amp; !emailSent">
+                <return error="true" message="The email request could not be queued; verify mail settings." />
+            </if>
             <if condition="emailSent">
-                <message public="true" type="success">A ${exportLabel} CSV file was sent by email to ${emailAddress}.</message>
+                <message public="true" type="success">A ${exportLabel} CSV email request was accepted for ${emailAddress}.</message>
             </if>
         </actions>
     </service>

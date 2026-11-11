@@ -14,7 +14,7 @@
 
 part of 'product_bloc.dart';
 
-enum ProductStatus { initial, loading, success, failure }
+enum ProductStatus { initial, loading, success, failure, downloaded }
 
 class ProductState extends Equatable {
   const ProductState({
@@ -22,12 +22,14 @@ class ProductState extends Equatable {
     this.products = const <Product>[],
     this.uoms = const <Uom>[],
     this.message,
+    this.csvFile,
     this.hasReachedMax = false,
     this.searchString = '',
   });
 
   final ProductStatus status;
   final String? message;
+  final String? csvFile;
   final List<Product> products;
   final List<Uom> uoms;
   final bool hasReachedMax;
@@ -36,6 +38,7 @@ class ProductState extends Equatable {
   ProductState copyWith({
     ProductStatus? status,
     String? message,
+    String? csvFile,
     List<Product>? products,
     List<Uom>? uoms,
     bool error = false,
@@ -47,13 +50,14 @@ class ProductState extends Equatable {
       products: products ?? this.products,
       uoms: uoms ?? this.uoms,
       message: message,
+      csvFile: csvFile,
       hasReachedMax: hasReachedMax ?? this.hasReachedMax,
       searchString: searchString ?? this.searchString,
     );
   }
 
   @override
-  List<Object?> get props => [status, message, products, hasReachedMax, uoms];
+  List<Object?> get props => [status, message, csvFile, products, hasReachedMax, uoms];
 
   @override
   String toString() =>

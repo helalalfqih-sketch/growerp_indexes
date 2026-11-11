@@ -57,6 +57,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     on<ProductDelete>(_onProductDelete);
     on<ProductUpload>(_onProductUpload);
     on<ProductDownload>(_onProductDownload);
+    on<ProductDownloadToDevice>(_onProductDownloadToDevice);
     on<ProductUom>(_onProductUom);
     on<ProductSearchChanged>(
       _onProductSearchChanged,
@@ -269,6 +270,34 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
     }
   }
 
+  Future<void> _onProductDownloadToDevice(
+    ProductDownloadToDevice event,
+    Emitter<ProductState> emit,
+  ) async {
+    try {
+      emit(state.copyWith(status: ProductStatus.loading));
+      final response = await restClient.exportScreenProductsCsv(
+        applicationId: applicationId,
+      );
+      final csv = response is String
+          ? response
+          : response is Map && response['fileText'] is String
+              ? response['fileText'] as String
+              : null;
+      if (csv == null || csv.trim().isEmpty) {
+        throw StateError('Product export returned an empty CSV');
+      }
+      emit(state.copyWith(status: ProductStatus.downloaded, csvFile: csv));
+    } on DioException catch (e) {
+      emit(state.copyWith(
+        status: ProductStatus.failure,
+        message: await getDioError(e),
+      ));
+    } catch (e) {
+      emit(state.copyWith(status: ProductStatus.failure, message: '$e'));
+    }
+  }
+
   Future<void> _onProductDownload(
     ProductDownload event,
     Emitter<ProductState> emit,
@@ -281,7 +310,7 @@ class ProductBloc extends Bloc<ProductEvent, ProductState> {
           status: ProductStatus.success,
           products: state.products,
           message:
-              "The request is scheduled and the email will be sent shortly",
+              "The email export request was queued; delivery is not yet confirmed.",
         ),
       );
     } on DioException catch (e) {

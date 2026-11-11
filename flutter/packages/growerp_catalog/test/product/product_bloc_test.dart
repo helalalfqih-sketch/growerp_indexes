@@ -346,6 +346,52 @@ void main() {
     );
   });
 
+  group('ProductDownloadToDevice', () {
+    blocTest<ProductBloc, ProductState>(
+      'CSV download returns file content without requesting email',
+      setUp: () => when(
+        () => restClient.exportScreenProductsCsv(applicationId: applicationId),
+      ).thenAnswer((_) async => {'fileText': 'name,price\nSample,12'}),
+      build: () => ProductBloc(restClient, applicationId),
+      act: (bloc) => bloc.add(ProductDownloadToDevice()),
+      expect: () => [
+        productState(ProductStatus.loading),
+        isA<ProductState>()
+            .having((s) => s.status, 'status', ProductStatus.downloaded)
+            .having((s) => s.csvFile, 'csvFile', 'name,price\nSample,12'),
+      ],
+      verify: (_) {
+        verifyNever(() => restClient.exportScreenProducts(applicationId: applicationId));
+      },
+    );
+
+    blocTest<ProductBloc, ProductState>(
+      'empty CSV fails closed',
+      setUp: () => when(
+        () => restClient.exportScreenProductsCsv(applicationId: applicationId),
+      ).thenAnswer((_) async => ''),
+      build: () => ProductBloc(restClient, applicationId),
+      act: (bloc) => bloc.add(ProductDownloadToDevice()),
+      expect: () => [
+        productState(ProductStatus.loading),
+        productState(ProductStatus.failure),
+      ],
+    );
+
+    blocTest<ProductBloc, ProductState>(
+      'API failure does not offer a CSV file',
+      setUp: () => when(
+        () => restClient.exportScreenProductsCsv(applicationId: applicationId),
+      ).thenThrow(dioError('Export unavailable')),
+      build: () => ProductBloc(restClient, applicationId),
+      act: (bloc) => bloc.add(ProductDownloadToDevice()),
+      expect: () => [
+        productState(ProductStatus.loading),
+        productState(ProductStatus.failure, message: 'Export unavailable'),
+      ],
+    );
+  });
+
   group('ProductUom', () {
     blocTest<ProductBloc, ProductState>(
       'ProductUom_restThrowsDio_emitsFailure',

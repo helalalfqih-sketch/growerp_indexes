@@ -1608,6 +1608,14 @@ limitations under the License.
             <method type="post">
                 <service name="growerp.100.ImportExportServices100.import#Entities" />
             </method>
+            <!-- Authenticated, tenant-scoped product CSV for direct device save. -->
+            <resource name="products">
+                <resource name="csv" require-authentication="true">
+                    <method type="get">
+                        <service name="growerp.100.ImportExportServices100.get#ExportProducts" />
+                    </method>
+                </resource>
+            </resource>
             <!-- export by email-->
             <method type="get">
                 <service name="growerp.100.ImportExportServices100.export#Entities" />

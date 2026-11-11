@@ -61,6 +61,9 @@ class ProductRentalOccupancy extends ProductEvent {
 /// initiate a download of products by email.
 class ProductDownload extends ProductEvent {}
 
+/// Download the current application's product CSV to this device.
+class ProductDownloadToDevice extends ProductEvent {}
+
 /// start a [Product] import
 class ProductUpload extends ProductEvent {
   const ProductUpload(this.file);

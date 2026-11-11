@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:flutter/foundation.dart' as foundation;
 /*
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -34,6 +36,23 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
     super.initState();
   }
 
+  Future<void> _saveCsv(String csv) async {
+    try {
+      final path = await FilePicker.saveFile(
+        dialogTitle: 'Products CSV',
+        fileName: 'Products.csv',
+        type: FileType.custom,
+        allowedExtensions: ['csv'],
+        bytes: foundation.Uint8List.fromList(utf8.encode(csv)),
+      );
+      if (!mounted || path == null) return;
+      HelperFunctions.showMessage(context, 'CSV saved', Colors.green);
+    } catch (e) {
+      if (!mounted) return;
+      HelperFunctions.showMessage(context, 'Could not save CSV: $e', Colors.red);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     var catalogLocalizations = CatalogLocalizations.of(context)!;
@@ -45,6 +64,9 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
             catalogLocalizations.error(state.message ?? ''),
             Colors.red,
           );
+        }
+        if (state.status == ProductStatus.downloaded && state.csvFile != null) {
+          await _saveCsv(state.csvFile!);
         }
         if (state.status == ProductStatus.success) {
           HelperFunctions.showMessage(
@@ -79,6 +101,18 @@ class _FilesHeaderState extends State<ProductFilesDialog> {
                       productBloc.add(ProductUpload(fileString));
                     }
                   },
+                ),
+                const SizedBox(height: 20),
+                OutlinedButton(
+                  key: const Key('downloadToDevice'),
+                  onPressed: state.status == ProductStatus.loading
+                      ? null
+                      : () => productBloc.add(ProductDownloadToDevice()),
+                  child: Text(
+                    Localizations.localeOf(context).languageCode == 'ar'
+                        ? 'تنزيل CSV إلى الهاتف'
+                        : 'Download CSV to device',
+                  ),
                 ),
                 const SizedBox(height: 20),
                 OutlinedButton(

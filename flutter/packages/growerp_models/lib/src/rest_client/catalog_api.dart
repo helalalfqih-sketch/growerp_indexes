@@ -115,6 +115,12 @@ mixin CatalogApi {
     @Query('applicationId') required String applicationId,
   });
 
+  /// Authenticated product CSV for local download; does not send email.
+  @GET("rest/s1/growerp/100/ImportExport/products/csv")
+  Future<dynamic> exportScreenProductsCsv({
+    @Query('applicationId') required String applicationId,
+  });
+
   // dayly rental
   @GET("rest/s1/growerp/100/DailyRentalOccupancy")
   Future<ProductRentalDates> getDailyRentalOccupancy({
