@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:growerp_core/growerp_core.dart';
 import 'package:file_picker/file_picker.dart';
@@ -6,6 +8,12 @@ import 'package:flutter/material.dart';
 import '../../../l10n/generated/user_company_localizations.dart';
 import '../../common/translate_bloc_messages.dart';
 import '../company_user.dart';
+
+/// Decode the UTF-8 CSV exported by NASQO and Excel, including an optional BOM.
+String decodeCompanyUserCsv(List<int> bytes) {
+  final csv = utf8.decode(bytes);
+  return csv.startsWith('\uFEFF') ? csv.substring(1) : csv;
+}
 
 class CompanyUserFilesDialog extends StatefulWidget {
   const CompanyUserFilesDialog({super.key});
@@ -28,7 +36,13 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
     return BlocConsumer<CompanyUserBloc, CompanyUserState>(
       listener: (context, state) async {
         if (state.status == CompanyUserStatus.failure) {
-          HelperFunctions.showMessage(context, '${state.message}', Colors.red);
+          HelperFunctions.showMessage(
+            context,
+            state.message == null
+                ? localizations.compUserUploadFailure
+                : translateCompanyUserBlocMessage(localizations, state.message!),
+            Colors.red,
+          );
         }
         if (state.status == CompanyUserStatus.success) {
           final translatedMessage = state.message != null
@@ -64,13 +78,24 @@ class _CompanyUserFilesDialogState extends State<CompanyUserFilesDialog> {
                     );
                     if (picked != null) {
                       final bytes = await picked.readAsBytes();
-                      final fileString = String.fromCharCodes(bytes);
-                      companyUserBloc.add(CompanyUserUpload(fileString));
-                      Future.delayed(const Duration(milliseconds: 1000), () {
-                        companyUserBloc.add(
-                          const CompanyUserFetch(refresh: true),
+                      try {
+                        final fileString = decodeCompanyUserCsv(bytes);
+                        if (!mounted) return;
+                        companyUserBloc.add(CompanyUserUpload(fileString));
+                        Future.delayed(const Duration(milliseconds: 1000), () {
+                          if (!mounted) return;
+                          companyUserBloc.add(
+                            const CompanyUserFetch(refresh: true),
+                          );
+                        });
+                      } on FormatException {
+                        if (!mounted) return;
+                        HelperFunctions.showMessage(
+                          context,
+                          localizations.csvUtf8Error,
+                          Colors.red,
                         );
-                      });
+                      }
                     }
                   },
                 ),
