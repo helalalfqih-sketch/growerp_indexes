@@ -1,5 +1,5 @@
 {
-  "appName": "",
+  "appName": "نسقو ERP",
   "packageName": "",
   "version": "",
   "build": "",
@@ -8,8 +8,8 @@
   "_________________comment__backend": "moqui / ofbiz",
   "backend": "moqui",
   "_________________comment__release to be used with docker locally ": "https://rest.example.com",
-  "databaseUrl": "https://backend.growerp.com",
-  "chatUrl": "wss://backend.growerp.com",
+  "databaseUrl": "https://erp.indexesstore.com",
+  "chatUrl": "wss://erp.indexesstore.com",
   "__________________leave empty for local system, use https://test.growerp.org for our test system": "",
   "databaseUrlDebug": "",
   "__________________leave empty for local system, use wss://chat.growerp.org for our test chat server": "",

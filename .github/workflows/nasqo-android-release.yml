@@ -1,0 +1,132 @@
+name: NASQO Android 1.22.10 review build (no publishing)
+on:
+  workflow_dispatch:
+  pull_request:
+    branches: [release/nasqo-production-foundation]
+    paths:
+      - 'flutter/**'
+      - '!flutter/packages/admin/web/**'
+      - 'tools/test_nasqo_android_release.sh'
+      - 'flutter/packages/admin/android/app/build.gradle.kts'
+      - 'flutter/packages/admin/android/app/src/main/AndroidManifest.xml'
+      - 'flutter/packages/admin/assets/cfg/app_settings.json'
+      - '.github/workflows/nasqo-android-release.yml'
+permissions:
+  contents: read
+jobs:
+  android-release:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      NASQO_BUILD_UNSIGNED: 'true'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: subosito/flutter-action@v2
+        with:
+          channel: stable
+          flutter-version: '3.47.9'
+          cache: true
+      - uses: ./.github/actions/bootstrap
+      - name: Generate NASQO launcher
+        working-directory: flutter/packages/admin
+        run: dart run flutter_launcher_icons
+      - name: Verify NASQO Android identity and backend before compiling
+        shell: bash
+        run: |
+          set -euo pipefail
+          grep -q 'applicationId = "com.indexesstore.nasqo"' flutter/packages/admin/android/app/build.gradle.kts
+          grep -q 'android:label="نسقو ERP"' flutter/packages/admin/android/app/src/main/AndroidManifest.xml
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          cfg=json.loads(Path('flutter/packages/admin/assets/cfg/app_settings.json').read_text())
+          assert cfg['databaseUrl']=='https://erp.indexesstore.com'
+          assert cfg['chatUrl']=='wss://erp.indexesstore.com'
+          assert cfg['applicationId']=='AppAdmin'
+          print('NASQO Android configuration verified')
+          PY
+      - name: Run focused customer and ledger UI tests
+        run: |
+          (cd flutter/packages/growerp_user_company && flutter test test/company_user/company_user_bloc_test.dart test/company_user/company_user_csv_encoding_test.dart)
+          (cd flutter/packages/growerp_core && flutter test test/styled_data_table_rtl_test.dart)
+          (cd flutter/packages/growerp_order_accounting && flutter test test/accounting/balance_summary_filter_test.dart)
+      - name: Build release APKs by architecture
+        working-directory: flutter/packages/admin
+        run: |
+          flutter build apk --release --no-pub --split-per-abi --target-platform android-arm64,android-x64 --build-name=1.22.10 --build-number=147 --dart-define=BACKEND_URL=https://erp.indexesstore.com
+      - name: Check release identity and package contents
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p dist release-test-report
+          build_tools="$(find "$ANDROID_HOME/build-tools" -mindepth 1 -maxdepth 1 -type d | sort -V | tail -1)"
+          echo "BUILD_TOOLS=$build_tools" >> "$GITHUB_ENV"
+          for abi in arm64-v8a x86_64; do
+            apk="flutter/packages/admin/build/app/outputs/flutter-apk/app-$abi-release.apk"
+            test -s "$apk"
+            unzip -tq "$apk"
+            "$build_tools/aapt2" dump badging "$apk" > "release-test-report/$abi-badging.txt"
+            grep -q "name='com.indexesstore.nasqo'" "release-test-report/$abi-badging.txt"
+            grep -q "versionName='1.22.10'" "release-test-report/$abi-badging.txt"
+            grep -q "native-code: '$abi'" "release-test-report/$abi-badging.txt"
+            ! grep -q application-debuggable "release-test-report/$abi-badging.txt"
+            "$build_tools/zipalign" -c -P 16 4 "$apk"
+            cp "$apk" "dist/NASQO_ERP_Android_1.22.10_$abi-unsigned.apk"
+          done
+          python3 - <<'PY'
+          import json,zipfile
+          from pathlib import Path
+          for apk in Path('dist').glob('*.apk'):
+              with zipfile.ZipFile(apk) as z:
+                  cfg=json.loads(z.read('assets/flutter_assets/assets/cfg/app_settings.json'))
+                  assert cfg['databaseUrl']=='https://erp.indexesstore.com'
+                  assert cfg['chatUrl']=='wss://erp.indexesstore.com'
+                  assert not cfg['googleLoginEnabled'] and not cfg['googleRegistrationEnabled']
+                  assert cfg['applicationId']=='AppAdmin'
+              assert apk.stat().st_size < 198643505, 'Release must be smaller than the previous universal debug APK'
+              print(apk.name, apk.stat().st_size)
+          PY
+          (cd dist && sha256sum *.apk > SHA256SUMS)
+      # The production keystore is NEVER uploaded to GitHub.
+      # This temporary key tests Android signing/installation, not update
+      # compatibility. Private server signing is a separate, approved step.
+      - name: Sign an isolated emulator-only copy
+        shell: bash
+        run: |
+          set -euo pipefail
+          keytool -genkeypair -keystore "$RUNNER_TEMP/emulator-test.p12" -storetype PKCS12 -storepass emulator-test-only -keypass emulator-test-only -alias emulator-test -keyalg RSA -keysize 3072 -validity 2 -dname "CN=Ephemeral CI test"
+          "$BUILD_TOOLS/apksigner" sign --ks "$RUNNER_TEMP/emulator-test.p12" --ks-pass pass:emulator-test-only --v1-signing-enabled true --v2-signing-enabled true --v3-signing-enabled true --out "$RUNNER_TEMP/nasqo-emulator-test.apk" dist/NASQO_ERP_Android_1.22.10_x86_64-unsigned.apk
+          "$BUILD_TOOLS/apksigner" verify --verbose "$RUNNER_TEMP/nasqo-emulator-test.apk"
+      - name: Enable emulator on this disposable runner
+        run: sudo setfacl -m "u:$(id -un):rw" /dev/kvm
+      - name: Install and launch on Android 13
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 33
+          target: google_apis
+          arch: x86_64
+          cores: 2
+          ram-size: 2048M
+          disk-size: 2048M
+          emulator-options: -no-window -gpu swiftshader_indirect -noaudio -no-boot-anim -no-snapshot-save
+          disable-animations: true
+          script: bash tools/test_nasqo_android_release.sh
+      - name: Upload unsigned artifacts for offline review only
+        uses: actions/upload-artifact@v4
+        with:
+          name: NASQO-Android-1.22.10-unsigned-review
+          path: dist/
+          if-no-files-found: error
+          retention-days: 14
+      - name: Preserve release test evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: NASQO-Android-1.22.10-test-report-review
+          path: release-test-report/
+          if-no-files-found: warn
+          retention-days: 14
