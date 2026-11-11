@@ -1579,25 +1579,55 @@ CRITICAL tool-use rules — follow exactly:
         return ts
     }
 
-    /** Build a toolset for an external (tenant-registered) MCP server. Unlike buildMcpToolset
-     *  this targets a third-party URL and sends only the server's own auth headers (from the
-     *  encrypted headersJson map) — no SystemSupport credentials. */
+    /** Build a toolset for an external (tenant-registered) MCP server.
+     *  Honor the persisted transport selection. Do not reuse the internal SystemSupport
+     *  credentials or silently fall back to SSE for an unknown transport. Header values
+     *  are stored encrypted, but static headers are NOT an OAuth authorization-code client:
+     *  OAuth-only servers need a separately managed, refreshable access token.
+     */
     private static com.google.adk.tools.mcp.McpToolset buildExternalMcpToolset(def srv) {
-        Map<String, String> sseHeaders = ['Accept': 'application/json, text/event-stream']
+        String transport = (srv.transport ?: 'sse') as String
+        if (!(transport in ['sse', 'http'])) {
+            throw new IllegalArgumentException("Unsupported external MCP transport: ${transport}")
+        }
+
+        Map<String, String> headers = ['Accept': 'application/json, text/event-stream']
         String hj = srv.headersJson as String
         if (hj) {
             try {
                 def parsed = new groovy.json.JsonSlurper().parseText(hj)
-                if (parsed instanceof Map) parsed.each { k, v -> if (k && v != null) sseHeaders[k as String] = v as String }
+                if (!(parsed instanceof Map)) {
+                    throw new IllegalArgumentException('MCP auth headers must be a JSON object')
+                }
+                parsed.each { k, v ->
+                    if (k && v != null) headers[k as String] = v as String
+                }
             } catch (Exception e) {
-                logger.warn("Bad headersJson for AdkMcpServer ${srv.adkMcpServerId}: ${e.message}")
+                // Never include the encrypted header values in diagnostics.
+                throw new IllegalArgumentException(
+                        "Invalid auth headers for external MCP server ${srv.adkMcpServerId}", e)
             }
         }
-        def sseParams = com.google.adk.tools.mcp.SseServerParameters.builder()
-                .url(srv.url as String)
+
+        String url = srv.url as String
+        if (!url?.trim()) throw new IllegalArgumentException('External MCP URL is required')
+        if (transport == 'http') {
+            def params = com.google.adk.tools.mcp.StreamableHttpServerParameters.builder()
+                    .url(url)
+                    .headers(headers)
+                    .build()
+            return new com.google.adk.tools.mcp.McpToolset(params)
+        }
+
+        // ADK 1.10.1 SSE headers accept Map<String, Object>, whereas Streamable
+        // HTTP headers accept Map<String, String>. Keep the HTTP map type-safe.
+        Map<String, Object> sseHeaders = [:]
+        sseHeaders.putAll(headers)
+        def params = com.google.adk.tools.mcp.SseServerParameters.builder()
+                .url(url)
                 .headers(sseHeaders)
                 .build()
-        return new com.google.adk.tools.mcp.McpToolset(sseParams)
+        return new com.google.adk.tools.mcp.McpToolset(params)
     }
 
     /** Build the toolsets for every enabled external MCP server attached to this agent.
