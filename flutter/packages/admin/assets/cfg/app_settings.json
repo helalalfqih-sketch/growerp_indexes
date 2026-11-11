@@ -4,7 +4,7 @@
   "version": "",
   "build": "",
   "applicationId": "AppAdmin",
-  "googleLoginEnabled": true,
+  "googleLoginEnabled": false,
   "_________________comment__backend": "moqui / ofbiz",
   "backend": "moqui",
   "_________________comment__release to be used with docker locally ": "https://rest.example.com",
@@ -29,5 +29,5 @@
   "restResponseLogs": false,
   "_________________comment_cacheMaxStaleMinutes": "maximum age of cached GET responses in minutes, 0 to disable caching",
   "cacheMaxStaleMinutes": 10,
-  "googleRegistrationEnabled": true
+  "googleRegistrationEnabled": false
 }
