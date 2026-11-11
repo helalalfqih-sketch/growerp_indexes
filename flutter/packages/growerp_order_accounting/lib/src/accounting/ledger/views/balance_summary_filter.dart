@@ -25,3 +25,12 @@ List<GlAccount> filterBalanceSummaryAccounts(
   });
   return filtered;
 }
+
+/// Parse the fiscal year for the period selector without reading the current
+/// clock. Prior UI code treated `Y2025q1` as a plain `Y...` and navigated
+/// from the wrong year when quarter/month filters were active.
+int? fiscalYearFromBalancePeriod(String periodName) {
+  final match = RegExp(r'^Y(\d{4})(?:q[1-4]|m(?:0?[1-9]|1[0-2]))?$')
+      .firstMatch(periodName.trim());
+  return match == null ? null : int.tryParse(match.group(1)!);
+}
