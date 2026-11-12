@@ -132,6 +132,27 @@ class MyFinDocState extends State<FinDocPage> {
   late OrderAccountingLocalizations _localizations;
   bool _shouldCloseOnFinDocSuccess = false;
 
+  // Translate the visible statuses without changing the backend status values.
+  String _localizedFinDocStatus(FinDocStatusVal status) {
+    switch (status) {
+      case FinDocStatusVal.created:
+        return _localizations.created;
+      case FinDocStatusVal.approved:
+        return _localizations.dashStageApproved;
+      case FinDocStatusVal.completed:
+        return _localizations.dashStageCompleted;
+      case FinDocStatusVal.cancelled:
+        return _localizations.dashStageCancelled;
+      case FinDocStatusVal.inPreparation:
+        return _localizations.dashStageInProcess;
+      case FinDocStatusVal.unknown:
+        return status.name;
+    }
+  }
+
+  String _itemsCountLabel(int count) =>
+      count == 0 ? _localizations.noItems : '${_localizations.item}: $count';
+
   String _getDocTypeLabel(FinDocType docType) {
     switch (docType) {
       case FinDocType.request:
@@ -259,11 +280,11 @@ class MyFinDocState extends State<FinDocPage> {
                   : finDocItemList(state),
               const SizedBox(height: 10),
               if (finDoc.docType == FinDocType.shipment)
-                Text("Items# ${finDocUpdated.items.length}"),
+                Text(_itemsCountLabel(finDocUpdated.items.length)),
               if (finDoc.docType != FinDocType.shipment)
                 Text(
-                  "Items# ${finDocUpdated.items.length}   "
-                  "Grand total : ${finDocUpdated.grandTotal.currency(currencyId: currencyId)}",
+                  '${_itemsCountLabel(finDocUpdated.items.length)}   '
+                  '${_localizations.dashTotal}: ${finDocUpdated.grandTotal.currency(currencyId: currencyId)}',
                   key: const Key('grandTotal'),
                 ),
               const SizedBox(height: 10),
@@ -513,7 +534,7 @@ class MyFinDocState extends State<FinDocPage> {
                           applicationId == 'AppHotel' ||
                                   applicationId == 'AppRental'
                               ? label.hotel
-                              : label.name,
+                              : _localizedFinDocStatus(label),
                         ),
                       ),
                     )
