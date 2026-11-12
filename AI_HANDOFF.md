@@ -58,3 +58,32 @@
 - No Docker daemon, Flutter, Gradle, Moqui, or APK tests ran inside Codespaces. The only passed checks remain the static checks performed on dot.
 - Stopped **only the new Codespace** after unsuccessful SSH tests to reduce compute charges. GitHub returned `ShuttingDown` at last observation.
 - Next: open the **new** Codespace in the GitHub browser, check its local `.devcontainer/devcontainer.json` and `git status`, safely pull the latest branch commit if clean, and rebuild the devcontainer. Inspect build logs for failures (especially archive checksum, package installations, and sshd feature). Then retry `gh codespace ssh`, run `bash .devcontainer/bootstrap.sh check`, Flutter/Moqui tests and Android build. Keep old Codespace and production untouched.
+
+
+## Live verification — 2026-11-12
+
+### Environment used
+- Work performed through dot \`14d973430cc6\` via GitHub CLI SSH (\`-F /dev/null\`) into \`nasqo-cloud-dev-ssh-r4v7q99pv9vr3xjw\` on \`chore/nasqo-codespaces-20261112\`. This is **not** the old \`didactic-disco\` Codespace.
+- Verified Docker CLI **29.9.3**, Docker Engine **29.9.3**, Flutter **3.47.9**, JDK **21.0.13**, Android Gradle Wrapper **9.1.0**, Moqui Gradle Wrapper **9.2.0**.
+- RAM 16 GiB; Codespace disk 32 GiB, around 6.0 GiB free after builds.
+
+### Executed tests and builds (all passed)
+1. \`cd flutter && flutter test --no-pub --reporter compact packages/growerp_models/test\`: **90 passed, 0 failed**, exit 0; approximately 22 seconds.
+2. \`cd flutter && flutter test --no-pub --reporter compact packages/growerp_order_accounting/test\`: **119 passed, 0 failed**, exit 0; approximately 35 seconds.
+3. \`cd flutter/packages/admin && flutter build apk --debug --no-pub\`: Android Gradle \`assembleDebug\` succeeded in **72.1 seconds**, exit 0. Created \`build/app/outputs/flutter-apk/app-debug.apk\` (198,668,277 bytes).
+4. Android APK archive check \`unzip -tq\`: exit 0, no errors; \`aapt2 dump badging\` package \`com.indexesstore.nasqo\`, versionName \`1.22.9\`, versionCode \`146\`, target SDK 36. Android \`apksigner verify --verbose\`: verifies under APK Signature v2 (debug signing).
+5. APK SHA-256: \`7c100278c8a5a7e992085e25ecc67daa6354a48e0001a2e1a8b9ec378f0deef2\`.
+6. \`cd moqui && ./gradlew :runtime:component:growerp:assemble --no-daemon --max-workers=2 -Dorg.gradle.jvmargs=-Xmx2g\`: **BUILD SUCCESSFUL in 13s**, exit 0; 7 actionable tasks (1 executed, 6 up-to-date); jar generated under \`backend/lib/\`.
+
+### Findings and limitations
+- Existing \`nasqo-cloud-dev-isolated-q7gvjrrpgwrgh9v9p\` failed SSH with an absent SSH server. Added the \`ghcr.io/devcontainers/features/sshd:1\` feature to \`.devcontainer/devcontainer.json\` on the GitHub branch. **That feature has not yet been tested through a fresh isolated Dev Container rebuild**. Do not switch or rebuild any Codespace with user uncommitted work.
+- The successful verification was performed on the second SSH-capable Codespace, which has existing untracked paths (VS Code notification data, backend/.settings, mantle-stripe/.settings, moqui-adk/.settings, pop-rest-store/build). They remained present and unchanged in Git tracking. \`git diff --stat\` was empty after tests. No tracked source edits, resets, cleans, deployments, database loads, or signing-key operations.
+- Android build printed nonfatal warnings about KGP compatibility in \`flutter_tts\` and \`home_widget\`, and Android SDK XML version mismatch.
+- **Not yet run**: full monorepo Melos tests, Moqui Spock/integration tests with dedicated test DB, full production Docker image build, fresh Dev Container rebuild after SSH fix, production release signing or deployment.
+- Build outputs are in the **SSH Codespace only**, not committed or published. APK is debug-signed and must not be treated as a production release.
+
+### Next steps
+1. Inspect and rebuild the **clean isolated Codespace only** when appropriate to verify the added SSH feature, or create a new Codespace from the updated branch.
+2. Run a broader unit-test suite or dedicated backend integration tests in an isolated test database before merge.
+3. Review PR #43, Android plugin warnings, and the 32 GiB disk capacity (6.0 GiB available after this round); consider larger storage capacity for fully fresh rebuilds.
+4. Preserve existing Codespace working trees, and stop unused Codespaces from GitHub to avoid compute charges. Never merge, deploy, or publish APK without review.
