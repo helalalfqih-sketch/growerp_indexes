@@ -37,7 +37,12 @@ case "${1:-}" in
     cd "$repo_root"
     # GitHub Codespaces normally uses HTTPS; rewrite the public SSH submodule
     # URL for this command only, without changing any global Git config.
-    git -c 'url.https://github.com/.insteadOf=git@github.com:' submodule update --init --recursive
+    # Keep this rewrite process-local so nested Git commands (including those
+    # inside setup-backend.sh) use HTTPS, without changing global Git settings.
+    export GIT_CONFIG_COUNT=1
+    export GIT_CONFIG_KEY_0='url.https://github.com/.insteadOf'
+    export GIT_CONFIG_VALUE_0='git@github.com:'
+    git submodule update --init --recursive
     bash setup-backend.sh
     echo "Moqui sources ready. Run (cd moqui && ./gradlew --version) first."
     ;;
