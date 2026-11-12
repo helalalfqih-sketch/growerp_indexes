@@ -1,6 +1,7 @@
 # AI_HANDOFF — NASQO cloud development (2026-11-12)
 
 ## Scope and ownership
+- Draft PR: https://github.com/helalalfqih-sketch/growerp_indexes/pull/43 (do not merge until Codespaces build passes).
 - Repo: `helalalfqih-sketch/growerp_indexes`; development branch: `chore/nasqo-codespaces-20261112`; base: `master`.
 - Goal: use GitHub Codespaces for Flutter 3.47.9, Moqui Java 21, Docker-in-Docker, Android SDK tools, with **dot** as a lightweight authorized remote terminal.
 - `nasqo-integration` is an Apify Python template, not the primary ERP source; it was not modified.
@@ -30,6 +31,7 @@
 - PASS: configuration assertions (pinned versions, feature names, checksums, no production Compose calls).
 - PASS: official Flutter and Android archive URLs respond HTTP 200 to HEAD.
 - NOT RUN: devcontainer image build, Docker daemon, Gradle build, Flutter analysis/tests, Android APK build. dot has no local Docker Engine.
+- NOT RUN: automated GitHub Actions checks (no PR checks reported at time of review).
 - NOT RUN: live Codespaces build; **existing** Codespace `didactic-disco-4j9q544wpjxp27q75` is stopped with uncommitted changes and one unpushed commit on `release/nasqo-production-foundation`. Do not switch or rebuild it.
 
 ## Current risks / blockers
