@@ -49,3 +49,12 @@
 4. If Android builds are required, explicitly review and accept SDK licenses, install Android SDK platforms and run `flutter build apk --debug --no-pub`.
 5. From dot run `gh codespace list` and `gh codespace ssh -c NEW_CODESPACE_NAME`, verify commands and keep dev ports private.
 6. Record exact errors and fixes in this file; do not deploy to production or touch the older Codespace's local work.
+
+## Codespace execution update — 2026-11-12 17:09 +03
+- Existing **new isolated** Codespace: `nasqo-cloud-dev-isolated-q7gvjrrpgwrgh9v9p`, branch `chore/nasqo-codespaces-20261112`, machine `standardLinux32gb` (4 CPU / 16 GB RAM / 32 GB storage); clean working tree per GitHub metadata.
+- This Codespace was already created when the current execution began. We did **not** create another or modify the old `didactic-disco-4j9q544wpjxp27q75`.
+- Dot GitHub CLI is authenticated and lists the Codespace. `gh codespace ssh` failed: `failed to start SSH server`. Added `ghcr.io/devcontainers/features/sshd:1` to `.devcontainer/devcontainer.json` on this branch.
+- Issued `gh codespace rebuild` for the new clean Codespace; after state returned `Available`, SSH **still** failed with the same missing-server error. Likely the Codespace working tree used an earlier commit; **not verified**. Do not assert the new feature was applied.
+- No Docker daemon, Flutter, Gradle, Moqui, or APK tests ran inside Codespaces. The only passed checks remain the static checks performed on dot.
+- Stopped **only the new Codespace** after unsuccessful SSH tests to reduce compute charges. GitHub returned `ShuttingDown` at last observation.
+- Next: open the **new** Codespace in the GitHub browser, check its local `.devcontainer/devcontainer.json` and `git status`, safely pull the latest branch commit if clean, and rebuild the devcontainer. Inspect build logs for failures (especially archive checksum, package installations, and sshd feature). Then retry `gh codespace ssh`, run `bash .devcontainer/bootstrap.sh check`, Flutter/Moqui tests and Android build. Keep old Codespace and production untouched.
